@@ -1,0 +1,537 @@
+\documentclass{scrartcl}
+%\documentclass[a5paper]{article}
+
+\usepackage[solutionfiles]{optional}
+%\usepackage[nosolutionfiles]{optional}
+\opt{nosolutionfiles}{\usepackage[nosolutionfiles]{answers}}
+\opt{solutionfiles}{\usepackage{answers}}
+
+\usepackage{preamble}
+
+% handle indentation below figure captions
+\setcapwidth[c]{.8\textwidth}
+\setcapwidth{0.95\textwidth}
+%\setcapindent{0pt}
+%\addtokomafont{caption}{\centering}
+
+%\usepackage[top=5mm, left=5mm, right=5mm, bottom=2cm]{geometry}
+
+\title{Queueing simulations}
+\author{N.D. Van Foreest}
+\begin{document}
+\maketitle
+
+\Opensolutionfile{hint}
+\Opensolutionfile{ans}
+
+document in de levelcrossing illustration directory. Kijk even goed wat ik eigenlijk allemaal al heb.
+
+\section{Introduction}
+Typically a queueing system is subject to rules about when to allow jobs to enter the system or to adapt the service capacity. Such a decision rule is typically called a \emph{policy}.  The theoretical analysis of the efficacy of policies is often very hard, while with simulation it is doable.  In this document we present a number of cases to see how simulation can be used to analyze and improve queueing systems. Each case is organized like this.
+
+
+\begin{enumerate}
+\item First hour
+  \begin{enumerate}
+\item Case description
+\item Modeling of the queueing system, the policy structure and the relevant KPIs (key performance indicators, such as cost, or utilization of the server, and so on) to evaluate the effect policy
+\item Implementation of the model in python. 
+  \end{enumerate}
+\item Second hour
+  \begin{enumerate}
+  \item Download, from nestor, the code written by the authors
+  \item Simulate a number of scenarios
+  \item Adapt the code to analyze some further policies/scenarios.
+  \end{enumerate}
+\end{enumerate}
+
+
+We expect you to work in a groups of 2 to 3 students and bring a laptop with an \emph{installed and working} python environment, such as anaconda.  There are also python environments available on the web, but that is typically a bit less practical than running the code on your own machine. 
+
+
+Our code is not the most efficient, or fast. Rather, we focus on clarity of code so that the underlying reasoning is as clear as possible. Once our ideas and code are correct, we can start optimizing, if this is necessary. 
+
+\section{Exponential distribution}
+
+The aim this tutorial is to build Figures 1.1, 1.2., and 1.3 of the queueing book.  (Read the description that underlies these figures.) Actually, we will not focus on  density functions here, but on the distributions.  
+
+\begin{exercise}
+  Make a plan of the steps you have to carry out to make Figure 1.1. In the next set of exercises we'll carry out these steps. So please do not read on before having thought about this problem. 
+  \begin{hint}
+Spend 5 minutes to think about how to approach the problem and how to chop it up into simple steps. Then organize the steps into a logical sequence. Don't worry at first about how to convert your ideas into computer code.   Coding is a separate activity. 
+  \end{hint}
+  \begin{solution}
+    \begin{enumerate}
+    \item Generate  uniform distributed random variables for one customer corresponding to interarrival times.
+    \item Plot the interarrival times
+    \item Compute (emperical) distribtuion function of the random interarrival times.
+    \item Plot the (emperical) distribtuion function
+    \item Generate  uniform distributed random variables for multiple customers, e.g., 3. 
+    \item Compute the arrival times for each customer.
+    \item Merge  the arrival times for all customers. This is the arrival process as seen by the shop.
+    \item Compute the interarrival times as seen by the shop
+    \item Plot these interarrival times.
+    \item Compare to the exponential density with a suitable arrival rate $\lambda$. 
+    \end{enumerate}
+  \end{solution}
+\end{exercise}
+
+
+\begin{exercise}
+  Generate 3 random numbers uniformly distributed on $[4,6]$. 
+
+  Read the documentation, on the web, of:
+  \begin{enumerate}
+  \item  \pyv{scipy.stats.uniform}.  Check in particular the \pyv{rvs()} function. 
+  \end{enumerate}
+
+  Note: \pyv{numpy} is a library of numerical functions to handle large (multi-dimensional) arrays with numbers. \pyv{scipy} contains numerical recipes, such as solvers for optimization software, solvers for differential equations. \pyv{scipy.stats} contains many probability distributions and numerical methods to operate on these functions. \pyv{matplotlib} provides plotting functionality.
+\begin{solution}
+Copy this code and run it.
+\begin{pyverbatim}
+# we first need to fix some initial settings.
+import numpy as np
+import scipy
+import matplotlib
+matplotlib.use('pdf') 
+import matplotlib.pyplot as plt
+from scipy.stats import uniform
+
+np.set_printoptions(precision=3) # this is to print not too many digits to the screen
+
+# fix the seed
+scipy.random.seed(3) 
+
+# parameters
+L = 3  # number of interarrival times
+
+G = uniform(loc=4, scale=2) 
+a = G.rvs(L)
+print(a)
+\end{pyverbatim}
+  
+\end{solution}
+
+\end{exercise}
+
+
+\begin{exercise}
+Generate $L=300$ random numbers $\sim U[4,6]$ and plot these. Save the figure to a pdf file. You should interpret these random numbers as interarrival times of one customer at a shop (in hours say.)
+
+See
+\begin{enumerate}
+\item  \pyv{matplotlib.pyplot.plot}
+\item \pyv{matplotlib.pyplot.savefig}.
+\end{enumerate}
+\begin{solution}
+Add this code to the other code and run it.
+\begin{pyverbatim}
+N = 1 # number of customers
+L = 300
+a = G.rvs(L)
+
+plt.plot(a, label="a")
+plt.title("N = {}, L = {}".format(N, L))
+plt.legend()
+plt.savefig("dummy_plot.pdf")
+plt.cla() # clear the figure so that we can overwrite it later.
+\end{pyverbatim}
+I use the same name for the pdf file, so to prevent having to delete 10 figures or so. If you don't like this, just provide another name. 
+\end{solution}
+\end{exercise}
+
+\begin{exercise}
+Compute  the emperical distribution function of these interarrival times, and plot it.
+
+See:
+\begin{enumerate}
+\item Look up the definition of the empirical distribution in the queueing book,
+\item \pyv{numpy.unique}
+\item \pyv{numpy.sort}
+\item \pyv{numpy.cumsum}
+\item \pyv{numpy.sum}
+\end{enumerate}
+\begin{solution}
+Add this to the other code and run it.
+\begin{pyverbatim}
+def cdf(X):
+    # remove multiple occurences of the same value
+    unique, count = np.unique(np.sort(X), return_counts=True)
+    x = unique
+    y = count.cumsum()/count.sum()
+    return x, y
+
+x, y = cdf(a)
+plt.plot(x,y,  label="d")
+plt.legend()
+plt.savefig("dummy_plot.pdf")
+plt.cla() # clear the figure
+\end{pyverbatim}
+\end{solution}
+\end{exercise}
+
+\begin{exercise}
+We like to compare the emperical distribution to the theoretical distribution of the interarrival times, which is uniform for this case. We can use the Kolmogorov-Smirnov statistic for this comparion. 
+
+See:
+\begin{enumerate}
+\item Kolmogorov-Smirnov (wikipedia)
+\\item \pyv{numpy.max}
+\\item \pyv{numpy.abs}
+\\item \pyv{scipy.stats.uniform}, the \pyv{cdf} function.
+\end{enumerate}
+
+\begin{solution}
+Add this to the other code and run it.
+\begin{pyverbatim}
+def KS(X, F):
+    # Compute the Kolmogorov-Smirnov statistic where
+    # X are the data points
+    # F is the theoretical distribution
+    support, y = cdf(X)
+    y_theo = np.array([F.cdf(x) for x in support])
+    return np.max(np.abs(y-y_theo))
+
+print(KS(a, G))    
+\end{pyverbatim}
+\end{solution}
+\end{exercise}
+
+\begin{exercise}
+  Now compute the KS statistics with an exponential distribution with a suitable mean. (What is this suitable mean?).
+
+See:
+\begin{enumerate}
+\item  \pyv{scipy.stats.expon}
+\end{enumerate}
+
+
+\begin{solution}
+Add this to the other code and run it. Since the mean interarrival time is $5$, take $\lambda = 1/5$.
+
+\begin{pyverbatim}
+from scipy.stats import expon
+
+labda = 1./5 # lambda is a function in python
+E = expon(scale=1/labda) 
+print(E.mean()) # to check that we chose the right scale
+print(KS(a, E))    
+\end{pyverbatim}
+\end{solution}
+\end{exercise}
+
+\begin{exercise}
+  Finally, plot the emperical distribution and the exponential distribution in one graph.
+\begin{solution}
+Add this to the other code and run it. 
+\begin{pyverbatim}
+x, y = cdf(a)
+plt.plot(x, y,  label="empirical")
+plt.plot(x, E.cdf(x),  label="exp")
+plt.legend()
+plt.savefig("dummy_plot.pdf")
+plt.cla() # clear the figure
+\end{pyverbatim}
+\end{solution}
+\end{exercise}
+
+The analysis for one customer is now finished. Lets extend to 3 customers. 
+
+\begin{exercise}
+Generate random interarrival times for 3 customers. Then turn this into arrival times for each customer. The shop sees the combined arrival process, so you need to find a way to merge the arrival times of the customers into one arrival process as observed by the shop. Finally, we need to convert this into interrival times to get a distribution of the interarrival times at the shop. 
+
+See:
+\begin{enumerate}
+\item \pyv{numpy.cumsum}, in particular read about the meaning of axis.
+\item \pyv{numpy.flatten}
+\item \pyv{numpy.diff}
+\end{enumerate}
+
+
+\begin{solution}
+Add this to the other code and run it. 
+\begin{pyverbatim}
+def superposition(a):
+    A = np.cumsum(a, axis=1)
+    A = np.sort(A.flatten())
+    return np.diff(A)
+
+N, L = 3, 100
+a = superposition(G.rvs((N, L)))
+
+E = expon(scale=1./(N*labda)) # the arrival rate of N customers is N times as large
+print(E.mean())
+
+x, y = cdf(a)
+plt.title("N = {}, L = {}".format(N, L))
+plt.plot(x, y,  label="empirical")
+plt.plot(x, E.cdf(x),  label="exp")
+plt.legend()
+plt.savefig("dummy_plot.pdf")
+plt.cla() # clear the figure
+\end{pyverbatim}
+
+\end{solution}
+\end{exercise}
+
+Lets see what happens for $N=10$ customers.
+
+\begin{exercise}
+  Compare  the emperical distribution of the interarrival times generated by  $N=10$ customers to the exponential distribution (compute the appropriate arrival rate). Make a plot. 
+\begin{solution}
+Add this to the other code and run it. 
+\begin{pyverbatim}
+N, L = 10, 10
+a = superposition(G.rvs((N, L)))
+
+E = expon(scale=1/(N*labda))
+
+x, y = cdf(a)
+plt.title("N = {}, L = {}".format(N, L))
+plt.plot(x, y,  label="empirical")
+plt.plot(x, E.cdf(x),  label="exp")
+plt.legend()
+plt.savefig("dummy_plot.pdf")
+plt.cla() # clear the figure
+\end{pyverbatim}
+
+\end{solution}
+\end{exercise}
+
+
+
+\begin{exercise}
+  Do the same for $N=10$ customers with normally distributed interarrival times with $\mu=5$, and $\sigma =1$.
+
+See:
+\begin{enumerate}
+\item \pyv{scipy.stats.norm}
+\end{enumerate}
+
+\begin{solution}
+Add this to the other code and run it. 
+\begin{pyverbatim}
+from scipy.stats import norm
+
+N, L = 10, 10
+a = superposition(norm(loc=5, scale=1).rvs((N, L)))
+
+plt.title("N = {}, L = {}".format(N, L))
+plt.plot(x, y,  label="empirical")
+plt.plot(x, E.cdf(x),  label="exp")
+plt.legend()
+plt.savefig("dummy_plot.pdf")
+plt.cla() # clear the figure
+\end{pyverbatim}
+
+\end{solution}
+\end{exercise}
+
+
+\subsection{Memoryless property}
+
+% It is well known that the exponential distribution has the memoryless property. Does it hold for simulations too? 
+
+% First generate our standard case.
+
+% \begin{pyblock}
+% N = 10
+% runlength = 1000
+% labda = N/m
+% d = m
+% G = stats.uniform(loc = m-d, scale = 2.*d) 
+
+% a = superposition(G, N, runlength)
+% \end{pyblock} 
+
+% Now select the interarrival times that exceed some number $x$ and
+% subtract $x$. These new values should, hopefully, have the same
+% distribution as the initial set of interarrival times.
+
+% \begin{pyblock}
+% x = 0.5 # threshold
+% c = a[a>x] -x # select the interarrival times longer than x
+% \end{pyblock} 
+
+% Let's plot it
+% \begin{pyblock}
+% e = empericalDistribution(c)
+% plt.plot(e.x, e.cdf , label = "emp")
+% plt.plot(e.x,1.-np.exp(-labda*e.x), label = "th")
+% plt.legend()
+% plt.show()
+% \end{pyblock} 
+
+% This is quite ok. What is the threshold $x$ becomes larger, e.g., 1?
+
+% \begin{pyblock}
+% x = 2. # threshold
+% c = a[a>x] -x # select the interarrival times longer than x
+
+% e = empericalDistribution(c)
+% plt.plot(e.x, e.cdf , label = "emp")
+% plt.plot(e.x,1.-np.exp(-labda*e.x), label = "th")
+% plt.legend()
+% plt.show()
+% \end{pyblock} 
+
+% Now the result is not as nice. What if we increase the simulation length? 
+% \begin{pyblock}
+% N = 10
+% runlength = 100000
+% labda = N/m
+% d = m
+% G = stats.uniform(loc = m-d, scale = 2.*d) 
+
+% a = superposition(G, N, runlength)
+
+% x = 2. # threshold
+% c = a[a>x] -x # select the interarrival times longer than x
+
+% e = empericalDistribution(c)
+% plt.plot(e.x, e.cdf , label = "emp")
+% plt.plot(e.x,1.-np.exp(-labda*e.x), label = "th")
+% plt.legend()
+% plt.show()
+% \end{pyblock} 
+
+% It is interesting to see that now the memoryless property seems to
+% hold again. But why do we need so many values to see this? 
+
+
+
+% \subsection{Analysis of the number arrivals in an interval}
+
+% Now I build the same data, but count the number of arrivals that occur in a certain interval. 
+
+% First I compute, as above, a number of arrival times as seen by the counter.
+
+% \begin{pyblock}
+% m = 5.
+% d = 2.
+% G = stats.uniform(loc = m-d, scale = 2.*d) 
+
+% N = 300
+% runlength = 1000
+% a = G.rvs((N, runlength))
+% A = np.cumsum(a, axis = 1)
+% A = np.sort(A.flatten())
+% \end{pyblock} 
+
+% Next, I make a histogram, that, is I chop up the entire simulation
+% interval, from the first arrival time to the last, into a number of
+% bins of equal length. Then I use $np.histogram$ to count the number of
+% arrivals in each such interval.  There are $N*runlength$ arrivals in
+% total.  I like the bins of such size that on average each bin will
+% contain 50 arrivals. Thus, the number of bins, i.e., the number of intervals in which the entire simulation interval needs to chopped, should be $N*runlength/50$. 
+
+% \begin{pyblock}
+% #bins = N*runlength/50
+% #p, x = np.histogram(A, bins = bins)
+% \end{pyblock} 
+
+% Here, $x$ contains the interval boundaries in which the simulation
+% interval is chopped up. Therefore $I=x[1]-x[0]$ is the length of one
+% such interval. The arrival rate in such interval must be $I*N/m$, as
+% $N/m$ is the arrival rate per unit time. Therefore,
+% \begin{pyblock}
+% #I = x[1]- x[0]
+% #labda = float(I)*N/m
+% \end{pyblock} 
+
+% Now I count the number of times a certain number of arrivals occured.
+% \begin{pyblock}
+% P =  np.bincount(p)
+% \end{pyblock} 
+
+% Finally, I want to fit a Poisson distribution to see how well the
+% Poisson distribution fits the data.  I need the support of the
+% measured data, and store in $x$. As $np.bincount$ only counts, it is
+% necessary to normalize $P$.
+% \begin{pyblock}
+% x = range(p.min(), p.max())
+
+% plt.plot(P/float(sum(P)))
+% plt.plot(x, scipy.stats.poisson.pmf(x, labda)) 
+% plt.show()
+% \end{pyblock} 
+
+% Not bad. However, some experimentation shows that when $N$ is small,
+% like 30 or so, and the $runlength$ is short, in the order of 100 or
+% so, the quality of the Poisson approximation is much less. I do not
+% fully understand why that is the case.
+
+% \begin{pyblock}
+% N = 30
+% runlength = 300
+% a = G.rvs((N, runlength))
+% A = np.cumsum(a, axis = 1)
+% A = np.sort(A.flatten())
+
+% bins = N*runlength/50
+% p, x = np.histogram(A, bins = bins)
+
+% I = x[1]- x[0]
+% labda = float(I)*N/m
+
+% P =  np.bincount(p)
+% plt.plot(P/float(sum(P)))
+
+% x = range(p.min(), p.max())
+% plt.plot(x, scipy.stats.poisson.pmf(x, labda)) 
+% plt.show()
+% \end{pyblock} 
+
+
+
+Overshoot verdeling? 
+
+\section{A single server queue}
+\label{sec:single-server-queue}
+
+\section{A queueing network}
+\label{sec:queueing-network}
+
+
+\section{A queueing network with workload control}
+\label{sec:queu-netw-with}
+
+
+
+\section{Heat bath}
+\label{sec:heat-bath}
+
+\section{Nurse routing}
+\label{sec:nurse-routing}
+
+shift sheduling. setups. 
+
+
+\section{An Assembly line}
+\label{sec:an-assembly-line}
+
+
+
+
+\Closesolutionfile{hint}
+\Closesolutionfile{ans}
+
+\clearpage
+\section*{Hints}
+\input{hint}
+
+\clearpage
+\section*{Solutions}
+\input{ans}
+
+
+\end{document}
+
+simulatie van single server queue
+
+simulatie van lopende band, idee met Marien.
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:
