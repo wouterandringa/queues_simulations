@@ -29,7 +29,7 @@
 
 
 \title{Queueing simulations}
-\author{N.D. Van Foreest}
+\author{N.D. Van Foreest and R. Van Beesten}
 \begin{document}
 \maketitle
 
@@ -43,28 +43,20 @@
 Compution, modeling is very interesting, and intellectually challenging. 
 
 
-Typically a queueing system is subject to rules about when to allow jobs to enter the system or to adapt the service capacity. Such a decision rule is typically called a \emph{policy}.  The theoretical analysis of the efficacy of policies is often very hard, while with simulation it is doable.  In this document we present a number of cases to see how simulation can be used to analyze and improve queueing systems. Each case is organized like this.
+Typically a queueing system is subject to rules about when to allow jobs to enter the system or to adapt the service capacity. Such a decision rule is typically called a \emph{policy}.  The theoretical analysis of the efficacy of policies is often very hard, while with simulation it becomes doable.  In this document we present a number of cases to see how simulation can be used to analyze and improve queueing systems. Besides that these the cases will improve your understanding of queueing systems and probability theory, they will also make clear  that simulation is a really creative activity and involves solving many interesting and challenging  algorithmic problems.  
 
+
+Each case is organized in a number of exercises. For each exercise,
 \begin{enumerate}
-\item First hour
-  \begin{enumerate}
-\item Case description
-\item Modeling of the queueing system, the policy structure and the relevant KPIs (key performance indicators, such as cost, or utilization of the server, and so on) to evaluate the effect policy
-\item Implementation of the model in python. 
-  \end{enumerate}
-\item Second hour
-  \begin{enumerate}
-  \item Download, from nestor, the code written by the authors
+\item First make a design of how you want to solve the problem. For instance, make a model of  queueing system, or a control policy structure, or compute relevant KPIs (key performance indicators, such as cost, or utilization of the server, and so on). In other words, think before you type. 
+\item Try to implement your ideas in python\footnote{Some of you might wonder why we use python rather than R. There are a few reasons for this. Python is more or less the third most used programming language, after c++ and java. It is widely used by companies, while R is hardly  used outside of academia. Programming OR applications is easier in python; it will also used in other courses. Finally, if you are interested in machine learning and artificial intelligence python is, hands-down, the best choice.}
+  \item If you don't succeed in getting your program to work,  look up the code written by us and type it to your python environment.\footnote{Typing yourself forces you to read the code well.}.
   \item Simulate a number of scenarios
-  \item Adapt the code to analyze some further policies/scenarios.
-  \end{enumerate}
+  \item Vary the parameter settings and see what happens, i.e., play with the numbers and see whether you can still understand the results. 
 \end{enumerate}
 
 
-We expect you to work in a groups of 2 to 3 students and bring a laptop with an \emph{installed and working} python environment, preferably  anaconda as this contains all functionality we will need\footnote{There are also python environments available on the web, such as repl.it., but that is typically a bit less practical than running the code on your own machine.}
-
-
-Our code is not the most efficient, or fast. Rather, we focus on clarity of code so that the underlying reasoning is as clear as possible. Once our ideas and code are correct, we can start optimizing, if this is necessary. 
+We expect you to work in a groups of 2 to 3 students and bring a laptop with an \emph{installed and working} python environment, preferably  the anaconda package available at \url{https://www.anaconda.com/}, as this contains all functionality we will need\footnote{There are also python environments available on the web, such as repl.it., but that is typically a bit less practical than running the code on your own machine.}. You can find a nice tutorial to python programming at  \url{https://www.programiz.com/python-programming}. Note, this site advises to install python just by itself. We advise you instead to download anaconda instead, as this contains also the required numerical libraries. 
 
 We will use the following libraries of python a lot:
 \begin{itemize}
@@ -73,6 +65,9 @@ We will use the following libraries of python a lot:
 \item \pyv{matplotlib}  provides plotting functionality.
 \end{itemize}
 
+Our code is not the most efficient, or fast. Rather, we focus on clarity of code so that the underlying reasoning is as clear as possible. Once our ideas and code are correct, we can start optimizing, if this is necessary. 
+
+Finally, the code is part of the course, hence of the midterms and the exams.  Unless indicated as not obligatory, you have to be able to read the code and understand it.
 
 \Opensolutionfile{hint}
 \Opensolutionfile{ans}
@@ -480,8 +475,7 @@ Try to understand this by reading the documentation (on the web) of the followin
 
 
 \begin{exercise}
-  Generate 100 random interarrival times for 3 customers, and plot the cdf of the merged process.
-
+  Generate 100 random interarrival times for 3 customers, plot the cdf of the merged process, and compare to the exponential distribution with the correct mean. What is the effect of increasing the number of customers from $N=1$ to $N=3$?
 \begin{solution}
 Add this to the other code and run it. 
 \begin{pyverbatim}
@@ -503,7 +497,6 @@ plt.cla() # clear the figure
 \end{solution}
 \end{exercise}
 
-Lets see what happens for $N=10$ customers.
 
 \begin{exercise}
   Compare  the empirical distribution of the interarrival times generated by  $N=10$ customers to the exponential distribution (compute the appropriate arrival rate). Make a plot, and explain what you see.
@@ -524,6 +517,7 @@ plt.savefig("dummy_plot.pdf")
 plt.cla() # clear the figure
 \end{pyverbatim}
 
+This is great. For just $N=10$ we see that the exponential distribution is a real good fit. 
 \end{solution}
 \end{exercise}
 
@@ -531,7 +525,7 @@ plt.cla() # clear the figure
 
 \begin{exercise}
   Do the same for $N=10$ customers with normally distributed interarrival times with $\mu=5$, and $\sigma =1$.
-For this use \pyv{scipy.stats.norm}. What do you see?
+For this use \pyv{scipy.stats.norm}. What do you see? What is the influence of the distribution of interarrival times of an individual customer? 
 \begin{solution}
 Add this to the other code and run it. 
 \begin{pyverbatim}
@@ -548,7 +542,13 @@ plt.savefig("dummy_plot.pdf")
 plt.cla() # clear the figure
 \end{pyverbatim}
 
+Clearly, whether the distribution of interarrival times of an individual customer are uniform, or normal, doesn't really matter. In both cases the exponential distribution is a good model for what the shop sees. We did not analyze what happens if we would merge customers with normal distribution and uniform distribution, but we can suspect that in all these cases the merged process converges to a set of i.i.d. exponentially distributed random variables.
+
 \end{solution}
+\end{exercise}
+
+\begin{exercise}
+If  $\mu=\sigma=5$ then the analysis should break down. What happens if you set $\sigma=5$? If you don't get real strange results, the code itself must be wrong. (As an aside, when testing code it is good to see what happens if you use bogus numbers. The program should fail.)
 \end{exercise}
 
 \begin{exercise}
