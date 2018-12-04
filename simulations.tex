@@ -2,7 +2,13 @@
 \documentclass{scrartcl}
 %\documentclass[a5paper]{article}
 
+% als je de antwoorden onder de vraag wilt hebben, gebruik dan deze regel
+
 \usepackage[solutionfiles]{optional}
+
+% en dat moet je deze uitquoten. Als je daarintegen de antwoorden aan
+% het eind wil hebben, quote dan bovenstaande uit, en gebruik de regel
+% hieronder
 %\usepackage[nosolutionfiles]{optional}
 \opt{nosolutionfiles}{\usepackage[nosolutionfiles]{answers}}
 \opt{solutionfiles}{\usepackage{answers}}
@@ -39,21 +45,19 @@
 \item Overshoot verdeling? 
 \end{itemize}
 
+\Opensolutionfile{ans}
+
 \section{Introduction}
 
-Compution, modeling is very interesting, and intellectually challenging. 
-
-
-Typically a queueing system is subject to rules about when to allow jobs to enter the system or to adapt the service capacity. Such a decision rule is typically called a \emph{policy}.  The theoretical analysis of the efficacy of policies is often very hard, while with simulation it becomes doable.  In this document we present a number of cases to see how simulation can be used to analyze and improve queueing systems. Besides that these the cases will improve your understanding of queueing systems and probability theory, they will also make clear  that simulation is a really creative activity and involves solving many interesting and challenging  algorithmic problems.  
+Typically a queueing system is subject to rules about when to allow jobs to enter the system or to adapt the service capacity. Such a decision rule is called a \emph{policy}.  The theoretical analysis of the efficacy of policies is often very hard, while with simulation it becomes doable.  In this document we present a number of cases to see how simulation can be used to analyze and improve queueing systems. Besides that these the cases will improve your understanding of queueing systems and probability theory, they will also make clear  that simulation is a really creative activity and involves solving many interesting and challenging  algorithmic problems.  
 
 
 Each case is organized in a number of exercises. For each exercise,
 \begin{enumerate}
-\item First make a design of how you want to solve the problem. For instance, make a model of  queueing system, or a control policy structure, or compute relevant KPIs (key performance indicators, such as cost, or utilization of the server, and so on). In other words, think before you type. 
-\item Try to implement your ideas in python\footnote{Some of you might wonder why we use python rather than R. There are a few reasons for this. Python is more or less the third most used programming language, after c++ and java. It is widely used by companies, while R is hardly  used outside of academia. Programming OR applications is easier in python; it will also used in other courses. Finally, if you are interested in machine learning and artificial intelligence python is, hands-down, the best choice.}
-  \item If you don't succeed in getting your program to work,  look up the code written by us and type it to your python environment.\footnote{Typing yourself forces you to read the code well.}.
-  \item Simulate a number of scenarios
-  \item Vary the parameter settings and see what happens, i.e., play with the numbers and see whether you can still understand the results. 
+\item Make a design of how you want to solve the problem. For instance, make a model of  queueing system, or a control policy structure, or compute relevant KPIs (key performance indicators, such as cost, or utilization of the server, and so on). In other words, think before you type. 
+\item Try to translate your ideas into pseudo code or, better yet,  python\footnote{Some of you might wonder why we use python rather than R. There are a few reasons for this. Python is more or less the third most used programming language, after c++ and java. It is widely used by companies, while R is hardly  used outside of academia. Programming OR applications is easier in python; it will also used in other courses. Finally, if you are interested in machine learning and artificial intelligence python is, hands-down, the best choice.}
+  \item If you don't succeed in getting your program to work,  look up the code written by us and type it into your python environment.\footnote{Typing yourself forces you to read the code well.}.
+  \item Simulate a number of scenarios by varying parameter settings and see what happens.
 \end{enumerate}
 
 
@@ -70,9 +74,8 @@ Our code is not the most efficient, or fast. Rather, we focus on clarity of code
 
 Finally, the code is part of the course, hence of the midterms and the exams.  Unless indicated as not obligatory, you have to be able to read the code and understand it.
 
-\Opensolutionfile{hint}
-\Opensolutionfile{ans}
 
+\clearpage
 \section{Exponential distribution}
 
 The aim of this tutorial is to show, empirically, a fascination fact: even for very small populations in which individuals decide independently to visit a server (a shop, a hospital, etc),  the  exponential distribution is a good model for the interarrival times as seen by the server.  We will develop a simulation to motivate this `fact of nature'.  In particular, our aim is to build Figures 1.1, 1.2., and 1.3 of the queueing book.  (Read the description that underlies these figures.)
@@ -82,7 +85,7 @@ One important step in this process is to compute the empirical distribution. As 
 \begin{exercise}
   Make a plan of the steps you have to carry out to make Figure 1.1. In the next set of exercises we'll carry out these steps. So please do not read on before having thought about this problem.
 
-  Spend some 5 minutes to think about how to approach the problem and how to chop it up into simple steps. Then organize the steps into a logical sequence. Don't worry at first about how to convert your ideas into computer code. Coding is a separate activity.  (As a matter of fact, I always start with making a small plan on how to turn an idea into code, and I call it `modeling'. This is not simple, typically.) 
+  Spend some 5 minutes to think about how to approach the problem and how to chop it up into simple steps. Then organize the steps into a logical sequence. Don't worry at first about how to convert your ideas into computer code. Coding is a separate activity.  (As a matter of fact, I always start with making a small plan on how to turn an idea into code, and I call this step `modeling'. Typicallly this is a creative step, and not easy.) 
 
   \begin{solution}
     \begin{enumerate}
@@ -147,7 +150,9 @@ F = cdf(a)
 print(F)
 \end{pyblock}
 we get
+
 \printpythontex
+
   \end{solution}
 \end{exercise}
 
@@ -174,15 +179,8 @@ import matplotlib.pyplot as plt
 
 I = range(0, len(a))
 plt.plot(I, sorted(a))
-plt.savefig("dummy_plot_1.pdf")
-plt.cla() # clear the figure so that we can overwrite it later.
+plt.show()
 \end{pyblock}
-
-When you use spyder to run your program you can use \pyv{plt.show()} instead of the last two lines, that is, you don't have to save the figure and clear it. 
-
-\begin{center}
-\includegraphics[scale=0.5]{dummy_plot_1.pdf}
-\end{center}
   \end{solution}
 \end{exercise}
 
@@ -200,15 +198,10 @@ def cdf(a):
 x, y = cdf(a)
 
 plt.plot(x, y)
-plt.savefig("dummy_plot_2.pdf")
-plt.cla() # clear the figure so that we can overwrite it later.
+plt.show()
 \end{pyblock}
 Why do we start $y$ with 1?
 
-
-\begin{center}
-\includegraphics[scale=0.5]{dummy_plot_2.pdf}
-\end{center}
   \end{solution}
 \end{exercise}
 
@@ -220,14 +213,9 @@ Read about the \pyv{drawstyle} option of  the plot function of matplotlib to see
 With the drawstyle option: 
 \begin{pyblock}
 plt.plot(x, y,  drawstyle = 'steps-pre')
-plt.savefig("dummy_plot_drawstyle.pdf")
-plt.cla() # clear the figure so that we can overwrite it later.
+plt.show()
 \end{pyblock}
 
-
-\begin{center}
-\includegraphics[scale=0.5]{dummy_plot_drawstyle.pdf}
-\end{center}
 
 But now we still have  vertical lines. To remove those, we can use \pyv{hlines}.
 
@@ -239,13 +227,8 @@ left = [0] + a
 right = a + [10]
 
 plt.hlines(y, left, right)
-plt.savefig("dummy_plot_lines.pdf")
-plt.cla() # clear the figure so that we can overwrite it later.
+plt.show()
 \end{pyblock}
-
-\begin{center}
-\includegraphics[scale=0.5]{dummy_plot_lines.pdf}
-\end{center}
 
 There  we are!.
   \end{solution}
@@ -328,8 +311,7 @@ a = G.rvs(L)
 plt.plot(a, label="a")
 plt.title("N = {}, L = {}".format(N, L))
 plt.legend()
-plt.savefig("dummy_plot.pdf")
-plt.cla() # clear the figure so that we can overwrite it later.
+plt.show()
 \end{pyverbatim}
 I use the same name for the pdf file, so to prevent having to delete 10 figures or so. If you don't like this, just provide another name. 
 \end{solution}
@@ -343,8 +325,7 @@ Add this to the other code and run it.
 x, y = cdf(a)
 plt.plot(x,y,  label="d")
 plt.legend()
-plt.savefig("dummy_plot.pdf")
-plt.cla() # clear the figure
+plt.show()
 \end{pyverbatim}
 \end{solution}
 \end{exercise}
@@ -405,8 +386,7 @@ x, y = cdf(a)
 plt.plot(x, y,  label="empirical")
 plt.plot(x, E.cdf(x),  label="exp")
 plt.legend()
-plt.savefig("dummy_plot.pdf")
-plt.cla() # clear the figure
+plt.show()
 \end{pyverbatim}
 
 It is pretty obvious why these graphs must be different: we compare a uniform and an exponential distribution. 
@@ -421,9 +401,7 @@ We now like to simulate the interarrival process as seen by a shop that serves m
 
 \begin{exercise}
   Suppose we have two customers with interarrival times $a=[4, 3, 1.2, 5]$ and $b=[2, 0.5, 9]$. Make, by hand, the empirical cdf of the merged process.
-  \begin{hint}
-  The shop sees the combined arrival process, so  first find a way to merge the arrival times of the customers into one arrival process as observed by the shop. Then  convert this into interrival times at the shop. 
-  \end{hint}
+(As a hit, note that   the shop sees the combined arrival process, so  first find a way to merge the arrival times of the customers into one arrival process as observed by the shop. Then  convert this into interrival times at the shop.)
   \begin{solution}
     The following steps in code explain the logic.
     \begin{pyblock}
@@ -493,8 +471,7 @@ plt.title("N = {}, L = {}".format(N, L))
 plt.plot(x, y,  label="empirical")
 plt.plot(x, E.cdf(x),  label="exp")
 plt.legend()
-plt.savefig("dummy_plot.pdf")
-plt.cla() # clear the figure
+plt.show()
 \end{pyverbatim}
 
 \end{solution}
@@ -516,8 +493,7 @@ plt.title("N = {}, L = {}".format(N, L))
 plt.plot(x, y,  label="empirical")
 plt.plot(x, E.cdf(x),  label="exp")
 plt.legend()
-plt.savefig("dummy_plot.pdf")
-plt.cla() # clear the figure
+plt.show()
 \end{pyverbatim}
 
 This is great. For just $N=10$ we see that the exponential distribution is a real good fit. 
@@ -541,8 +517,7 @@ plt.title("N = {}, L = {}".format(N, L))
 plt.plot(x, y,  label="empirical")
 plt.plot(x, E.cdf(x),  label="exp")
 plt.legend()
-plt.savefig("dummy_plot.pdf")
-plt.cla() # clear the figure
+plt.show()
 \end{pyverbatim}
 
 Clearly, whether the distribution of interarrival times of an individual customer are uniform, or normal, doesn't really matter. In both cases the exponential distribution is a good model for what the shop sees. We did not analyze what happens if we would merge customers with normal distribution and uniform distribution, but we can suspect that in all these cases the merged process converges to a set of i.i.d. exponentially distributed random variables.
@@ -790,16 +765,18 @@ With the code of the above exercises we can start our experiments.
 \begin{exercise}
 Copy the code of the previous exercises to spyder, and run the code below. Here $\lambda$ is the arrival rate, $\mu$ the service rate, $N$ the number of periods, and $q_0$ the starting level of the queue. Explain what the code does. Can you also explain the value of the mean and the standard deviation? (Check the solution to see all necessary code.) 
 
-  \begin{pyblock}
+  \begin{pyverbatim}
+from scipy.stats import poisson
 labda, mu, q0, N = 5, 6, 0, 100
+
 a = poisson(labda).rvs(N)
 s = poisson(mu).rvs(N)
 print(a.mean(), a.std())
-\end{pyblock}
+\end{pyverbatim}
 \begin{solution}
   Here is the complete code in case you have messed things up.
 
-\begin{pyblock}
+\begin{pyverbatim}
 import numpy as np
 import scipy
 from scipy.stats import poisson
@@ -828,7 +805,7 @@ labda, mu, q0, N = 5, 6, 0, 100
 a = poisson(labda).rvs(N)
 s = poisson(mu).rvs(N)
 print(a.mean(), a.std())
-\end{pyblock}
+\end{pyverbatim}
 
 \end{solution}
 \end{exercise}
@@ -836,7 +813,7 @@ print(a.mean(), a.std())
 \begin{exercise}
   Modify  the appropriate parts of  code of the previous exercise to the below,  and run it. Explain what you see.
 
-  \begin{pyblock}
+  \begin{pyverbatim}
 labda, mu, q0, N = 5, 6, 0, 100
 a = poisson(labda).rvs(N)
 s = poisson(mu).rvs(N)
@@ -845,26 +822,26 @@ Q, d = compute_Q_d(a, s, q0)
 
 plt.plot(Q)
 plt.show()
-  \end{pyblock}
+  \end{pyverbatim}
 \end{exercise}
 
 \begin{exercise}
   Getting statistics is now really easy.
-  \begin{pyblock}
+  \begin{pyverbatim}
 print(Q.mean(), Q.std())
 print(d.mean())
     
 x, F = cdf(Q)
 plt.plot(x, F)
 plt.show()
-  \end{pyblock}
+  \end{pyverbatim}
 Can you explain the value of the mean of the departure process $d$?
 \end{exercise}
 
 \begin{exercise}
 Plot the queue length process for a large initial queue, for instance, with
 
-\begin{pyblock}
+\begin{pyverbatim}
 q0, N = 1000, 100
 
 a = poisson(labda).rvs(N)
@@ -874,7 +851,7 @@ Q, d = compute_Q_d(a, s, q0)
 
 plt.plot(Q)
 plt.show()
-  \end{pyblock}
+  \end{pyverbatim}
 
 Next, set $q_0=10000$ and $N=1000$.  (In spyder you can just change the numbers and run the code again, in other words, you don't have to copy all the code.) Finally,  make these values again 10 times larger. 
 
@@ -887,7 +864,7 @@ Explain what you see. What is the drain rate of $Q$?
 \begin{exercise}
 What do you expect to see when $\lambda=6$ and $\mu=5$? Once you formulated your hypothesis, check it.
 
-\begin{pyblock}
+\begin{pyverbatim}
 N = 10000
 labda = 6
 mu = 5
@@ -900,7 +877,7 @@ Q, d = compute_Q_d(a, s, q0)
 
 plt.plot(Q)
 plt.show()
-  \end{pyblock}
+  \end{pyverbatim}
 Explain again what you see.
 \end{exercise}
 
@@ -908,9 +885,9 @@ Explain again what you see.
 What do you expect to see when we change the service distribution? What would it be if  it were constant,  for instance?
 
 Change the code for the services into the following.
-\begin{pyblock}
+\begin{pyverbatim}
 s = np.ones_like(a) * mu
-\end{pyblock}
+\end{pyverbatim}
 (What does this code do?) Explain again what you see. Why doesn't it make sense to plot the empirical distribution of $Q$ for this case?
 \end{exercise}
 
@@ -927,7 +904,7 @@ To quantify the effect of regularity of service times we first assume that the s
 
 
 So, lets test. First run this:
-\begin{pyblock}
+\begin{pyverbatim}
 N = 10000
 labda = 6
 mu = 5
@@ -938,7 +915,7 @@ s = poisson(mu).rvs(N)
 
 Q, d = compute_Q_d(a, s, q0)
 print(Q.mean(), Q.std())
-  \end{pyblock}
+  \end{pyverbatim}
   Then run the same code with \pyv{s = np.ones_like(a) * mu} rather than the Poisson distribution. Explain the result.
 \end{exercise}
 
@@ -951,15 +928,60 @@ For our experiments it is about 20\% extra.
   \end{solution}
 \end{exercise}
 
+
+
+You should make the crucial observation now that we can experiment with all kinds of changes (system improvements) and compare their effects. In more general terms: simulation allows us to do `what-if' analysis. 
+
+
+
+
+\subsection{Control }
+\label{sec:control-}
+
+In the previous section we analyzed the effect of the design of the system, such as changing the average service times. These changes are independent of the queue length. In many systems, however, the service rate depends on the dynamics of the queue process. When the queue is large, service rates increase, while when the queue is small, service rates decrease. 
+
 \begin{exercise}
-  Finally, we may also block customers if the queue is too long (or customers don't want to join the queue if its too long). What if we block at a level of 15? How would that affect the average queue?
+  Suppose that normally we have 6 servers, each working at rate $1$ per period. When the queue becomes longer than 10 we hire two extra servers, and when the queue is empty again, we send the extra two servers home, until the queue hits 20 again, and so on. Try to write your own code to compute the queue process. (This is pretty challenging, and a good test to see how creative you are in modelling. As a hint, you need a state variable to track whether the extra servers are present or not. The solution shows the code.) Analyze the effect of the threshold at 20; what happens if you set it to 18, say, or 30? What is the effect of the number of extra servers; what if you would add 3 instead of 2?
+  
+
+  \begin{solution}
+    \begin{pyverbatim}
+def compute_Q_d(a, q0=0):
+    d = np.zeros_like(a)
+    Q = np.zeros_like(a)
+    Q[0] = q0
+    present = False # extra employee is not in.
+    for i in range(1, len(a)):
+        mu = 8 if present else 6
+        s = poisson(mu).rvs()
+        d[i] = min(Q[i-1], s)
+        Q[i] = Q[i-1] + a[i] - d[i]
+        if Q[i] == 0:
+            present = False # send employee home
+        elif Q[i] >= 10:
+            present = True # hire employee for next period
+
+    return Q, d
+    
+    \end{pyverbatim}
+
+
+
+Note that this code runs significantly slower than the other code. The reason that here we have to call \pyv{poisson(mu).rvs()} in every step of the for-loop. In the other code we could use the scipy library to generate $N$ random numbers in one step. (In you are interested, loops in C++ can be a factor 1000 or so faster than loops in python.)
+  \end{solution}
+  
+\end{exercise}
+
+
+\begin{exercise}
+Another way to deal with large queues is to simply  block customers if the queue is too long (or customers don't want to join the queue if its too long). What if we block at a level of 15? How would that affect the average queue and the distribution of the queue? 
 
   Modify the code to compute the queue and do an experiment.
 
 \begin{solution}
 Here is an example. What can be the meaning of \pyv{np.inf}? 
 
-\begin{pyblock}
+\begin{pyverbatim}
 def compute_Q_d(a, s, q0=0, b = np.inf):
     # b is the blocking level.
     d = np.zeros_like(a)
@@ -983,67 +1005,96 @@ s = poisson(mu).rvs(N)
 
 Q, d = compute_Q_d(a, s, q0, b=15)
 print(Q.mean(), Q.std())
-\end{pyblock}
+
+x, F = cdf(Q)
+plt.plot(x, F)
+plt.show()
+\end{pyverbatim}
 
   \end{solution}
 \end{exercise}
 
-
-You should make the crucial observation now that we can experiment with all kinds of changes (system improvements) and compare their effects. In more general terms: simulation allows us to do `what-if' analysis. 
-
-
-
-
-\subsection{Control }
-\label{sec:control-}
-
-In the previous section we analyzed the effect of the design of the system, such as changing the average service times. These changes are independent of the queue length. In many systems, however, the service rate depends on the dynamics of the queue process. When the queue is large, service rates increase, while when the queue is small, service rates decrease. 
+As a final case consider a single server queue that can be switched on and off. There is a cost $h$ associated with keeping a job waiting for one period, there is a cost $p$ to hire the server for one period, and it costs $s$ to switch on the server. Given the parameter values of the next exercise,  would what be a good threshold $N$ such that when the queue hits or exceeds $N$, the server is switched on. We assume (and it is easy to prove) that it is optimal to switch off the server when the queue is emtpy. 
 
 \begin{exercise}
-  Suppose that normally we have 6 servers, each working at rate $1$ per period. When the queue becomes longer than 10 we hire two extra servers, and when the queue is empty again, we send the extra two servers home, until the queue hits 20 again, and so on. Try to write your own code to compute the queue process. (This is pretty challenging, and a good test to see how creative you are in modelling. As a hint, you need a state variable to track whether the extra servers are present or not. The solution shows the code. As a matter of fact, the extra code is suprisingly little.)
-  
+  Jobs arrive at rate $\lambda=0.3$ per period, if the server is present the service rate is $\mu=1$ per period. The number of arrivals and service are Poisson distributed with the given rates. Then, $h=1$ (without loss of generality), $p=5$ and $S=500$. Write a simulator to compute the average cost for setting $T=100$. Then, change $T$ to find a better value.
 
-  \begin{solution}
-    \begin{pyblock}
-def compute_Q_d(a, q0=0):
+How large will the cost to server be? Motivate first that this does not depend on $T$, unless $T$ is in the order of magnitude as the simulation duration. Then make an estimate.
+  
+\begin{solution}
+  
+\begin{pyverbatim}
+N = 10000
+labda = 0.3
+mu = 1
+q0 = 0
+T = 100
+
+h = 1
+p = 5
+S = 500
+
+
+def compute_cost(a, q0=0):
     d = np.zeros_like(a)
     Q = np.zeros_like(a)
     Q[0] = q0
-    present = False # extra employee is not in.
+    present = False  # extra employee is not in.
+    queueing_cost = 0
+    server_cost = 0
+    setup_cost = 0
     for i in range(1, len(a)):
-        mu = 8 if present else 6
-        s = poisson(mu).rvs()
-        d[i] = min(Q[i-1], s)
-        Q[i] = Q[i-1] + a[i] - d[i]
+        if present:
+            server_cost += p
+            s = poisson(mu).rvs()
+        else:
+            s = 0
+        d[i] = min(Q[i - 1], s)
+        Q[i] = Q[i - 1] + a[i] - d[i]
         if Q[i] == 0:
-            present = False # send employee home
-        elif Q[i] >= 10:
-            present = True # hire employee for next period
+            present = False  # send employee home
+        elif Q[i] >= T:
+            if present == False:  # server is switched on:
+                setup_cost += S
+            present = True
+        queueing_cost += h * Q[i]
 
-    return Q, d
-    
-    \end{pyblock}
+    print(queueing_cost, setup_cost, server_cost)
 
-Note that this code runs significantly slower than the other code. The reason that here we have to call \pyv{poisson(mu).rvs()} in every step of the for-loop. In the other code we could use the scipy library to generate $N$ random numbers in one step. (In you are interested, loops in C++ can be a factor 1000 or so faster than loops in python.)
-  \end{solution}
-  
+    total_cost = queueing_cost + server_cost + setup_cost
+    num_periods = len(a) - 1
+    average_cost = total_cost / num_periods
+    return average_cost
+
+a = poisson(labda).rvs(N)
+av = compute_cost(a, q0)
+print(av)
+\end{pyverbatim}
+After a bit of experimentation, we see that $T=15$ is quite a bit better.
+
+The total cost of the server must be $ p \rho N = p \lambda/\mu N$. To see this, note that $\rho$ must be the fraction of the time the server is busy, hence $N\rho$ is the total time it is busy. Thus the cost must be about \py{5*0.3/1*10000} 
+\end{solution}
+
+
 \end{exercise}
 
-
-
 \begin{itemize}
-\item Control zoals bij de psychiaters. Maak de empirische verdelingsfunctie van de wachttijd voor deze queue. Dit lijkt ook op een supermarkt. 
-\item Simulation of a D policy of wachttijd berekening ipv queue lengte.
 \item Time varying demand.
 \end{itemize}
 
 
+\begin{exercise}
+  What have you learned from this tutorial?
+  \begin{solution}
+    \begin{enumerate}
+    \item  Making a  simulation requires some ingenuity, but is, often, not difficult
+    \item With simulation it becomes possible to analyze queueing situations. The mathematical analysis of often much harder. 
+    \item We studied the behavior of queues under certain control policies, typically policies that change the service rate as a function of the queue length.
+    \end{enumerate}
+  \end{solution}
+\end{exercise}
 
-
-
-\section{Heat bath}
-\label{sec:heat-bath}
-
+\clearpage
 
 \section{A queueing network}
 \label{sec:queueing-network}
@@ -1051,6 +1102,8 @@ Note that this code runs significantly slower than the other code. The reason th
 
 \section{A queueing network with workload control}
 \label{sec:queu-netw-with}
+
+
 
 
 \section{Nurse routing}
@@ -1065,12 +1118,8 @@ shift sheduling. setups.
 
 
 
-\Closesolutionfile{hint}
 \Closesolutionfile{ans}
 
-\clearpage
-\section*{Hints}
-\input{hint}
 
 \clearpage
 \section*{Solutions}

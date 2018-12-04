@@ -112,7 +112,8 @@
 \renewcommand{\TH}{\mathrm{TH}} % indicator
 
 \newcommand{\recall}[1]{\emph{#1}} %\recallsymbol}
-\newcommand{\nvf}[1]{\tbdsymbol}
+\newcommand{\nvf}[1]{\marginpar{nvf}\footnote{NVF: #1}}
+\newcommand{\rvb}[1]{\marginpar{rvb}\footnote{RVB: #1}}
 
 \makeatletter
 \def\integral#1#2{\def\temp@expr{#1\,\mathrm d#2}\int\integral@}
