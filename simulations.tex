@@ -15,6 +15,8 @@
 
 \usepackage{preamble}
 
+\newcommand{\notet}[1]{\textcolor{red}{#1}}
+
 % handle indentation below figure captions
 \setcapwidth[c]{.8\textwidth}
 \setcapwidth{0.95\textwidth}
@@ -60,7 +62,7 @@ Each case is organized in a number of exercises. For each exercise,
   \item Simulate a number of scenarios by varying parameter settings and see what happens.
 \end{enumerate}
 
-We expect you to work in a groups of 2 to 3 students and bring a laptop with an \emph{installed and working} python environment, preferably  the anaconda package available at \url{https://www.anaconda.com/}, as this contains all functionality we will need\footnote{There are also python environments available on the web, such as repl.it., but that is typically a bit less practical than running the code on your own machine.}. You can find a nice tutorial to python programming at  \url{https://www.programiz.com/python-programming}. Note, this site advises to install python just by itself. We instead advise you to download anaconda, as this contains also the required numerical libraries. 
+We expect you to work in a groups of 2 to 3 students and bring a laptop with an \emph{installed and working} python environment, preferably  the anaconda package available at \url{https://www.anaconda.com/},  as this contains all functionality we will need\footnote{There are also python environments available on the web, such as repl.it., but that is typically a bit less practical than running the code on your own machine.}. \notet{Ik heb hierbij drie opmerkingen. (1) Is het niet handiger om dit in een computerlokaal te doen met RuG-computers? Anders vrees ik allerlei problemen omdat mensen hun software niet werkend krijgen. (2) Zo ja, dan zou ik een python environment kiezen die op de RuG-accounts is voorgeprogrammeerd. Volgens mij heeft iedereen Spyder 3 tot zijn/haar beschikking; Anaconda ben ik niet zeker van. (3) Mocht het niet mogelijk zijn om een computerlokaal te regelen, dan zou ik in ieder geval aangeven welke python environment de studenten op hun RuG-account kunnen gebruiken. } You can find a nice tutorial to python programming at  \url{https://www.programiz.com/python-programming}. Note, this site advises to install python just by itself. We instead advise you to download anaconda, as this contains also the required numerical libraries. 
 
 We will use the following libraries of python a lot:
 \begin{itemize}
@@ -531,7 +533,7 @@ Clearly, whether the distribution of interarrival times of an individual custome
 \begin{exercise}
 If  $\mu=\sigma=5$ then the analysis should break down. What happens if you set $\sigma=5$? If you don't get real strange results, the code itself must be wrong. (As an aside, when testing code it is good to see what happens if you use bogus numbers. The program should fail.)
 \begin{solution}
-	SOLUTION WAS MISSING. PROBABLY YOU MEAN THAT THERE ARE NEGATIVE INTERARRIVAL TIMES NOW, WHICH DOES NOT MAKE SENSE. HOWEVER, WHEN I TRY IT OUT, THE CODE STILL RUNS SMOOTHLY AND THE RESULTS LOOK JUST FINE.
+	\notet{Solution was missing. Probably you mean that there are negative interarrival times now, which does not make sense. However, when I try it out, the code still runs smoothly and the results seem to be just fine.}
 \end{solution}	
 \end{exercise}
 
@@ -755,7 +757,7 @@ def compute_Q_d(a, s, q0=0):
 \begin{exercise}
   Sketch (in pseudo code, or python) how to compute the empirical distribution function of a set of numbers $a$. (Resist the temptation to look it up from the previous tutorial. It is very important to actively try to recall what you learned, even if you don't succeed.)
   \begin{solution}
-Here it is
+Here it is \notet{Note: the solution below is different than the one we used in section 2. I think we'd better choose one of them to avoid confusion.}
 \begin{pyblock}
 def cdf(a):
     y = np.arange(1, len(a)+1)/len(a)
@@ -769,10 +771,9 @@ def cdf(a):
 With the code of the above exercises we can start our experiments.
 
 \begin{exercise}
-Copy the code of the previous exercises to spyder, and run the code below. Here $\lambda$ is the arrival rate, $\mu$ the service rate, $N$ the number of periods, and $q_0$ the starting level of the queue. Explain what the code does. Can you also explain the value of the mean and the standard deviation? (Check the solution to see all necessary code.) 
+Copy the code of the previous exercises to Anaconda, and run the code below. Here $\lambda$ is the arrival rate, $\mu$ the service rate, $N$ the number of periods, and $q_0$ the starting level of the queue. Explain what the code does. Can you also explain the value of the mean and the standard deviation? (Check the solution to see all necessary code.) 
 
   \begin{pyverbatim}
-from scipy.stats import poisson
 labda, mu, q0, N = 5, 6, 0, 100
 
 a = poisson(labda).rvs(N)
@@ -859,7 +860,7 @@ plt.plot(Q)
 plt.show()
   \end{pyverbatim}
 
-Next, set $q_0=10000$ and $N=1000$.  (In spyder you can just change the numbers and run the code again, in other words, you don't have to copy all the code.) Finally,  make these values again 10 times larger. 
+Next, set $q_0=10000$ and $N=1000$.  (In Anaconda you can just change the numbers and run the code again, in other words, you don't have to copy all the code.) Finally,  make these values again 10 times larger. 
 
 Explain what you see. What is the drain rate of $Q$?
 \begin{solution}
@@ -888,13 +889,13 @@ Explain again what you see.
 \end{exercise}
 
 \begin{exercise}
-What do you expect to see when we change the service distribution? What would it be if  it were constant,  for instance?
+What do you expect to see when we change the service distribution? What would it be if it were constant, for instance?
 
 Change the code for the services into the following.
 \begin{pyverbatim}
 s = np.ones_like(a) * mu
 \end{pyverbatim}
-(What does this code do?) Explain again what you see. Why doesn't it make sense to plot the empirical distribution of $Q$ for this case?
+(What does this code do?) Explain again what you see. Why doesn't it make sense to plot the empirical distribution of $Q$ for this case? \notet{I don't see the point here. When I try to plot the empirical distribution (for $\lambda < \mu$), it looks fine. Maybe you mean that when \emph{both} $a$ and $s$ are deterministic, then $Q$ is deterministic as well and there is no point in deriving its empirical distribution?}
 \end{exercise}
 
 \subsection{What if analysis}
@@ -909,7 +910,7 @@ To quantify the effect of regularity of service times we first assume that the s
  Deterministic service times are the best we can achieve. Thus, if we don't change the mean of the service times, it will not become any better than this.
 
 
-So, lets test. First run this:
+So, let's test. First run this:
 \begin{pyverbatim}
 N = 10000
 labda = 6
@@ -921,16 +922,19 @@ s = poisson(mu).rvs(N)
 
 Q, d = compute_Q_d(a, s, q0)
 print(Q.mean(), Q.std())
-  \end{pyverbatim}
-  Then run the same code with \pyv{s = np.ones_like(a) * mu} rather than the Poisson distribution. Explain the result.
+\end{pyverbatim}
+Then run the same code with \pyv{s = np.ones_like(a) * mu} rather than the Poisson distribution. Explain the result.
+\begin{solution}
+	You should observe that the statistics improve.
+\end{solution}
 \end{exercise}
 
 
 
 \begin{exercise}
-  Next, we might be able to reduce the average service time by 10\%, say, but reducing the variability is hard, what should we take for $s$? Do the computations and compare the results to those of the previous exercise. What change in average time do we need to get about the same average queue length for the queueing system with deterministic service times?
+  Next, we might be able to reduce the average service time by 10\%, say, but reducing the variability is hard, what should we take for $s$? \notet{I don't understand the question.} Do the computations and compare the results to those of the previous exercise. What change in average \notet{(service?)} time do we need to get about the same average queue length for the queueing system with deterministic service times? \notet{Rephrase this question, it is not entirely clear what is meant here.}
   \begin{solution}
-For our experiments it is about 20\% extra.
+\notet{Solution to the first question (what should we take for $s$?) is missing.} For our experiments it is about 20\% extra.
   \end{solution}
 \end{exercise}
 
@@ -947,33 +951,33 @@ You should make the crucial observation now that we can experiment with all kind
 In the previous section we analyzed the effect of the design of the system, such as changing the average service times. These changes are independent of the queue length. In many systems, however, the service rate depends on the dynamics of the queue process. When the queue is large, service rates increase, while when the queue is small, service rates decrease. 
 
 \begin{exercise}
-  Suppose that normally we have 6 servers, each working at rate $1$ per period. When the queue becomes longer than 10 we hire two extra servers, and when the queue is empty again, we send the extra two servers home, until the queue hits 20 again, and so on. Try to write your own code to compute the queue process. (This is pretty challenging, and a good test to see how creative you are in modelling. As a hint, you need a state variable to track whether the extra servers are present or not. The solution shows the code.) Analyze the effect of the threshold at 20; what happens if you set it to 18, say, or 30? What is the effect of the number of extra servers; what if you would add 3 instead of 2?
+  Suppose that normally we have 6 servers, each working at rate $1$ per period. When the queue becomes longer than 20 we hire two extra servers, and when the queue is empty again, we send the extra two servers home, until the queue hits 20 again, and so on. Try to write your own code to compute the queue process. (This is pretty challenging, and a good test to see how creative you are in modelling. As a hint, you need a state variable to track whether the extra servers are present or not. The solution shows the code.) Analyze the effect of the threshold at 20; what happens if you set it to 18, say, or 30? What is the effect of the number of extra servers; what if you would add 3 instead of 2?
   
 
   \begin{solution}
     \begin{pyverbatim}
-def compute_Q_d(a, q0=0):
+def compute_Q_d(a, q0=0, mu=6, threshold=20, extra=2):
     d = np.zeros_like(a)
     Q = np.zeros_like(a)
     Q[0] = q0
-    present = False # extra employee is not in.
+    present = False # extra employees are not in
     for i in range(1, len(a)):
-        mu = 8 if present else 6
-        s = poisson(mu).rvs()
-        d[i] = min(Q[i-1], s)
+        rate = mu + extra if present else mu # service rate
+        s = poisson(rate).rvs()
+        d[i] = min(Q[i-1],s)
         Q[i] = Q[i-1] + a[i] - d[i]
         if Q[i] == 0:
             present = False # send employee home
-        elif Q[i] >= 10:
+        elif Q[i] >= threshold:
             present = True # hire employee for next period
-
+    
     return Q, d
     
     \end{pyverbatim}
 
 
 
-Note that this code runs significantly slower than the other code. The reason that here we have to call \pyv{poisson(mu).rvs()} in every step of the for-loop. In the other code we could use the scipy library to generate $N$ random numbers in one step. (In you are interested, loops in C++ can be a factor 1000 or so faster than loops in python.)
+Note that this code runs significantly more slowly than the other code. The reason that here we have to call \pyv{poisson(mu).rvs()} in every step of the for-loop. We could make the program run faster by using the scipy library to generate $N$ random numbers in one step outside of the for loop and then extract numbers from there when needed. (In you are interested, loops in C++ can be a factor 1000 or so faster than loops in python.)
   \end{solution}
   
 \end{exercise}
@@ -988,7 +992,7 @@ Another way to deal with large queues is to simply  block customers if the queue
 Here is an example. What can be the meaning of \pyv{np.inf}? 
 
 \begin{pyverbatim}
-def compute_Q_d(a, s, q0=0, b = np.inf):
+def compute_Q_d(a, s, q0=0, b=np.inf):
     # b is the blocking level.
     d = np.zeros_like(a)
     Q = np.zeros_like(a)
@@ -1007,7 +1011,6 @@ q0 = 0
 
 a = poisson(labda).rvs(N)
 s = poisson(mu).rvs(N)
-#s = np.ones_like(a) * mu
 
 Q, d = compute_Q_d(a, s, q0, b=15)
 print(Q.mean(), Q.std())
@@ -1020,7 +1023,7 @@ plt.show()
   \end{solution}
 \end{exercise}
 
-As a final case consider a single server queue that can be switched on and off. There is a cost $h$ associated with keeping a job waiting for one period, there is a cost $p$ to hire the server for one period, and it costs $s$ to switch on the server. Given the parameter values of the next exercise,  would what be a good threshold $N$ such that when the queue hits or exceeds $N$, the server is switched on. We assume (and it is easy to prove) that it is optimal to switch off the server when the queue is emtpy. 
+As a final case consider a single server queue that can be switched on and off. There is a cost $h$ associated with keeping a job waiting for one period, there is a cost $p$ to hire the server for one period, and it costs $s$ to switch on the server. Given the parameter values of the next exercise,  would what be a good threshold $N$ such that when the queue hits or exceeds $N$, the server is switched on? We assume (and it is easy to prove) that it is optimal to switch off the server when the queue is emtpy. 
 
 \begin{exercise}
   Jobs arrive at rate $\lambda=0.3$ per period, if the server is present the service rate is $\mu=1$ per period. The number of arrivals and service are Poisson distributed with the given rates. Then, $h=1$ (without loss of generality), $p=5$ and $S=500$. Write a simulator to compute the average cost for setting $T=100$. Then, change $T$ to find a better value.
@@ -1055,14 +1058,14 @@ def compute_cost(a, q0=0):
             s = poisson(mu).rvs()
         else:
             s = 0
-        d[i] = min(Q[i - 1], s)
-        Q[i] = Q[i - 1] + a[i] - d[i]
+        d[i] = min(Q[i-1], s)
+        Q[i] = Q[i-1] + a[i] - d[i]
         if Q[i] == 0:
             present = False  # send employee home
         elif Q[i] >= T:
-            if present == False:  # server is switched on:
-                setup_cost += S
-            present = True
+            if present == False: 
+	            present = True # server is switched on
+                setup_cost += S            
         queueing_cost += h * Q[i]
 
     print(queueing_cost, setup_cost, server_cost)
@@ -1078,14 +1081,14 @@ print(av)
 \end{pyverbatim}
 After a bit of experimentation, we see that $T=15$ is quite a bit better.
 
-The total cost of the server must be $ p \rho N = p \lambda/\mu N$. To see this, note that $\rho$ must be the fraction of the time the server is busy, hence $N\rho$ is the total time it is busy. Thus the cost must be about \py{5*0.3/1*10000} 
+The total cost of the server must be $\rho N p = \tfrac{\lambda}{\mu} N p$. To see this, note that $\rho$ must be the fraction of the time the server is busy, hence $\rho N$ is the total time it is busy. Thus the cost must be about \py{(0.3/1)*10000*5} 
 \end{solution}
 
 
 \end{exercise}
 
 \begin{itemize}
-\item Time varying demand.
+\item Time varying demand. \notet{It took me about two hours to complete everything, so I guess there is already enough material for one tutorial.}
 \end{itemize}
 
 
@@ -1093,7 +1096,7 @@ The total cost of the server must be $ p \rho N = p \lambda/\mu N$. To see this,
   What have you learned from this tutorial?
   \begin{solution}
     \begin{enumerate}
-    \item  Making a  simulation requires some ingenuity, but is, often, not difficult
+    \item  Making a  simulation requires some ingenuity, but is often not difficult
     \item With simulation it becomes possible to analyze queueing situations. The mathematical analysis of often much harder. 
     \item We studied the behavior of queues under certain control policies, typically policies that change the service rate as a function of the queue length.
     \end{enumerate}
@@ -1120,7 +1123,7 @@ shift sheduling. setups.
 
 \section{An Assembly line}
 \label{sec:an-assembly-line}
-
+\notet{You now have titles for six assignments, but there are only five tutorials scheduled. Keep that in mind.}
 
 
 
