@@ -53,6 +53,7 @@
 \item shift sheduling. setups. 
 \end{itemize}
 
+\Opensolutionfile{hint}
 \Opensolutionfile{ans}
 
 \section{Introduction}
@@ -438,7 +439,9 @@ We would now like to simulate the interarrival process as seen by a shop that se
 
 \begin{exercise}
   Suppose we have two customers with interarrival times $a=[4, 3, 1.2, 5]$ and $b=[2, 0.5, 9]$. Make, by hand, the empirical cdf of the merged process.
-(As a hint, note that the shop sees the combined arrival process, so first find a way to merge the arrival times of the customers into one arrival process as observed by the shop. Then convert this into interrival times at the shop.)
+  \begin{hint}
+Note that the shop sees the combined arrival process, so first find a way to merge the arrival times of the customers into one arrival process as observed by the shop. Then convert this into interrival times at the shop.
+  \end{hint}
   \begin{solution}
     The following steps in code explain the logic.
     \begin{pyblock}
@@ -850,7 +853,9 @@ plt.show()
 
 \begin{exercise}
   Getting statistics is now really easy. For example,  sketch the empirical distribution function of the queue length process and Compute the mean number of departures per period.
-  (Hint, for  the empirical distribution function  you can use the code of Exercise~\ref{ex:1}. Before looking it up, try to recall how the cdf is computed.)
+  \begin{hint}
+For  the empirical distribution function  you can use the code of Exercise~\ref{ex:1}. Before looking it up, try to recall how the cdf is computed.
+  \end{hint}
 
 
   \begin{solution}
@@ -967,8 +972,10 @@ You should make the crucial observation now that we can experiment with all kind
 In the previous section we analyzed the effect of the design of the system, such as changing the average service times. These changes are independent of the queue length. In many systems, however, the service rate depends on the dynamics of the queue process. When the queue is large, service rates increase, while when the queue is small, service rates decrease.  YOu see this type of policy often in supermarkets, extra cashiers will open when the queues increase.
 
 \begin{exercise}
-  Suppose that normally we have 6 servers, each working at rate $1$ per period. When the queue becomes longer than 20 we hire two extra servers, and when the queue is empty again, we send the extra two servers home, until the queue hits 20 again, and so on. Try to write your own code to compute the queue process. (This is pretty challenging, and a good test to see how creative you are in modelling. As a hint, you need a state variable to track whether the extra servers are present or not. The solution shows the code.) Analyze the effect of the threshold at 20; what happens if you set it to 18, say, or 30? What is the effect of the number of extra servers; what if you would add 3 instead of 2?
-  
+  Suppose that normally we have 6 servers, each working at rate $1$ per period. When the queue becomes longer than 20 we hire two extra servers, and when the queue is empty again, we send the extra two servers home, until the queue hits 20 again, and so on. Try to write your own code to compute the queue process. (This is pretty challenging, and a good test to see how creative you are in modelling.
+  \begin{hint}
+  As a hint, you need a state variable to track whether the extra servers are present or not. The solution shows the code.) Analyze the effect of the threshold at 20; what happens if you set it to 18, say, or 30? What is the effect of the number of extra servers; what if you would add 3 instead of 2?
+  \end{hint}
 
   \begin{solution}
 Here is one way.
@@ -1118,10 +1125,10 @@ An interesting extension is to incorporate time-varying demand. In many systems,
 
 \clearpage
 
-\section{Simulation of th $G/G/c$ in continuous time}
+\section{Simulation of the $G/G/c$ queue in continuous time}
 \label{sec:ggc-continuous-time}
 
-In this tutorial we will write a simulator for the $G/G/c$ queue. For this we use two concepts that are essential to simulate any stochastic system of reasonable complexity: an \emph{event stack} (or event schedule) to keep track of the sequence in which  events occur,  and \emph{classes} to organize data and behavior into single logical units.  We will work in steps  towards our goal; along the way you will learn a number of fundamental and highly interesting concepts.
+In this tutorial we will write a simulator for the $G/G/c$ queue. For this we use two concepts that are essential to simulate any stochastic system of reasonable complexity: an \emph{event stack} (or event schedule) to keep track of the sequence in which  events occur,  and \emph{classes} to organize data and behavior into single logical units.  We will work in steps  towards our goal; along the way you will learn a number of fundamental and highly interesting concepts such as \emph{classes}  and efficient \emph{data structures}.  If you have understood our implementation of the $G/G/c$ queue, discrete event simulators are no longer a black box for you. Hence, what you will learn from this practical extends well beyond the simulation of the $G/G/c$ queueing process. 
 
 
 \subsection{Sorting with event stacks}
@@ -1249,9 +1256,9 @@ class Job:
 
 A class has a number of attributes to capture its  state and a number of functions\footnote{In python, functions related to a class are called `methods'. More generally, functions belonging to a class are called `member functions'.}. We initialize the arrival time and service time to zero. Then we store the departure time and queue length for a statistical analysis at the end of the simulations. Finally, we have functions to compute the waiting time and the sojourn time; the \texttt{repr} function is used to print the job. Note that our naming of functions also acts as documentation of what the functions do. Note also that member variables and functions in python start with the word \texttt{self}; this is to distinguish the (value of the) member variables from variables with the same name but lying outside the scope of the class.
 
-Classes are extremely useful programming concepts, as it enables you to organize state (that is, attributes) and behavior (that is, functions that apply to the attributes) into logical components. Moreover, classes can offer functionality to a programmer without the programmer needing to understand how this functionality is built. As an example, a user of the class \texttt{Job} can use the function \texttt{sojourn time} without being needing to know how to compute it. 
+Classes are extremely useful programming concepts, as it enables you to organize state (that is, attributes) and behavior (that is, functions that apply to the attributes) into logical components. Moreover, classes can offer functionality to a programmer without the programmer needing to understand how this functionality is built. Classes offer much more advantages such as inheritance, but we will not discuss that here. 
 
-Once we have a class, making an object is simple.\footnote{The wording is important here. Objects are instances of classes. As an example: Albert Einstein was a human being. Here, `Einstein' is the object, and `human being' is a class.}
+Once we have a class, making an object is simple with this code.\footnote{The wording is important here. Objects are instances of classes. As an example: Albert Einstein was a human being. Here, `Einstein' is the object, and `human being' is a class.}
 
 \begin{pyblock}
 job = Job()
@@ -1259,8 +1266,8 @@ job.arrival_time = 3
 job.service_time = 2
 \end{pyblock}
 
-\begin{exercise}
-  Make 10 jobs with exponentially distributed interarrival times, with $\lambda=2$,  and exponentially distributed service times with $\mu=3$. Put these jobs on an event stack, and print them in order of arrival time. Tag the events with the job, and event type (which is an arrival).
+\begin{exercise}\label{ex:3}
+  Make $10$ jobs with exponentially distributed interarrival times, with $\lambda=2$,  and exponentially distributed service times with $\mu=3$. Put these jobs on an event stack, and print them in order of arrival time. Tag the events with the job, and event type (which is an arrival).
   \begin{solution}
 One way is like this.     
     \begin{pyblock}
@@ -1352,7 +1359,7 @@ while stack:
 \end{exercise}
 
 \begin{exercise}
-  Run a simulation for 100 jobs and compute the average queue length. Then extend to $1000 =1e3$, and $1e5$. Compare it to the theoretical expected queue length of the $M/M/1$ at arrival moments. 
+  Run a simulation for 100 jobs and compute the average queue length. Then extend to $1000$, and $10^5$. Compare it to the theoretical expected queue length of the $M/M/1$ queue at arrival moments. 
   \begin{solution}
 Now we see that we needed to store the jobs in \texttt{served\_jobs}.
 
@@ -1396,34 +1403,101 @@ Then use this in our simulation. What happens? What happens if you reverse the 2
  \end{solution}
 \end{exercise}
 
+\begin{exercise}
+  In a priority queue  jobs belong to a priority class. Jobs with higher priority are served before jobs with lower priority, and within one priority class jobs are served in FIFO sequence. A concrete example of a priority queue is the intake process of business and economy class customers at airports.  How would you build a $G/G/1$ priority queue?
+  \begin{hint}
+We have used a good data structure already. How should this be applied?
+  \end{hint}
+\begin{solution}
+  As in the LIFO example, we only have to change the data structure. First, we give each job an extra attribute corresponding to its priority. Then we use a heap to store the jobs in queue. Specifically,  change the line with
+\texttt{queue.append(job)} by \texttt{heappush(queue, (job.priority, job))}, and \texttt{queue.pop(0)} by \texttt{heappop(queue)}. 
 
-\subsection{G/G/c queue, to be done}
+\end{solution}
+\end{exercise}
+
+\begin{exercise}
+
+  We implemented the queue as a python list. Why is a deque a more efficient data structure to simulate a queue?  Why is it important to know the efficiency of the data structures and algorithms you use?
+  \begin{hint}
+  Search the web on \texttt{python} and \texttt{deque}.
+  \end{hint}
+  \begin{solution}
+    In a python list the \texttt{pop(0)} function is an $O(n)$ operation, where $n$ is the number of elements in the list. In a deque appending and removing items to either end of the deque is an $O(1)$ operation. 
+
+When you do large scale simulations, involving many hours of simulation time, all inefficiencies build up and can make the running time orders of magnitude longer. A famous example is the sorting of numbers. A simple, but stupid, sorting algorithm is $O(n^2)$ while a good algorithm is $O(n \log n)$. The sorting time of $10^6$ numbers is dramatically different. 
+
+  \end{solution}
+\end{exercise}
+
+\begin{exercise}
+  Recall that in Exercise~\ref{ex:3} we build all jobs before the queueing simulation starts. Why is this not a good decision? Note that in the simulation of $G/G/c$ queue below we will generate jobs only when needed. 
+  \begin{solution}
+    Typically, generating all jobs at the start is not a real good idea. When running large simulations the amount of computer memory required to store all this data grows out of hand. Also our \texttt{served\_jobs} list is not memory efficient. 
+  \end{solution}
+\end{exercise}
+
+\subsection{G/G/c queue}
 
 \label{sec:ggc-queue}
 
+Extending the simulation of the $G/G/1$ queue to a $G/G/c$ queue is not really hard. In the $G/G/1$ we have just one server which is busy or not.
+
+\begin{exercise}
+  Generalize  the \texttt{handle\_arrival} function of the $G/G/1$ queue such that it can cope with multiple servers.
+
+  \begin{hint}
+  Introduce a \texttt{num\_busy} variable that keeps track of the number of busy servers. What happens if a job arrives and this number is less than $c$; what if this number is equal to $c$?
+  \end{hint}
+  \begin{solution}
+    If the number of busy servers is less than $c$, a service can start. Otherwise a job has to queue. If a service starts, increase \texttt{num\_busy} by one. 
+  \end{solution}
+\end{exercise}
+
+
+\begin{exercise}
+Likewise,   generalize  the \texttt{handle\_departure} function of the $G/G/1$ queue such that it can cope with multiple servers.
+\begin{hint}
+  Again, use the \texttt{num\_busy} variable. 
+\end{hint}
+
+\begin{solution}
+  At a departure, a server becomes free, hence decrease \texttt{num\_busy} by one. If there are jobs in queue, start a new service.
+\end{solution}
+\end{exercise}
+
+\begin{exercise}
+  Can you think of some sort of property of the $G/G/c$ queue that must be true at all times? It is important to use such properties  as tests while developing.
+  \begin{hint}
+    There must be a relation between the queue length and the number of busy servers.
+  \end{hint}
+  \begin{solution}
+    Of course, the number of busy servers cannot be negative or larger than $c$. The queue length cannot be negative. Finally, it cannot be that  the queue length is positive and the number of busy servers is less than $c$. 
+  \end{solution}
+\end{exercise}
 
 
 
+\begin{hint}
+  The design of the simulation of $G/G/1$ queue is not entirely satisfactory. For instance, if we want to run different experiments, we have to clean up old experiments before we can start new ones. The current design is not very practical for this. How to solve this?
+  \begin{solution}
+     Build the simulator as a class!
+  \end{solution}
+\end{hint}
+\begin{solution}
+Here is the entire class. Read it carefully.   
 
-Tests
-\begin{itemize}
-\item Compare with standard formulas for gg1
- \item $D/D/3$ in overload is evident, constructable by hand. 
-\item $M/M/3$ compare the formulas
-\end{itemize}
 
 \begin{pyblock}
-
 class GGc:
     def __init__(self, F, G, c, run_length):
         self.F = F
         self.G = G
         self.c = c
-        self.num_busy = 0
+        self.num_busy = 0   # number of busy servers
         self.run_length = run_length
-        self.served_jobs = set()
-        self.queue = []
         self.stack = [] # event stack
+        self.queue = deque()
+        self.served_jobs = set()
 
     def handle_arrival(self, time, job):
         self.generate_new_arrival(time)
@@ -1431,7 +1505,7 @@ class GGc:
         if self.num_busy < self.c:
             self.start_service(time, job)
         else:
-            self.put_on_queue(time, job)
+            self.queue.append(job)
 
     def generate_new_arrival(self, time):
         if self.run_length > 0:
@@ -1449,9 +1523,6 @@ class GGc:
         job.departure_time = time + job.service_time
         heappush(self.stack, (job.departure_time, job, DEPARTURE))
 
-    def put_on_queue(self, time, job):
-        self.queue.append(job)
-
     def handle_departure(self, time, job):
         self.num_busy -= 1
         self.served_jobs.add(job)
@@ -1468,29 +1539,84 @@ class GGc:
 
     def run(self):
         time = 0
-        self.put_new_arrival_on_stack(0)
+        self.put_new_arrival_on_stack(time)
 
         while self.stack:  # not empty
             time, job, typ = heappop(self.stack)
-            # self.consistency_check()
+            # self.consistency_check() # only use when testing.
             if typ == ARRIVAL:
                 self.handle_arrival(time, job)
             else:
                 self.handle_departure(time, job)
-  
+
+
 \end{pyblock}
+\end{solution}
+
+      
+
+\begin{exercise}
+
+How can we instantiate the \texttt{GGc} simulator, i.e., make a object of a class? How can we run a simulation with exponential interarrival times with $\lambda=2$, exponential service times with $\mu=1$, $c=3$, and $10$ jobs?
+\begin{solution}
+First we instantiate, then we run and print. 
+\begin{pyblock}
+ggc = GGc(expon(2), expon(1), 3, 10)
+ggc.run()
+
+print(ggc.served_jobs)
+\end{pyblock}
+\end{solution}
+\end{exercise}
+
+\begin{exercise}
+Test the simulator with deterministic interarrival times, for instance a job that arrives every 10 minutes, and each job takes 1 hour of service. Check the departure process for $c=1$, $c=2$, $c=5$, $c=6$, and $c=7$. 
+\end{exercise}
+
+
+\begin{exercise}
+  What other tests can you think of?
+  \begin{solution}
+    Implement the $M/M/3$ queue for instance, and compare the theoretical results with the simulation.  We can also check the quality of Sakasegawa's approximation. 
+  \end{solution}
+\end{exercise}
+
+\begin{exercise}
+  What have you learned in this tutorial, and how can you extend this work to more general cases? 
+  \begin{solution}
+    Topics learned.
+    \begin{enumerate}
+    \item Efficient data structures such as heap queues
+    \item Event stacks to organize the tracking of events in time. With the concept of event stack, you now know discrete event simulators work. 
+    \item The simulation of the $G/G/1$ queue and $G/G/c$ queue
+    \item Python classes and, a bit more generally, object oriented programming. 
+    \end{enumerate}
+
+Some  interesting extensions.
+    \begin{enumerate}
+    \item   Scale up to networks of $G/G/c$ queues.
+    \item In the $G/G/c$ queue the assumption is that all servers have the same service rate. In production settings this is typically not the case. There is a queue of jobs, and these jobs are served by machines with different speeds. For instance, old machines may work at a slower rate than new machines. 
+    \item Above we also mentioned how to deal with priorities. Once we included priorities we can simulate the queueing behavior at the check-in desks at airports. 
+    \end{enumerate}
+  \end{solution}
+\end{exercise}
 
 \section{Queueing networks and workload control}
 \label{sec:queueing-network}
 
 
+\Closesolutionfile{hint}
 \Closesolutionfile{ans}
 
 
+\opt{solutionfiles}{
+\clearpage
+\section{Hints}
+\input{hint}
 \clearpage
 \section{Solutions}
 \input{ans}
-
+}
 
 \end{document}
 
