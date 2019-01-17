@@ -16,6 +16,7 @@
 \usepackage{manfnt} %for the dangerous bend
 \usepackage{fontawesome} % for the linux hint symbol
 \newcommand{\hintsymbol}{\marginpar{\center{\faLinux}}}
+%\newcommand{\hintsymbol}{\faLinux}
 %\newcommand{\tbdsymbol}{\marginpar{\center{\dbend}}}
 \newcommand{\tbdsymbol}{\dbend}
 \newcommand{\recallsymbol}{\marginpar{\center{\bomb}}}
@@ -41,7 +42,7 @@
 \setlength{\headheight}{14pt} 
 
 \Newassociation{solution}{Solution}{ans}
-\Newassociation{sol}{Solution}{ans}
+%\Newassociation{sol}{Solution}{ans}
 \Newassociation{hint}{Hint}{hint}
 \renewcommand{\Hintlabel}[1]{\textbf{h.#1}}
 \renewcommand{\Solutionlabel}[1]{\textbf{s.#1}}
@@ -56,12 +57,12 @@
 \definecolor{light-gray}{gray}{0.9}
 \usepackage{mdframed}
 
-\newtheorem{mdexercise}{}[section]
-\newenvironment{exercise}%
-  {\begin{mdframed}[backgroundcolor=light-gray, hidealllines=true]\begin{mdexercise}}%
-  {\end{mdexercise}\end{mdframed}}
 
-
+\newtheorem{exercise}[theorem]{}
+% \newtheorem{mdexercise}{}[section]
+% \newenvironment{exercise}%
+%   {\begin{mdframed}[backgroundcolor=light-gray, hidealllines=true]\begin{mdexercise}}%
+%   {\end{mdexercise}\end{mdframed}}
 
 % \newenvironment{myleftbar}{%
 % \def\FrameCommand{\vrule width 2pt\hspace{0.6em}}%

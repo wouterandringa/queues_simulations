@@ -1,4 +1,3 @@
-
 \documentclass{scrartcl}
 %\documentclass[a5paper]{article}
 
@@ -58,13 +57,25 @@
 
 \section{Introduction}
 
-Typically a queueing system is subject to rules about when to allow jobs to enter the system or to adapt the service capacity. Such a decision rule is called a \emph{policy}.  The theoretical analysis of the efficacy of policies is often very hard, while with simulation it becomes doable.  In this document we present a number of cases to see how simulation can be used to analyze and improve queueing systems. Besides the fact that these the cases will improve your understanding of queueing systems and probability theory, they will also make clear  that simulation is a really creative activity and involves solving many interesting and challenging  algorithmic problems.  
+Typically a queueing system is subject to rules about when to allow jobs to enter the system or to adapt the service capacity.
+Such a decision rule is called a \emph{policy}.
+The theoretical analysis of the efficacy of policies is often very hard, while with simulation it becomes doable.
+In this document we present a number of cases to see how simulation can be used to analyze and improve queueing systems.
+Besides the fact that these the cases will improve your understanding of queueing systems and probability theory, they will also make clear that simulation is a really creative activity and involves solving many interesting and challenging algorithmic problems.
 
 
-Each case is organized in a number of exercises. For each exercise,
+Each case is organized in a number of exercises.
+For each exercise,
 \begin{enumerate}
-\item Make a design of how you want to solve the problem. For instance, make a model of a queueing system, or a control policy structure, or compute relevant KPIs (key performance indicators, such as cost, or utilization of the server, and so on). In other words, think before you type. 
-\item Try to translate your ideas into pseudo code or, better yet,  python\footnote{Some of you might wonder why we use python rather than R. There are a few reasons for this. Python is more or less the third most used programming language, after C++ and java. It is widely used by companies, while R is hardly  used outside academia. Programming OR applications is easier in python; it will also used in other courses. Finally, if you are interested in machine learning and artificial intelligence, python i, hands-down the best choice.}
+\item Make a design of how you want to solve the problem.
+  For instance, make a model of a queueing system, or a control policy structure, or compute relevant KPIs (key performance indicators, such as cost, or utilization of the server, and so on).
+  In other words, think before you type.
+\item Try to translate your ideas into pseudo code or, better yet, python\footnote{Some of you might wonder why we use python rather than R.
+    There are a few reasons for this.
+    Python is more or less the third most used programming language, after C++ and java.
+    It is widely used by companies, while R is hardly used outside academia.
+    Programming OR applications is easier in python; it will also used in other courses.
+    Finally, if you are interested in machine learning and artificial intelligence, python i, hands-down the best choice.}
   \item If you don't succeed in getting your program to work,  look up the code written by us and type it into your python environment.\footnote{Typing yourself forces you to read the code well.}.
   \item Simulate a number of scenarios by varying parameter settings and see what happens.
 \end{enumerate}
@@ -78,20 +89,32 @@ We will use the following libraries of python a lot:
 \item \pyv{matplotlib} provides plotting functionality.
 \end{itemize}
 
-Our code is not the most efficient, or fast. Rather, we focus on clarity of code so that the underlying reasoning is as clear as possible. Once our ideas and code are correct, we can start optimizing, if this is necessary. 
+Our code is not the most efficient, or fast.
+Rather, we focus on clarity of code so that the underlying reasoning is as clear as possible.
+Once our ideas and code are correct, we can start optimizing, if this is necessary.
 
-Finally, the code is part of the course, hence of the midterms and the exams.  Unless indicated as not obligatory, you have to be able to read the code and understand it.
+Finally, the code is part of the course, hence of the midterms and the exams.
+Unless indicated as not obligatory, you have to be able to read the code and understand it.
 
 
 \clearpage
 \section{Exponential distribution}
 
-The aim of this tutorial is to show, empirically, a fascinating fact: even for very small populations in which individuals decide independently to visit a server (a shop, a hospital, etc),  the  exponential distribution is a good model for the interarrival times as seen by the server.  We will develop a simulation to motivate this `fact of nature'.  In particular, our aim is to build analogues to Figure 1.1, 1.2., and 1.3 of the queueing book\footnote{You can find this here:
-\url{https://github.com/ndvanforeest/queueing_book}}, but in terms of cdfs instead of pdfs. (Read the description that underlies these figures.)
+The aim of this tutorial is to show, empirically, a fascinating fact: even for very small populations in which individuals decide independently to visit a server (a shop, a hospital, etc), the exponential distribution is a good model for the interarrival times as seen by the server.
+We will develop a simulation to motivate this `fact of nature'.
+In particular, our aim is to build analogues to Figure 1.1, 1.2., and 1.3 of the queueing book\footnote{You can find this here: \url{https://github.com/ndvanforeest/queueing_book}}, but in terms of cdfs instead of pdfs.
+(Read the description that underlies these figures.)
 
 
 \begin{exercise}
-  Make a plan of the steps you have to carry out to make Figure 1.1 of the queueing book. In the next set of exercises we'll carry out these steps. So please do not read on before having thought about this problem, but   spend some 5 minutes to think about how to approach the problem and how to chop it up into simple steps. Then organize the steps into a logical sequence. Don't worry at first about how to convert your ideas into computer code. Coding is a separate activity.  (As a matter of fact, I always start with making a small plan on how to turn an idea into code, and I call this step `modeling'. Typicallly this is a creative step, and not easy.) 
+  Make a plan of the steps you have to carry out to make Figure 1.1 of the queueing book.
+  In the next set of exercises we'll carry out these steps.
+  So please do not read on before having thought about this problem, but spend some 5 minutes to think about how to approach the problem and how to chop it up into simple steps.
+  Then organize the steps into a logical sequence.
+  Don't worry at first about how to convert your ideas into computer code.
+  Coding is a separate activity.
+  (As a matter of fact, I always start with making a small plan on how to turn an idea into code, and I call this step `modeling'.
+  Typicallly this is a creative step, and not easy.)
 
   \begin{solution}
     \begin{enumerate}
@@ -245,8 +268,12 @@ def cdf(a):
 \end{exercise}
 
 
-With the algorithm of Exercise~\ref{ex:1} we can  compute and plot a distribution function of interarrival times specified by a list (vector, array) $a$. For our present goals this suffices. If, however, you like details, you should notice that our plot of the distribution function is still not entirely OK:  the graph should make  jumps, but it doesn't.  Moreover, our cdf is not a real function, it can be of the form $x=(1,1,3)$, $y=(0, 0.5, 1)$. In the rest of this subsection we repair these points.
-You can skip this if you are not interested. 
+With the algorithm of Exercise~\ref{ex:1} we can compute and plot a distribution function of interarrival times specified by a list (vector, array) $a$.
+For our present goals this suffices.
+If, however, you like details, you should notice that our plot of the distribution function is still not entirely OK: the graph should make jumps, but it doesn't.
+Moreover, our cdf is not a real function, it can be of the form $x=(1,1,3)$, $y=(0, 0.5, 1)$.
+In the rest of this subsection we repair these points.
+You can skip this if you are not interested.
 
 \begin{exercise}
 Read about the \pyv{drawstyle} option of the plot function of matplotlib to see how to make jumps.
@@ -438,7 +465,12 @@ It is pretty obvious why these graphs must be different: we compare a uniform an
 We would now like to simulate the interarrival process as seen by a shop that serves many customers. For ease, we call this the merged, or superposed, interarrival process. Again, this requires quite a bit of thought. Thus, we start with a numerical example with two customers, and organize all steps we make to compute the empirical distribution of the merged interarrival process. Then we make an algorithm, and scale up to many numbers. 
 
 \begin{exercise}
+
+
   Suppose we have two customers with interarrival times $a=[4, 3, 1.2, 5]$ and $b=[2, 0.5, 9]$. Make, by hand, the empirical cdf of the merged process.
+
+\hintsymbol
+
   \begin{hint}
 Note that the shop sees the combined arrival process, so first find a way to merge the arrival times of the customers into one arrival process as observed by the shop. Then convert this into interrival times at the shop.
   \end{hint}
@@ -792,7 +824,7 @@ def compute_Q_d(a, s, q0=0):
 
 With the code of the above exercises we can start our experiments.
 
-\begin{exercise}
+\begin{exercise}\label{ex:4}
 Copy the code of the previous exercise to a new file in Anaconda. Then add the code below and run it. Here $\lambda$ is the arrival rate, $\mu$ the service rate, $N$ the number of periods, and $q_0$ the starting level of the queue. Explain what the code does. Can you also explain the value of the mean and the standard deviation? 
 
   \begin{pyverbatim}
@@ -853,7 +885,7 @@ plt.show()
 
 \begin{exercise}
   Getting statistics is now really easy. For example,  sketch the empirical distribution function of the queue length process and Compute the mean number of departures per period.
-  \begin{hint}
+  \hintsymbol\begin{hint}
 For  the empirical distribution function  you can use the code of Exercise~\ref{ex:1}. Before looking it up, try to recall how the cdf is computed.
   \end{hint}
 
@@ -973,7 +1005,7 @@ In the previous section we analyzed the effect of the design of the system, such
 
 \begin{exercise}
   Suppose that normally we have 6 servers, each working at rate $1$ per period. When the queue becomes longer than 20 we hire two extra servers, and when the queue is empty again, we send the extra two servers home, until the queue hits 20 again, and so on. Try to write your own code to compute the queue process. (This is pretty challenging, and a good test to see how creative you are in modelling.
-  \begin{hint}
+  \hintsymbol\begin{hint}
   As a hint, you need a state variable to track whether the extra servers are present or not. The solution shows the code.) Analyze the effect of the threshold at 20; what happens if you set it to 18, say, or 30? What is the effect of the number of extra servers; what if you would add 3 instead of 2?
   \end{hint}
 
@@ -1405,7 +1437,7 @@ Then use this in our simulation. What happens? What happens if you reverse the 2
 
 \begin{exercise}
   In a priority queue  jobs belong to a priority class. Jobs with higher priority are served before jobs with lower priority, and within one priority class jobs are served in FIFO sequence. A concrete example of a priority queue is the intake process of business and economy class customers at airports.  How would you build a $G/G/1$ priority queue?
-  \begin{hint}
+  \hintsymbol\begin{hint}
 We have used a good data structure already. How should this be applied?
   \end{hint}
 \begin{solution}
@@ -1418,14 +1450,15 @@ We have used a good data structure already. How should this be applied?
 \begin{exercise}
 
   We implemented the queue as a python list. Why is a deque a more efficient data structure to simulate a queue?  Why is it important to know the efficiency of the data structures and algorithms you use?
-  \begin{hint}
+  \hintsymbol\begin{hint}
   Search the web on \texttt{python} and \texttt{deque}.
   \end{hint}
   \begin{solution}
-    In a python list the \texttt{pop(0)} function is an $O(n)$ operation, where $n$ is the number of elements in the list. In a deque appending and removing items to either end of the deque is an $O(1)$ operation. 
+    In a python list the \texttt{pop(0)} function is an $O(n)$ operation, where $n$ is the number of elements in the list. In a deque appending and removing items to either end of the deque is an $O(1)$ operation.
 
 When you do large scale simulations, involving many hours of simulation time, all inefficiencies build up and can make the running time orders of magnitude longer. A famous example is the sorting of numbers. A simple, but stupid, sorting algorithm is $O(n^2)$ while a good algorithm is $O(n \log n)$. The sorting time of $10^6$ numbers is dramatically different. 
 
+    For our code, use replace \texttt{self.queue = []()} by \texttt{self.queue = deque()},   and \texttt{queue.pop(0)}  by \texttt{queue.popleft()}.
   \end{solution}
 \end{exercise}
 
@@ -1445,7 +1478,7 @@ Extending the simulation of the $G/G/1$ queue to a $G/G/c$ queue is not really h
 \begin{exercise}
   Generalize  the \texttt{handle\_arrival} function of the $G/G/1$ queue such that it can cope with multiple servers.
 
-  \begin{hint}
+  \hintsymbol\begin{hint}
   Introduce a \texttt{num\_busy} variable that keeps track of the number of busy servers. What happens if a job arrives and this number is less than $c$; what if this number is equal to $c$?
   \end{hint}
   \begin{solution}
@@ -1456,7 +1489,7 @@ Extending the simulation of the $G/G/1$ queue to a $G/G/c$ queue is not really h
 
 \begin{exercise}
 Likewise,   generalize  the \texttt{handle\_departure} function of the $G/G/1$ queue such that it can cope with multiple servers.
-\begin{hint}
+\hintsymbol\begin{hint}
   Again, use the \texttt{num\_busy} variable. 
 \end{hint}
 
@@ -1467,7 +1500,7 @@ Likewise,   generalize  the \texttt{handle\_departure} function of the $G/G/1$ q
 
 \begin{exercise}
   Can you think of some sort of property of the $G/G/c$ queue that must be true at all times? It is important to use such properties  as tests while developing.
-  \begin{hint}
+  \hintsymbol\begin{hint}
     There must be a relation between the queue length and the number of busy servers.
   \end{hint}
   \begin{solution}
@@ -1477,11 +1510,11 @@ Likewise,   generalize  the \texttt{handle\_departure} function of the $G/G/1$ q
 
 
 
-\begin{hint}
-  The design of the simulation of $G/G/1$ queue is not entirely satisfactory. For instance, if we want to run different experiments, we have to clean up old experiments before we can start new ones. The current design is not very practical for this. How to solve this?
-  \begin{solution}
+\begin{exercise}
+The design of the simulation of $G/G/1$ queue is not entirely satisfactory. For instance, if we want to run different experiments, we have to clean up old experiments before we can start new ones. The current design is not very practical for this. How to solve this?
+
+\hintsymbol\begin{hint}
      Build the simulator as a class!
-  \end{solution}
 \end{hint}
 \begin{solution}
 Here is the entire class. Read it carefully.   
@@ -1527,7 +1560,7 @@ class GGc:
         self.num_busy -= 1
         self.served_jobs.add(job)
         if self.queue:  # not empty
-            next_job = self.queue.pop(0)
+            next_job = self.queue.popleft()
             self.start_service(time, next_job)
 
     def consistency_check(self):
@@ -1552,6 +1585,8 @@ class GGc:
 
 \end{pyblock}
 \end{solution}
+  
+\end{exercise}
 
       
 
@@ -1561,7 +1596,9 @@ How can we instantiate the \texttt{GGc} simulator, i.e., make a object of a clas
 \begin{solution}
 First we instantiate, then we run and print. 
 \begin{pyblock}
-ggc = GGc(expon(2), expon(1), 3, 10)
+labda = 2
+mu = 1  
+ggc = GGc(expon(1./labda), expon(1./mu), 3, 10)
 ggc.run()
 
 print(ggc.served_jobs)
@@ -1575,23 +1612,138 @@ Test the simulator with deterministic interarrival times, for instance a job tha
 
 
 \begin{exercise}
-  What other tests can you think of?
+  Test the code for the $M/M/1$ queue with $\lambda=0.8$ and $\mu=1$. Compute the mean waiting time in queue and compare this to the theoretical value. Test it first for run length $N=100$, then for $N=10000$. Think about how to organize your tests. 
+\hintsymbol\begin{hint}
+    Implement the test in a function so that you can organize all your setting in one clean environment. Implement Sakasegawa's formmula. We can use this below for more general cases. BTW, why should you use Sakasegawa's formula?
+  \end{hint}
   \begin{solution}
-    Implement the $M/M/3$ queue for instance, and compare the theoretical results with the simulation.  We can also check the quality of Sakasegawa's approximation. 
+Recall that Sakasegawa's formula is exact for the $M/G/1$ queue, hence also for the $M/M/1$ queue. 
+
+\begin{pyblock}
+
+def sakasegawa(F, G, c):
+    labda = 1./F.mean()
+    ES = G.mean()
+    rho = labda*ES/c
+    EWQ_1 = rho**(np.sqrt(2*(c+1)) - 1)/(c*(1-rho))*ES
+    ca2 = F.var()*labda*labda
+    ce2 = G.var()/ES/ES
+    return (ca2+ce2)/2 * EWQ_1
+    
+
+def mm1_test():
+    labda = 0.9
+    mu = 1
+    c = 1
+    F = expon(scale=1./labda)
+    G = expon(scale=1./mu)
+
+    print("approx: ", sakasegawa(F, G, c))
+
+    num = 100000
+    ggc = GGc(F, G, c, num)
+    ggc.run()
+
+    tot_waiting_time = sum(j.waiting_time() for j in ggc.served_jobs)
+    mean = tot_waiting_time/num
+    print("mean waiting: ", mean)
+  
+
+mm1_test()
+\end{pyblock}
+
   \end{solution}
 \end{exercise}
 
 \begin{exercise}
-  What have you learned in this tutorial, and how can you extend this work to more general cases? 
+  Now test it for the $M/D/1$ queue with $\lambda=0.9$ and $S\equiv 1$.
+
+\hintsymbol\begin{hint}
+    Implement the deterministic distribution as \texttt{uniform(1, 0.00001)}.
+  \end{hint}
+
+  \begin{solution}
+Here is a function to keep things organized.
+  \begin{pyblock}
+def md1_test():
+    labda = 0.9
+    mu = 1
+    c = 1
+    F = expon(scale=1./labda)
+    G = uniform(mu, 0.0001)
+    #G = expon(scale=1./1.5)
+
+    print("approx: ", sakasegawa(F, G, c))
+
+    num = 10000
+    ggc = GGc(F, G, c, num)
+    ggc.run()
+
+    tot_waiting_time = sum(j.waiting_time() for j in ggc.served_jobs)
+    mean = tot_waiting_time/num
+    print("mean waiting: ", mean)
+    
+
+md1_test()
+
+  \end{pyblock}
+  \end{solution}
+
+\end{exercise}
+
+\begin{exercise}
+With our simulation we can also check the quality of Sakasegawa's approximation. Try this for the $M/D/2$ queue $\lambda=1.8$ and $S\equiv 1$. 
+
+\begin{solution}
+The code.
+
+  \begin{pyblock}
+    
+def md2_test():
+    labda = 1.8
+    mu = 1
+    c = 2
+    F = expon(scale=1./labda)
+    G = uniform(mu, 0.0001)
+    #G = expon(scale=1./1.5)
+
+    print("approx: ", sakasegawa(F, G, c))
+
+    num = 10000
+    ggc = GGc(F, G, c, num)
+    ggc.run()
+
+    tot_waiting_time = sum(j.waiting_time() for j in ggc.served_jobs)
+    mean = tot_waiting_time/num
+    print("mean waiting: ", mean)
+
+
+md2_test()
+
+  \end{pyblock}
+  
+\end{solution}
+
+\end{exercise}
+
+
+\begin{exercise}
+  What have you learned in this tutorial?
   \begin{solution}
     Topics learned.
     \begin{enumerate}
-    \item Efficient data structures such as heap queues
+    \item Efficient data structures such as heap queues. In general, it is important to have some basic knowledge of algorithmic complexity. 
     \item Event stacks to organize the tracking of events in time. With the concept of event stack, you now know discrete event simulators work. 
     \item The simulation of the $G/G/1$ queue and $G/G/c$ queue
     \item Python classes and, a bit more generally, object oriented programming. 
+    \item Organizing cases and experiments with functions.
     \end{enumerate}
+  \end{solution}
+\end{exercise}
 
+\begin{exercise}
+ How can you extend this work to more general cases? 
+  \begin{solution}
 Some  interesting extensions.
     \begin{enumerate}
     \item   Scale up to networks of $G/G/c$ queues.
@@ -1601,8 +1753,269 @@ Some  interesting extensions.
   \end{solution}
 \end{exercise}
 
+\clearpage
+
 \section{Queueing networks and workload control}
 \label{sec:queueing-network}
+
+In many organizations jobs or orders are  processed in various stages. For example,  a case at a court undergoes a number of processing stems. When a new case arrives is first filed and queued. Then a clerk reads it and sometimes assembles some necessary data. The case is then sent to a judge for further assessment. The judge may send the case back to the clerk, or may play a trial. After some loops, the trial is held. After the trial, the clerk has to write a report, which in turn has to be checked by the judge, and perhaps repaired. In all steps, an (electronic) document is passed on from station to another, and waits there until the server has time to process the job. In many cases the job is sent to a next station, but the job may also be sent back to the station itself. Other instances of queueing networks are job shops/production networks, hospitals, custom's services, and so on. Hence, with the tools we develop in this section it becomes possible to analyze quite difficult business processes in terms of throughput and delay as functions of arrival and service rate, and routing (the rules that determine what sequence of stations jobs have to follow.)
+
+In this tutorial we will develop the tools to simulate such queueing networks. Of particular importance in such networks are throughput (the average output of the network), and lead times (the time orders spend in the queueing network itself, but also the time spent before any action can start.) We start with a very simple network. Then we extend the situation to a network in which the number of jobs `on the floor' is limited. (The jobs `on the `floor' are all jobs waiting between two stations or in actual service; jobs waiting at the entrance to get access to the queueing network are not included.) 
+
+This form of control, known as \emph{CONWIP} (constant work in process), is a very simple but effective way to control queueing networks. To see it working in a simulation is actually quite fascinating. There is also an large amount of literature on this topic. We refer to Factory Physics by Hopp and Spearman for further background. 
+
+
+\subsection{A Simple Queueing Network}
+
+
+With recursions it is (nearly) trivial to simulate a so-called feed-forward network, that is, networks without feedback or loops.  In terms of a graph, a feed-forward network is a loop-free directed graph. 
+
+\begin{exercise}
+  Suppose we have a network with two stations such that all the output of station 1 moves to station 2. What information do you need to simulate the queueing behavior at station 1 and 2. Then write a function to simulate a queueing process in discrete time, and use this to form the required queueing network. Assume that jobs arrive as a Poisson process at the first station with rate $\lambda=3$ per period, the service capacity is $\sim P(4)$ at the first station and $\sim P(3.5)$ at the second station. 
+  \hintsymbol\begin{hint}
+    Use the code of Exercise~\ref{ex:4} to simulate one queue. The output of this function gives the number of jobs served at station 1 for each period. Then this output forms the input to the next station. 
+  \end{hint}
+  \begin{solution}
+Here is the code.
+\begin{pyblock}
+import numpy as np
+from scipy.stats import poisson
+import matplotlib.pyplot as plt
+
+def compute_Q_d(a, s, q0=0):
+    d = np.zeros_like(a)
+    Q = np.zeros_like(a)
+    Q[0] = q0  # starting level of the queue
+    for i in range(1, len(a)):
+        d[i] = min(Q[i - 1], s[i])
+        Q[i] = Q[i - 1] + a[i] - d[i]
+
+    return Q, d
+
+N = 1000
+labda = 3
+mu1 = 4
+a1 = poisson(labda).rvs(N)
+s1 = poisson(mu1).rvs(N)
+q1, d1 = compute_Q_d(a1, s1)
+
+# station 2
+a2 = d1
+mu2 = 3.5
+s2 = poisson(mu2).rvs(N)
+q2, d2 = compute_Q_d(a2, s2)
+
+plt.plot(q1, label="q1")
+plt.plot(q2, label="q2")
+plt.legend()
+plt.show()
+  
+\end{pyblock}
+    
+  \end{solution}
+\end{exercise}
+
+\begin{exercise}
+  Suppose station 2 gets some extra external jobs arriving as $\sim P(0.3)$. Include this in your simulator. What happens to the queue length process at station 2? 
+  \begin{solution}
+Build the arrival process at station 2 like this. 
+    \begin{pyblock}
+gamma2 = 0.3
+g2 = poisson(gamma2).rvs(N)
+a2 = d1 + g2
+    \end{pyblock}
+
+The queue at the second station becomes quite a bit larger. This is evident as the load at station 2 becomes higher. 
+    
+  \end{solution}
+\end{exercise}
+
+
+\begin{exercise}
+  Suppose we have seven stations such that the output of station 1 and 2 feed into station 3, the output of stations 3 and 4 into 5. Then, one third of the jobs of station 5 go to station 6, and the rest to station 7. Assume that external jobs arrive as Poisson processes with $\gamma_1 = 3$, $\gamma_2=2$ and $\gamma_4=1$. The service processes are Poisson with rates are $\mu_1=3.5, \mu_2 = 2.5, \mu_3=5.5, \mu_4 = 2.5, \mu_5 = 5.5, \mu_6=4, \mu_7 = 4$. Connect the stations and make plots of the queue length processes. Note in particular that node 3 is a `join' node, and node 5 a `fork' node. 
+  \begin{solution}
+When you run the code below, you'll see that the capacity at one node is too small. 
+    \begin{pyblock}
+N = 1000
+
+def network():
+    # station 1
+    a1 = poisson(3).rvs(N)
+    s1 = poisson(3.5).rvs(N)
+    q1, d1 = compute_Q_d(a1, s1)
+    
+    # station 2
+    a2 = poisson(2).rvs(N)
+    s2 = poisson(2.5).rvs(N)
+    q2, d2 = compute_Q_d(a2, s2)
+    
+    # station 3 
+    a3 = d1+d2
+    s3 = poisson(5.5).rvs(N)
+    q3, d3 = compute_Q_d(a3, s3)
+
+
+    # station 4
+    a4 = poisson(1).rvs(N)
+    s4 = poisson(2.5).rvs(N)
+    q4, d4 = compute_Q_d(a4, s4)
+    
+    # station 5
+    a5 = d3+d4
+    s5 = poisson(5.5).rvs(N)
+    q5, d5 = compute_Q_d(a5, s5)
+
+    # station 6 
+    a6 = d5//3    #fork 1/3, and round to int 
+    # a6 = a6.astype(int)
+    s6 = poisson(4).rvs(N)
+    q6, d6 = compute_Q_d(a6, s6)
+
+    # station 7
+    a7 = d5 - a6   #rest of the station 5
+    s7 = poisson(4).rvs(N)
+    q7, d7 = compute_Q_d(a7, s7)
+
+    plt.plot(q1, label="Q1")
+    plt.plot(q2, label="Q2")
+    plt.plot(q3, label="Q3")
+    plt.plot(q4, label="Q4")
+    plt.plot(q5, label="Q5")
+    plt.plot(q6, label="Q6")
+    plt.plot(q7, label="Q7")
+    plt.legend()
+    plt.show()
+
+
+network()    
+    \end{pyblock}
+  \end{solution}
+\end{exercise}
+
+\begin{exercise}
+  It should be clear that the capacity of station 5 is too small. Suppose you would set it to 7.4. What happens now?
+  \begin{solution}
+Station 7 becomes now a bottleneck. Interestingly, when station 5 was a bottleneck, there was not a long queue at station 7. Hence, in general, `up-stream' bottlenecks prevent long queues to form at potential bottleneck downstream. Once we added capacity to station 5, a big queue started to form in front of station 7. Hence, the capacity at station 7 also has to be increased. 
+  \end{solution}
+\end{exercise}
+
+
+\subsection{CONWIP}
+\label{sec:conwip}
+
+A simple, but very important, observation is that if we have a choice where to queue jobs, we typically prefer them to queue at the start of the network.
+
+\begin{exercise}
+  Why is it, typically, preferable to have jobs wait at the start of the network? This is a very important question; if you ever need to design logistic processes (hosptials, production processes, and so on), the answer to this question will serve you a life time. 
+  \begin{solution}
+    If we can limit the leadtime on the floor, we limit the amount of time and raw material invested in unfinished goods. Realize that unfinished goods required investments but did not result in an income. Next, orders may change, so unfinished products can become obsolete. They can also break, spoil, etc. Finally, physical queues require physical floor space, hence need investments in buildings, transportation, heating, etc. So, all in all, we only want to release jobs into the network when there is actual capacity to serve the job.
+
+
+
+  \end{solution}
+\end{exercise}
+
+A good idea is to  install an order book at the front of the network. Here we let orders wait until the lead time in the network is below some amount of time, $T$ say. 
+  
+
+\begin{exercise}
+  Can you come up with an estimate of the total time the job spends in the entire system, that is, the time in the order book and the time on the floor?
+  \begin{solution}
+The rate at which the order book drains must be about equal to the service rate $r_b$ of the bottleneck station. Of course, not all jobs include the bottleneck in their routing, but, given that there is a bottleneck, many jobs must pass the bottleneck. So, as an approximation, the time spent in the order book must be about equal to the total work in the order book divided by $r_b$ plus the time on the floor.      
+  \end{solution}
+\end{exercise}
+
+Often it is not easy to obtain precise estimates of the amount of work on the floor.
+However, counting jobs is easy.
+So, an easy control is to limit the number of orders on the floor.
+Then, if the amount of work on the floor, i.e., the WIP, is quite small, the leadime, i.e., the total time a job spends on the floor from start to end, must also be quite small.
+In this section we will analyze the effect of putting a cap on the amount of work on the floor.
+In other works, we will study the effects of installing a CONWIP control.
+
+You should note that a network under CONWIP control is a so-called semi-closed queueing network.
+In an open network, jobs can enter and leave the network; in a closed network, the amount of jobs is kept constant; in a semi-closed (or semi-open) network, the number of jobs in part of the network is limited.
+
+Setting up a discrete-time simulation of a CONWIP network is in essence quite simple, but getting the details right is considerably less so.
+For this reason we start with nearly the simplest possible case and, once this is correct, we scale up to a larger network.
+(Recall, once we have the correct equations, the conversion to python code is pretty simple.
+Thus, the real work is to get the equations, i.e., the model, right.)
+
+Consider the following network.
+There are two production stations in tandem, each with deterministic capacity of 1 job per period.
+New jobs are first sent to the order book, which also acts as a queue.
+Whenever all the work $w(t)t$ at stations 1 and 2 in period $t$ becomes less than the CONWIP level $W$, an amount $W-w(t)$ of orders will be released from the order book and sent to the first station.
+Jobs served at the first station the orders move on to the second station.
+After being processed at this last station, jobs depart from the network.
+
+
+Let, for $i=0, 1, 2$, 
+\begin{align*}
+a_i(t) & \text{the number of arrivals at station $i$  at the start of period $t$} \\
+d_i(t) & \text{the number of jobs at depart from station $i$  at the end of period $t$} \\
+q_i(t) & \text{the amount of jobs at station $i$  at the end of period $t$} \\
+c_i(t) & \text{the amount of jobs that station $i$  can serve during  period $t$}, \\
+w(t) & \text{the amount of jobs in the network at the end of period $t$}, \\
+\end{align*}
+Thus, we call the order book station $0$. 
+
+Assuming that jobs that arrive at the start of a period $t$ can also be served during period $t$, the queues behave according to the standard equations
+\begin{align*}
+  d_i(t) &= \min\{q_i(t-1) + a_i(t), c_i(t)\} \\
+  q_i(t) &= q_i(t-1) + a_i(t) - d_i(t).
+\end{align*}
+
+
+\begin{exercise} Relate $d_0$ to $a_1$ and $d_1$ to $a_2$, assuming that the jobs released at period $t$ become available at the next station in the next period.
+  \begin{solution}
+    Given the timing, we take $a_i(t) = d_{i-1}(t-1)$ for $i=1,2$.
+    That this holds for stations 0 and 1 is a bit disputable, because the release of an order from the order book does nto take any time, hence, we might say that $a_1(t) = d_0(t)$.
+    However, typically, to start working on an order, it is required to assemble raw materials.
+    Thus, we simply assume that this takes one period.
+    Hence, orders released from the orderbook become available for production in the next period.
+  \end{solution}
+\end{exercise}
+
+\begin{exercise}
+  Implement CONWIP by relating $c_0(t)$, i.e., the amount of jobs that can be released from the order book during period $t$, to the other variables.
+  In particular, assume for the moment that $w(t)$ is known.
+  In the next exercise we will deal with the computation of $w(t)$.
+  \begin{solution}
+    At the end of period $t-1$ there is room $W-w(t)$.
+    Hence, we release $c_0(t+1) = W-w(t)$ in the next period to the network.
+    Note that this is just the amount of orders that we are willing to release.
+    To actually release thhis amount, these orders should of course be available in the order book.
+    For this reason we also use the queueing equations to model the behavior of the order book.
+  \end{solution}
+\end{exercise}
+
+
+\begin{exercise}
+  Find an expression for $w(t)$ in terms of the other variables. 
+
+  \hintsymbol
+\begin{hint}
+
+  Explain why $w(t) \neq q_1(t) + q_2(t)$.
+  Also, why $w(t) \neq q_0(t) + q_1(t) + q_2(t)$.
+\end{hint}
+
+\begin{solution}
+    We must have this: $w(t) = d_0(t) + q_1(t) + d_1(t) + q_2(t)$.
+    We released $d_0(t)$ orders into the network and assembled raw material for these orders during period $t$.
+    Thus, $d_0(t)$ jobs lie on the floor, waiting in the queue before station 1.
+    Then, the departures of station 1 are in transit to station 2.
+    Hence, they must also count as WIP.
+
+
+    Of course $w(t) \neq q_0(t) + q_1(t) + q_2(t)$.
+    The whole point of CONWIP is to limit the amount of work on the floor.
+    Hence, including $q_0$, i.e., the orders in the order book, is completely wrong.
+    Orders in the order book are meant to be \emph{not} on the floor.
+    \end{solution}
+\end{exercise}
+
+
+The next step is to convert this model into code. 
 
 
 \Closesolutionfile{hint}
