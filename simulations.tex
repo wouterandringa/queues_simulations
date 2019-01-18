@@ -429,7 +429,7 @@ Add this to the other code and run it. Since the mean interarrival time is $5$, 
 from scipy.stats import expon
 
 labda = 1./5 # lambda is a function in python
-E = expon(scale=1/labda) 
+E = expon(scale=1./labda) 
 print(E.mean()) # to check that we chose the right scale
 print(KS(a, E))    
 \end{pyverbatim}
@@ -1208,10 +1208,6 @@ We can make the  tuples, i.e., the data between the brackets,  just longer.
 
 \begin{pyblock}
 from heapq import heappop, heappush
-import numpy as np 
-from scipy.stats import  expon
-
-np.random.seed(3)
 
 stack = []
 
@@ -1223,7 +1219,6 @@ heappush(stack, (25, "Cynthia", "Nexus"))
 while stack:
     age, name, phone = heappop(stack)
     print(age, name, phone)
-
 \end{pyblock}
 
 
@@ -1252,7 +1247,7 @@ We start with some basic imports,  initialize the stack,  and define two numbers
 \begin{pyblock}
 from heapq import heappop, heappush
 import numpy as np 
-from scipy.stats import  expon
+from scipy.stats import expon
 
 np.random.seed(3)
 
@@ -1299,7 +1294,7 @@ job.service_time = 2
 \end{pyblock}
 
 \begin{exercise}\label{ex:3}
-  Make $10$ jobs with exponentially distributed interarrival times, with $\lambda=2$,  and exponentially distributed service times with $\mu=3$. Put these jobs on an event stack, and print them in order of arrival time. Tag the events with the job, and event type (which is an arrival).
+  Make $10$ jobs with exponentially distributed interarrival times, with $\lambda=2$,  and exponentially distributed service times with $\mu=3$. Put these jobs on an event stack, and print them in order of smallest to largest interarrival time. Tag the events with the job, and event type (which is an arrival).
   \begin{solution}
 One way is like this.     
     \begin{pyblock}
@@ -1374,7 +1369,7 @@ def handle_arrival(time, job):
 def handle_departure(time, job):
     server.busy = False
     if queue: # queue is not empty
-        next_job = queue.pop(0) # get oldest job in queue
+        next_job = queue.pop(0) # get oldest job in queue and remove it from queue
         start_service(time, next_job)
         
 while stack:
@@ -1399,12 +1394,12 @@ Now we see that we needed to store the jobs in \texttt{served\_jobs}.
 
 tot_queue = sum(j.queue_length_at_arrival for j in served_jobs)
 av_queue_length = tot_queue/len(served_jobs)
-print(av_queue_length)
-print('theoretical: ', rho*rho/(1-rho))
+print("Theoretical avg. queue length: ", rho*rho/(1-rho))
+print("Simulated avg. queue length:", av_queue_length)
       
 tot_sojourn = sum(j.sojourn_time() for j in served_jobs)
-av_sojourn_length = tot_sojourn/len(served_jobs)
-print(av_sojourn)
+av_sojourn_time = tot_sojourn/len(served_jobs)
+print("Avg. sojourn time:", av_sojourn_time)
 \end{pyblock}
 
 You should see that you need a real large amount of jobs to obtain a good estimate for the (theoretical) expected queue length. I have to admit that I don't understand why (at least in my simulation, I need about $1e5$ jobs to get a good estimate. 
@@ -1423,13 +1418,13 @@ G = uniform(2, 0.00001)
 
 Then use this in our simulation. What happens? What happens if you reverse the 2 and the 3 in $F$ and $G$?
 \begin{solution}
-  With \texttt{F=uniform(3, 0.00001)} job interarrival times are nearly 3. Likewise, the service times are nearly 2. When you reverse the 2 and 3 a queue should build up. 
+  With \texttt{F=uniform(3, 0.00001)} job interarrival times are nearly 3. Likewise, the service times are nearly 2. Hence, arriving customers will always see an empty queue, implying that the average queue length upon arrival equals zero. When you reverse the 2 and 3 a queue should build up. 
 \end{solution}
 \end{exercise}
 
 
 \begin{exercise}
-  Up to now we studied the $G/G/1$ FIFO queue. How to change the code to simulate a LIFO queue?
+  Up to now we studied the $G/G/1$ FIFO (First In First Out) queue. How to change the code to simulate a LIFO (Last In Last Out) queue?
   \begin{solution}
     This is really easy: change the line \texttt{queue.pop(0)} by  \texttt{queue.pop()}. 
  \end{solution}
@@ -1458,12 +1453,12 @@ We have used a good data structure already. How should this be applied?
 
 When you do large scale simulations, involving many hours of simulation time, all inefficiencies build up and can make the running time orders of magnitude longer. A famous example is the sorting of numbers. A simple, but stupid, sorting algorithm is $O(n^2)$ while a good algorithm is $O(n \log n)$. The sorting time of $10^6$ numbers is dramatically different. 
 
-    For our code, use replace \texttt{self.queue = []()} by \texttt{self.queue = deque()},   and \texttt{queue.pop(0)}  by \texttt{queue.popleft()}.
+    For our code, add the line \texttt{from collections import deque} and replace \texttt{queue = []} by \texttt{queue = deque()}, and \texttt{queue.pop(0)}  by \texttt{queue.popleft()}.
   \end{solution}
 \end{exercise}
 
 \begin{exercise}
-  Recall that in Exercise~\ref{ex:3} we build all jobs before the queueing simulation starts. Why is this not a good decision? Note that in the simulation of $G/G/c$ queue below we will generate jobs only when needed. 
+  Recall that in Exercise~\ref{ex:3} we built all jobs before the queueing simulation starts. Why is this not a good decision? Note that in the simulation of $G/G/c$ queue below we will generate jobs only when needed. 
   \begin{solution}
     Typically, generating all jobs at the start is not a real good idea. When running large simulations the amount of computer memory required to store all this data grows out of hand. Also our \texttt{served\_jobs} list is not memory efficient. 
   \end{solution}
@@ -1592,13 +1587,13 @@ class GGc:
 
 \begin{exercise}
 
-How can we instantiate the \texttt{GGc} simulator, i.e., make a object of a class? How can we run a simulation with exponential interarrival times with $\lambda=2$, exponential service times with $\mu=1$, $c=3$, and $10$ jobs?
+How can we instantiate the \texttt{GGc} simulator, i.e., make an object of a class? How can we run a simulation with exponential interarrival times with $\lambda=2$, exponential service times with $\mu=1$, $c=3$, and $10$ jobs?
 \begin{solution}
 First we instantiate, then we run and print. 
 \begin{pyblock}
 labda = 2
 mu = 1  
-ggc = GGc(expon(1./labda), expon(1./mu), 3, 10)
+ggc = GGc(expon(scale=1./labda), expon(scale=1./mu), 3, 10)
 ggc.run()
 
 print(ggc.served_jobs)
@@ -1631,25 +1626,22 @@ def sakasegawa(F, G, c):
     return (ca2+ce2)/2 * EWQ_1
     
 
-def mm1_test():
-    labda = 0.9
-    mu = 1
-    c = 1
-    F = expon(scale=1./labda)
-    G = expon(scale=1./mu)
+def mm1_test(labda=0.8, mu=1, num_jobs=100):
+	c = 1
+	F = expon(scale=1./labda)
+	G = expon(scale=1./mu)
 
-    print("approx: ", sakasegawa(F, G, c))
+	ggc = GGc(F, G, c, num_jobs)
+	ggc.run()
+	tot_wait_in_q = sum(j.waiting_time() for j in ggc.served_jobs)
+	avg_wait_in_q = tot_wait_in_q/len(ggc.served_jobs)
+	
+	print("M/M/1 TEST")
+	print("Theoretical avg. waiting time in queue:", sakasegawa(F, G, c))
+	print("Simulated avg. waiting time in queue:", avg_wait_in_q)
 
-    num = 100000
-    ggc = GGc(F, G, c, num)
-    ggc.run()
-
-    tot_waiting_time = sum(j.waiting_time() for j in ggc.served_jobs)
-    mean = tot_waiting_time/num
-    print("mean waiting: ", mean)
-  
-
-mm1_test()
+mm1_test(num_jobs=100)
+mm1_test(num_jobs=10000)
 \end{pyblock}
 
   \end{solution}
@@ -1665,26 +1657,22 @@ mm1_test()
   \begin{solution}
 Here is a function to keep things organized.
   \begin{pyblock}
-def md1_test():
-    labda = 0.9
-    mu = 1
+def md1_test(labda=0.9, mu=1, num_jobs=100):
     c = 1
     F = expon(scale=1./labda)
     G = uniform(mu, 0.0001)
-    #G = expon(scale=1./1.5)
-
-    print("approx: ", sakasegawa(F, G, c))
-
-    num = 10000
-    ggc = GGc(F, G, c, num)
-    ggc.run()
-
-    tot_waiting_time = sum(j.waiting_time() for j in ggc.served_jobs)
-    mean = tot_waiting_time/num
-    print("mean waiting: ", mean)
     
-
-md1_test()
+    ggc = GGc(F, G, c, num_jobs)
+    ggc.run()
+    tot_wait_in_q = sum(j.waiting_time() for j in ggc.served_jobs)
+    avg_wait_in_q = tot_wait_in_q/len(ggc.served_jobs)
+        
+    print("M/D/1 TEST")
+    print("Theoretical avg. waiting time in queue:", sakasegawa(F, G, c))
+    print("Simulated avg. waiting time in queue:", avg_wait_in_q)
+    
+md1_test(num_jobs=100)
+md1_test(num_jobs=10000)
 
   \end{pyblock}
   \end{solution}
@@ -1699,26 +1687,22 @@ The code.
 
   \begin{pyblock}
     
-def md2_test():
-    labda = 1.8
-    mu = 1
+def md2_test(labda=1.8, mu=1, num_jobs=100):
     c = 2
     F = expon(scale=1./labda)
     G = uniform(mu, 0.0001)
-    #G = expon(scale=1./1.5)
-
-    print("approx: ", sakasegawa(F, G, c))
-
-    num = 10000
-    ggc = GGc(F, G, c, num)
+    
+    ggc = GGc(F, G, c, num_jobs)
     ggc.run()
+    tot_wait_in_q = sum(j.waiting_time() for j in ggc.served_jobs)
+    avg_wait_in_q = tot_wait_in_q/len(ggc.served_jobs)
+        
+    print("M/D/2 TEST")
+    print("Theoretical avg. waiting time in queue:", sakasegawa(F, G, c))
+    print("Simulated avg. waiting time in queue:", avg_wait_in_q)
 
-    tot_waiting_time = sum(j.waiting_time() for j in ggc.served_jobs)
-    mean = tot_waiting_time/num
-    print("mean waiting: ", mean)
-
-
-md2_test()
+md2_test(num_jobs=100)
+md2_test(num_jobs=10000)
 
   \end{pyblock}
   
@@ -1733,7 +1717,7 @@ md2_test()
     Topics learned.
     \begin{enumerate}
     \item Efficient data structures such as heap queues. In general, it is important to have some basic knowledge of algorithmic complexity. 
-    \item Event stacks to organize the tracking of events in time. With the concept of event stack, you now know discrete event simulators work. 
+    \item Event stacks to organize the tracking of events in time. With the concept of event stack, you now know how discrete event simulators work. 
     \item The simulation of the $G/G/1$ queue and $G/G/c$ queue
     \item Python classes and, a bit more generally, object oriented programming. 
     \item Organizing cases and experiments with functions.
@@ -1758,11 +1742,11 @@ Some  interesting extensions.
 \section{Queueing networks and workload control}
 \label{sec:queueing-network}
 
-In many organizations jobs or orders are  processed in various stages. For example,  a case at a court undergoes a number of processing stems. When a new case arrives is first filed and queued. Then a clerk reads it and sometimes assembles some necessary data. The case is then sent to a judge for further assessment. The judge may send the case back to the clerk, or may play a trial. After some loops, the trial is held. After the trial, the clerk has to write a report, which in turn has to be checked by the judge, and perhaps repaired. In all steps, an (electronic) document is passed on from station to another, and waits there until the server has time to process the job. In many cases the job is sent to a next station, but the job may also be sent back to the station itself. Other instances of queueing networks are job shops/production networks, hospitals, custom's services, and so on. Hence, with the tools we develop in this section it becomes possible to analyze quite difficult business processes in terms of throughput and delay as functions of arrival and service rate, and routing (the rules that determine what sequence of stations jobs have to follow.)
+In many organizations jobs or orders are  processed in various stages. For example,  a case at a court undergoes a number of processing stems. When a new case arrives it is first filed and queued. Then a clerk reads it and sometimes assembles some necessary data. The case is then sent to a judge for further assessment. The judge may send the case back to the clerk, or may play a trial. After some loops, the trial is held. After the trial, the clerk has to write a report, which in turn has to be checked by the judge, and perhaps repaired. In all steps, an (electronic) document is passed on from one station to another, and waits there until the server has time to process the job. In many cases the job is sent to a next station, but the job may also be sent back to the station itself. Other instances of queueing networks are job shops/production networks, hospitals, customs services, and so on. Hence, with the tools we develop in this section it becomes possible to analyze quite difficult business processes in terms of throughput and delay as functions of arrival and service rate, and routing (the rules that determine what sequence of stations jobs have to follow.)
 
 In this tutorial we will develop the tools to simulate such queueing networks. Of particular importance in such networks are throughput (the average output of the network), and lead times (the time orders spend in the queueing network itself, but also the time spent before any action can start.) We start with a very simple network. Then we extend the situation to a network in which the number of jobs `on the floor' is limited. (The jobs `on the `floor' are all jobs waiting between two stations or in actual service; jobs waiting at the entrance to get access to the queueing network are not included.) 
 
-This form of control, known as \emph{CONWIP} (constant work in process), is a very simple but effective way to control queueing networks. To see it working in a simulation is actually quite fascinating. There is also an large amount of literature on this topic. We refer to Factory Physics by Hopp and Spearman for further background. 
+This form of control, known as \emph{CONWIP} (constant work in process), is a very simple but effective way to control queueing networks. To see it working in a simulation is actually quite fascinating. There is also an large amount of literature on this topic. We refer to the book Factory Physics by Hopp and Spearman for further background. 
 
 
 \subsection{A Simple Queueing Network}
@@ -1771,7 +1755,7 @@ This form of control, known as \emph{CONWIP} (constant work in process), is a ve
 With recursions it is (nearly) trivial to simulate a so-called feed-forward network, that is, networks without feedback or loops.  In terms of a graph, a feed-forward network is a loop-free directed graph. 
 
 \begin{exercise}
-  Suppose we have a network with two stations such that all the output of station 1 moves to station 2. What information do you need to simulate the queueing behavior at station 1 and 2. Then write a function to simulate a queueing process in discrete time, and use this to form the required queueing network. Assume that jobs arrive as a Poisson process at the first station with rate $\lambda=3$ per period, the service capacity is $\sim P(4)$ at the first station and $\sim P(3.5)$ at the second station. 
+  Suppose we have a network with two stations such that all the output of station 1 moves to station 2. First think about what information you need in order to simulate the queueing behavior at station 1 and 2. Then write a function to simulate a queueing process in discrete time, and use this to form the required queueing network. Assume that jobs arrive as a Poisson process at the first station with rate $\lambda=3$ per period, and that the service times are exponentially distributed with rate $\mu_1 = 4$ and $\mu_2 = 3.5$ for station 1 and 2, respectively.
   \hintsymbol\begin{hint}
     Use the code of Exercise~\ref{ex:4} to simulate one queue. The output of this function gives the number of jobs served at station 1 for each period. Then this output forms the input to the next station. 
   \end{hint}
@@ -1805,8 +1789,8 @@ mu2 = 3.5
 s2 = poisson(mu2).rvs(N)
 q2, d2 = compute_Q_d(a2, s2)
 
-plt.plot(q1, label="q1")
-plt.plot(q2, label="q2")
+plt.plot(q1, label="Q1")
+plt.plot(q2, label="Q2")
 plt.legend()
 plt.show()
   
@@ -1943,8 +1927,8 @@ Thus, the real work is to get the equations, i.e., the model, right.)
 Consider the following network.
 There are two production stations in tandem, each with deterministic capacity of 1 job per period.
 New jobs are first sent to the order book, which also acts as a queue.
-Whenever all the work $w(t)t$ at stations 1 and 2 in period $t$ becomes less than the CONWIP level $W$, an amount $W-w(t)$ of orders will be released from the order book and sent to the first station.
-Jobs served at the first station the orders move on to the second station.
+Whenever all the work $w(t)$ at stations 1 and 2 in period $t$ becomes less than the CONWIP level $W$, an amount $W-w(t)$ of orders will be released from the order book and sent to the first station.
+Jobs served at the first station move on to the second station.
 After being processed at this last station, jobs depart from the network.
 
 
@@ -1968,7 +1952,7 @@ Assuming that jobs that arrive at the start of a period $t$ can also be served d
 \begin{exercise} Relate $d_0$ to $a_1$ and $d_1$ to $a_2$, assuming that the jobs released at period $t$ become available at the next station in the next period.
   \begin{solution}
     Given the timing, we take $a_i(t) = d_{i-1}(t-1)$ for $i=1,2$.
-    That this holds for stations 0 and 1 is a bit disputable, because the release of an order from the order book does nto take any time, hence, we might say that $a_1(t) = d_0(t)$.
+    That this holds for stations 0 and 1 is a bit disputable, because the release of an order from the order book does not take any time, hence, we might say that $a_1(t) = d_0(t)$.
     However, typically, to start working on an order, it is required to assemble raw materials.
     Thus, we simply assume that this takes one period.
     Hence, orders released from the orderbook become available for production in the next period.
@@ -1980,7 +1964,7 @@ Assuming that jobs that arrive at the start of a period $t$ can also be served d
   In particular, assume for the moment that $w(t)$ is known.
   In the next exercise we will deal with the computation of $w(t)$.
   \begin{solution}
-    At the end of period $t-1$ there is room $W-w(t)$.
+    At the end of period $t$ there is room $W-w(t)$.
     Hence, we release $c_0(t+1) = W-w(t)$ in the next period to the network.
     Note that this is just the amount of orders that we are willing to release.
     To actually release thhis amount, these orders should of course be available in the order book.
