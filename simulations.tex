@@ -3,11 +3,11 @@
 
 % als je de antwoorden aan het eind wil hebben, gebruik dan deze regel
 
-\usepackage[solutionfiles]{optional}
+%\usepackage[solutionfiles]{optional}
 
 % Als je daarentegen de antwoorden onder de opdracht wil hebben, quote
 % dan bovenstaande uit, en gebruik de regel hieronder
-%\usepackage[nosolutionfiles]{optional}
+\usepackage[nosolutionfiles]{optional}
 
 \opt{nosolutionfiles}{\usepackage[nosolutionfiles]{answers}}
 \opt{solutionfiles}{\usepackage{answers}}
@@ -40,17 +40,6 @@
 \begin{document}
 \maketitle
 \tableofcontents
-
-\begin{itemize}
-\item document in de levelcrossing illustration directory. 
-\item Kijk even goed wat ik eigenlijk allemaal al heb.
-\item Overshoot verdeling? 
-\item Control zoals bij de psychiaters. Maak de empirische verdelingsfunctie van de wachttijd voor deze queue. Dit lijkt ook op een supermarkt. 
-\item Simulation of a D policy of wachttijd berekening ipv queue lengte.
-\item Heat bath
-\item Nurse routing or assembly line
-\item shift sheduling. setups. 
-\end{itemize}
 
 \Opensolutionfile{hint}
 \Opensolutionfile{ans}
@@ -1157,10 +1146,10 @@ An interesting extension is to incorporate time-varying demand. In many systems,
 
 \clearpage
 
-\section{Simulation of the $G/G/c$ queue in continuous time}
+\section{Simulation of the $G/G/1$ queue in continuous time}
 \label{sec:ggc-continuous-time}
 
-In this tutorial we will write a simulator for the $G/G/c$ queue. For this we use two concepts that are essential to simulate any stochastic system of reasonable complexity: an \emph{event stack} (or event schedule) to keep track of the sequence in which  events occur,  and \emph{classes} to organize data and behavior into single logical units.  We will work in steps  towards our goal; along the way you will learn a number of fundamental and highly interesting concepts such as \emph{classes}  and efficient \emph{data structures}.  If you have understood our implementation of the $G/G/c$ queue, discrete event simulators are no longer a black box for you. Hence, what you will learn from this practical extends well beyond the simulation of the $G/G/c$ queueing process. 
+In this tutorial we will write a simulator for the $G/G/c$ queue. For this we use two concepts that are essential to simulate any stochastic system of reasonable complexity: an \emph{event stack} (or event schedule) to keep track of the sequence in which  events occur,  and \emph{classes} to organize data and behavior into single logical units.  We will work in steps  towards our goal; along the way you will learn a number of fundamental and highly interesting concepts such as \emph{classes}  and efficient \emph{data structures}.  If you have understood the implementation of the $G/G/1$ queue, discrete event simulators are no longer a black box for you. Hence, what you will learn from this practical extends well beyond the simulation of the $G/G/1$ queueing process. 
 
 
 \subsection{Sorting with event stacks}
@@ -1242,20 +1231,22 @@ More generally, a discrete-time stochastic process moves from event to event. At
 
 In this section we will set up a simulator for the $G/G/1$ queue with  an event stack. Let us work in steps toward the final simulator.
 
-We start with some basic imports,  initialize the stack,  and define two numbers \texttt{ARRIVAL} and \texttt{DEPARTURE} that will used to tag the type of event that will be popped from the event stack. So, make a new file, and the following at the  top of it.
+We start with some basic imports,  initialize the stack,  and define two numbers \texttt{ARRIVAL} and \texttt{DEPARTURE} that will used to tag the type of event that will be popped from the event stack. So, make a new file, and type the following at the  top of it.
 
 \begin{pyblock}
 from heapq import heappop, heappush
 import numpy as np 
 from scipy.stats import expon
 
-np.random.seed(3)
+np.random.seed(3) 
 
 ARRIVAL = 0
 DEPARTURE = 1
 
 stack = [] # this is the event stack
 \end{pyblock}
+
+Note again that we fix the seed so that we get the same random numbers while testing our code. 
 
 
 First of all we need jobs with arrival times and service times. The easiest way to handle jobs in a simulator is by means of a class, as in the code below.
@@ -1281,7 +1272,7 @@ class Job:
   
 \end{pyblock}
 
-A class has a number of attributes to capture its  state and a number of functions\footnote{In python, functions related to a class are called `methods'. More generally, functions belonging to a class are called `member functions'.}. We initialize the arrival time and service time to zero. Then we store the departure time and queue length for a statistical analysis at the end of the simulations. Finally, we have functions to compute the waiting time and the sojourn time; the \texttt{repr} function is used to print the job. Note that our naming of functions also acts as documentation of what the functions do. Note also that member variables and functions in python start with the word \texttt{self}; this is to distinguish the (value of the) member variables from variables with the same name but lying outside the scope of the class.
+A class has a number of \emph{attributes}, such as \texttt{self.arrival\_time}, to capture its  state and a number of functions, such as \texttt{def waiting time(self)}, to compute specific information that relates to the class\footnote{In python, functions belonging  to a class are called `methods' or `member functions'.}. We initialize the arrival time and service time to zero. Then we store the departure time and queue length for a statistical analysis at the end of the simulations. Finally, we have functions to compute the waiting time and the sojourn time; the \texttt{repr} function is used to print the job. Note that our naming of functions also acts as documentation of what the functions do. Note also that member variables and functions in python start with the word \texttt{self}; this is to distinguish the (value of the) member variables from variables with the same name but lying outside the scope of the class.
 
 Classes are extremely useful programming concepts, as it enables you to organize state (that is, attributes) and behavior (that is, functions that apply to the attributes) into logical components. Moreover, classes can offer functionality to a programmer without the programmer needing to understand how this functionality is built. Classes offer much more advantages such as inheritance, but we will not discuss that here. 
 
@@ -1325,7 +1316,6 @@ while stack:
 
 Now that we know how to make jobs and put them on an event stack, we can make a plan to simulate the $G/G/1$ queue. 
 
-\begin{exercise}
   Replace the while loop of the previous exercise by the code below. Observe that we split events into two types\footnote{The word \texttt{type} is a reserved word in python, hence I use \texttt{typ} instead.}: arrivals and departures. 
 
   \begin{pyblock}
@@ -1338,9 +1328,8 @@ while stack:
     
   \end{pyblock}
 
-Now make a list of things that have to take place at an arrival event (in particular, what should happen when the server is busy at an arrival epoch, what should happen if the server is idle?) and at a departure event (in particular, what if the queue is empty, or not empty)? 
-
-Turn your ideas into code and see whether you can get your simulator working. (Its not a problem if you spend some time on this; you will learn a lot in the process.)
+\begin{exercise}
+With the above idea to make a while loop,  make a list of things that have to take place at an arrival event (in particular, what should happen when the server is busy at an arrival epoch, what should happen if the server is idle?) and at a departure event (in particular, what if the queue is empty, or not empty)? Turn your ideas into code and see whether you can get your simulator working. (Its not a problem if you spend some time on this; you will learn a lot in the process.)
 
 \begin{solution}
 We need a server object to keep track of the state of the server, and we also need  a list to queue the jobs. 
@@ -1385,11 +1374,19 @@ while stack:
 
 \end{exercise}
 
-\begin{exercise}
-  Run a simulation for 100 jobs and compute the average queue length. Then extend to $1000$, and $10^5$. Compare it to the theoretical expected queue length of the $M/M/1$ queue at arrival moments. 
-  \begin{solution}
-Now we see that we needed to store the jobs in \texttt{served\_jobs}.
+\subsection{Testing}
+\label{sec:testing}
 
+As a general observation, testing code is very important. For this reason, before we can use our simulator, we should apply it to some cases that we can analyze with theory. 
+
+\begin{exercise}
+  Run a simulation for the $M/M/1$ queue with $\lambda=2$ and $\mu=3$ with 100 jobs and compute the average queue length. Then extend to $1000$, and then to $10^5$. Compare it to the theoretical expected queue length of the $M/M/1$ queue at arrival moments.
+
+  \hintsymbol\begin{hint}
+You might want to check Exercise~\ref{ex:3} to see how to generate the jobs.
+    
+  \begin{solution}
+Now we see that we needed to store the jobs in \texttt{served\_jobs}. Set \texttt{num\_jobs = 100} in the code of Exercise~\ref{ex:3}. Put the following code at the end of the simulator to compute the statistics. 
     \begin{pyblock}
 
 tot_queue = sum(j.queue_length_at_arrival for j in served_jobs)
@@ -1402,13 +1399,15 @@ av_sojourn_time = tot_sojourn/len(served_jobs)
 print("Avg. sojourn time:", av_sojourn_time)
 \end{pyblock}
 
-You should see that you need a real large amount of jobs to obtain a good estimate for the (theoretical) expected queue length. I have to admit that I don't understand why (at least in my simulation, I need about $1e5$ jobs to get a good estimate. 
+Now run the simulator.
+
+You should see that you need a real large amount of jobs to obtain a good estimate for the (theoretical) expected queue length\footnote{I have to admit that I don't understand why (at least in my simulation, I need about $1e5$ jobs to get a good estimate.}. 
 
   \end{solution}
 \end{exercise}
 
 \begin{exercise}
-  As a general observation, testing code is very important. Thus, let us get further confidence in our $G/G/1$ simulator by specializing it to the $D/D/1$ queue. Check the documentation of the \texttt{uniform} distribution in \texttt{scipy.stats} to see what the following code does
+ Thus, let us get further confidence in our $G/G/1$ simulator by specializing it to the $D/D/1$ queue. Check the documentation of the \texttt{uniform} distribution in \texttt{scipy.stats} to see what the following code does
   \begin{pyblock}
 from scipy.stats import uniform
 
@@ -1444,7 +1443,7 @@ We have used a good data structure already. How should this be applied?
 
 \begin{exercise}
 
-  We implemented the queue as a python list. Why is a deque a more efficient data structure to simulate a queue?  Why is it important to know the efficiency of the data structures and algorithms you use?
+  We implemented the queue as a python list. Why is a deque\footnote{Search the web to understand what this is.} a more efficient data structure to simulate a queue?  Why is it important to know the efficiency of the data structures and algorithms you use?
   \hintsymbol\begin{hint}
   Search the web on \texttt{python} and \texttt{deque}.
   \end{hint}
@@ -1464,13 +1463,28 @@ When you do large scale simulations, involving many hours of simulation time, al
   \end{solution}
 \end{exercise}
 
-\subsection{G/G/c queue}
-
-\label{sec:ggc-queue}
-
-Extending the simulation of the $G/G/1$ queue to a $G/G/c$ queue is not really hard. In the $G/G/1$ we have just one server which is busy or not.
 
 \begin{exercise}
+  What have you learned in this tutorial?
+  \begin{solution}
+    Topics learned.
+    \begin{enumerate}
+    \item Efficient data structures such as heap queues. In general, it is important to have some basic knowledge of algorithmic complexity. 
+    \item Event stacks to organize the tracking of events in time. With the concept of event stack, you now know how discrete event simulators work. 
+    \item The simulation of the $G/G/1$ queue
+    \end{enumerate}
+  \end{solution}
+\end{exercise}
+
+
+\section{Simulation of the $G/G/c$ queue in continuous time}
+\label{sec:ggc-continuous-time}
+
+The goal of this tutorial is to  generalize the simulator for the $G/G/1$ to a $G/G/c$ queue. You will see that this is rather easy, once you have the right idea. We will organize the entire simulator into a single class so that our code is organized and we will develop a method to set up a simple method of structured  testing\footnote{If you are interested, check the web on  \emph{python unittest}. Structured testing is enormously important when you use code for real. For instance, I guess you prefer that all code that is used in self-driving cars is tested.} 
+
+
+\begin{exercise}
+In the $G/G/1$ we have just one server which is busy or not.
   Generalize  the \texttt{handle\_arrival} function of the $G/G/1$ queue such that it can cope with multiple servers.
 
   \hintsymbol\begin{hint}
@@ -1502,8 +1516,6 @@ Likewise,   generalize  the \texttt{handle\_departure} function of the $G/G/1$ q
     Of course, the number of busy servers cannot be negative or larger than $c$. The queue length cannot be negative. Finally, it cannot be that  the queue length is positive and the number of busy servers is less than $c$. 
   \end{solution}
 \end{exercise}
-
-
 
 \begin{exercise}
 The design of the simulation of $G/G/1$ queue is not entirely satisfactory. For instance, if we want to run different experiments, we have to clean up old experiments before we can start new ones. The current design is not very practical for this. How to solve this?
@@ -1625,20 +1637,24 @@ def sakasegawa(F, G, c):
     ce2 = G.var()/ES/ES
     return (ca2+ce2)/2 * EWQ_1
     
+  \end{pyblock}
+  
+In the next function we perform the test. We give this function standard  arguments so that we can  run the function as a standalone test. As such we want to to  contain all parameter values. 
 
+\begin{pyblock}
 def mm1_test(labda=0.8, mu=1, num_jobs=100):
-	c = 1
-	F = expon(scale=1./labda)
-	G = expon(scale=1./mu)
+    c = 1
+    F = expon(scale=1./labda)
+    G = expon(scale=1./mu)
 
-	ggc = GGc(F, G, c, num_jobs)
-	ggc.run()
-	tot_wait_in_q = sum(j.waiting_time() for j in ggc.served_jobs)
-	avg_wait_in_q = tot_wait_in_q/len(ggc.served_jobs)
+    ggc = GGc(F, G, c, num_jobs)
+    ggc.run()
+    tot_wait_in_q = sum(j.waiting_time() for j in ggc.served_jobs)
+    avg_wait_in_q = tot_wait_in_q/len(ggc.served_jobs)
 	
-	print("M/M/1 TEST")
-	print("Theoretical avg. waiting time in queue:", sakasegawa(F, G, c))
-	print("Simulated avg. waiting time in queue:", avg_wait_in_q)
+    print("M/M/1 TEST")
+    print("Theoretical avg. waiting time in queue:", sakasegawa(F, G, c))
+    print("Simulated avg. waiting time in queue:", avg_wait_in_q)
 
 mm1_test(num_jobs=100)
 mm1_test(num_jobs=10000)
@@ -1716,11 +1732,9 @@ md2_test(num_jobs=10000)
   \begin{solution}
     Topics learned.
     \begin{enumerate}
-    \item Efficient data structures such as heap queues. In general, it is important to have some basic knowledge of algorithmic complexity. 
-    \item Event stacks to organize the tracking of events in time. With the concept of event stack, you now know how discrete event simulators work. 
-    \item The simulation of the $G/G/1$ queue and $G/G/c$ queue
+    \item The simulation of the $G/G/c$ queue
     \item Python classes and, a bit more generally, object oriented programming. 
-    \item Organizing cases and experiments with functions.
+    \item Organizing cases and experiments by means of  functions. With these functions we can keep a log of what we precisely tested, what parameter values we used and which code we ran. These tests are also useful to show how to actually use/run the code.
     \end{enumerate}
   \end{solution}
 \end{exercise}
@@ -1738,6 +1752,8 @@ Some  interesting extensions.
 \end{exercise}
 
 \clearpage
+
+
 
 \section{Queueing networks and workload control}
 \label{sec:queueing-network}
