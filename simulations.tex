@@ -1149,7 +1149,7 @@ An interesting extension is to incorporate time-varying demand. In many systems,
 \section{Simulation of the $G/G/1$ queue in continuous time}
 \label{sec:ggc-continuous-time}
 
-In this tutorial we will write a simulator for the $G/G/c$ queue. For this we use two concepts that are essential to simulate any stochastic system of reasonable complexity: an \emph{event stack} (or event schedule) to keep track of the sequence in which  events occur,  and \emph{classes} to organize data and behavior into single logical units.  We will work in steps  towards our goal; along the way you will learn a number of fundamental and highly interesting concepts such as \emph{classes}  and efficient \emph{data structures}.  If you have understood the implementation of the $G/G/1$ queue, discrete event simulators are no longer a black box for you. Hence, what you will learn from this practical extends well beyond the simulation of the $G/G/1$ queueing process. 
+In this tutorial we will write a simulator for the $G/G/1$ queue. For this we use two concepts that are essential to simulate any stochastic system of reasonable complexity: an \emph{event stack} (or event schedule) to keep track of the sequence in which  events occur,  and \emph{classes} to organize data and behavior into single logical units.  We will work in steps  towards our goal; along the way you will learn a number of fundamental and highly interesting concepts such as \emph{classes}  and efficient \emph{data structures}.  If you have understood the implementation of the $G/G/1$ queue, discrete event simulators are no longer a black box for you. Hence, what you will learn from this practical extends well beyond the simulation of the $G/G/1$ queueing process. 
 
 
 \subsection{Sorting with event stacks}
@@ -1183,7 +1183,7 @@ while stack:
 
   \end{pyblock}
 
-Pushing puts things in an sorted fashion on the stack, popping takes things from the stack. First we put the students on the stack. To print, we remove items from the stack until it is empty.
+Pushing puts things on the stack in a sorted fashion, popping takes things from the stack. First we put the students on the stack. To print, we remove items from the stack until it is empty.
 \end{solution}
   
 \end{exercise}
@@ -1191,7 +1191,7 @@ Pushing puts things in an sorted fashion on the stack, popping takes things from
 
 
 \begin{exercise}
-  Extend the code of the previous exercise such that we can include  with more information with the ages than just the name, for instance, also the brand of their mobile phone. 
+  Extend the code of the previous exercise such that we can include more information with the ages than just the name, for instance, also the brand of their mobile phone. 
 \begin{solution}
 We can make the  tuples, i.e., the data between the brackets,  just longer. 
 
@@ -1218,7 +1218,7 @@ while stack:
 \begin{exercise}
   It may seem that we have just solved a simple toy problem, but this is not true. In fact, we have established something of real importance: heap queues form the core functionality of (nearly) all discrete event simulators used around the world.  To help you understand this fact, sketch how to use heap queues  to simulate a queueing process. 
   \begin{solution}
-    For a queueing process we can start with putting a number of job arrivals on the stack and label these events as `arrivals'. Whenever a service starts, compute the departure time of a job, and put this departure moment on the stack. Label this event as a `departure'. Then move to the next event. Since, the event stack is sorted in time, the event at the head of the stack is the first moment in time something useful happens. 
+    For a queueing process we can start with putting a number of job arrivals on the stack and label these events as `arrivals'. Whenever a service starts, compute the departure time of a job, and put this departure moment on the stack. Label this event as a `departure'. Then move to the next event. Since the event stack is sorted in time, the event at the head of the stack is the first moment in time something useful happens. 
 
 More generally, a discrete-time stochastic process moves from event to event. At an event certain actions have to be taken, and these actions may involve the generation of new events or the removal of old events. The new events are put on the stack, the obsolete ones removed, and then the simulator moves to the first event on the stack. 
   \end{solution}
@@ -1231,7 +1231,7 @@ More generally, a discrete-time stochastic process moves from event to event. At
 
 In this section we will set up a simulator for the $G/G/1$ queue with  an event stack. Let us work in steps toward the final simulator.
 
-We start with some basic imports,  initialize the stack,  and define two numbers \texttt{ARRIVAL} and \texttt{DEPARTURE} that will used to tag the type of event that will be popped from the event stack. So, make a new file, and type the following at the  top of it.
+We start with some basic imports,  initialize the stack,  and define two numbers \texttt{ARRIVAL} and \texttt{DEPARTURE} that will be used to tag the type of event that will be popped from the event stack. So, make a new file, and type the following at the top of it.
 
 \begin{pyblock}
 from heapq import heappop, heappush
@@ -1274,7 +1274,7 @@ class Job:
 
 A class has a number of \emph{attributes}, such as \texttt{self.arrival\_time}, to capture its  state and a number of functions, such as \texttt{def waiting time(self)}, to compute specific information that relates to the class\footnote{In python, functions belonging  to a class are called `methods' or `member functions'.}. We initialize the arrival time and service time to zero. Then we store the departure time and queue length for a statistical analysis at the end of the simulations. Finally, we have functions to compute the waiting time and the sojourn time; the \texttt{repr} function is used to print the job. Note that our naming of functions also acts as documentation of what the functions do. Note also that member variables and functions in python start with the word \texttt{self}; this is to distinguish the (value of the) member variables from variables with the same name but lying outside the scope of the class.
 
-Classes are extremely useful programming concepts, as it enables you to organize state (that is, attributes) and behavior (that is, functions that apply to the attributes) into logical components. Moreover, classes can offer functionality to a programmer without the programmer needing to understand how this functionality is built. Classes offer much more advantages such as inheritance, but we will not discuss that here. 
+Classes are extremely useful programming concepts, as it enables you to organize state (that is, attributes) and behavior (that is, functions that apply to the attributes) into logical components. Moreover, classes can offer functionality to a programmer without the programmer needing to understand how this functionality is built. Classes offer many more advantages such as inheritance, but we will not discuss that here. 
 
 Once we have a class, making an object is simple with this code.\footnote{The wording is important here. Objects are instances of classes. As an example: Albert Einstein was a human being. Here, `Einstein' is the object, and `human being' is a class.}
 
@@ -1285,7 +1285,7 @@ job.service_time = 2
 \end{pyblock}
 
 \begin{exercise}\label{ex:3}
-  Make $10$ jobs with exponentially distributed interarrival times, with $\lambda=2$,  and exponentially distributed service times with $\mu=3$. Put these jobs on an event stack, and print them in order of smallest to largest interarrival time. Tag the events with the job, and event type (which is an arrival).
+  Make $10$ jobs with exponentially distributed interarrival times, with $\lambda=2$,  and exponentially distributed service times with $\mu=3$. Put these jobs on an event stack, and print them in order of arrival time. Tag the events with the job, and event type (which is an arrival).
   \begin{solution}
 One way is like this.     
     \begin{pyblock}
@@ -1329,7 +1329,7 @@ while stack:
   \end{pyblock}
 
 \begin{exercise}
-With the above idea to make a while loop,  make a list of things that have to take place at an arrival event (in particular, what should happen when the server is busy at an arrival epoch, what should happen if the server is idle?) and at a departure event (in particular, what if the queue is empty, or not empty)? Turn your ideas into code and see whether you can get your simulator working. (Its not a problem if you spend some time on this; you will learn a lot in the process.)
+With the above idea to make a while loop,  make a list of things that have to take place at an arrival event (in particular, what should happen when the server is busy at an arrival epoch, what should happen if the server is idle?) and at a departure event (in particular, what if the queue is empty, or not empty)? Turn your ideas into code and see whether you can get your simulator working. (It's not a problem if you spend some time on this; you will learn a lot in the process.)
 
 \begin{solution}
 We need a server object to keep track of the state of the server, and we also need  a list to queue the jobs. 
@@ -1384,7 +1384,7 @@ As a general observation, testing code is very important. For this reason, befor
 
   \hintsymbol\begin{hint}
 You might want to check Exercise~\ref{ex:3} to see how to generate the jobs.
-    
+    \end{hint}
   \begin{solution}
 Now we see that we needed to store the jobs in \texttt{served\_jobs}. Set \texttt{num\_jobs = 100} in the code of Exercise~\ref{ex:3}. Put the following code at the end of the simulator to compute the statistics. 
     \begin{pyblock}
@@ -1401,7 +1401,7 @@ print("Avg. sojourn time:", av_sojourn_time)
 
 Now run the simulator.
 
-You should see that you need a real large amount of jobs to obtain a good estimate for the (theoretical) expected queue length\footnote{I have to admit that I don't understand why (at least in my simulation, I need about $1e5$ jobs to get a good estimate.}. 
+You should see that you need a real large amount of jobs to obtain a good estimate for the (theoretical) expected queue length\footnote{I have to admit that I don't understand why (at least in my simulation) I need about $1e5$ jobs to get a good estimate.}. 
 
   \end{solution}
 \end{exercise}
@@ -1423,7 +1423,7 @@ Then use this in our simulation. What happens? What happens if you reverse the 2
 
 
 \begin{exercise}
-  Up to now we studied the $G/G/1$ FIFO (First In First Out) queue. How to change the code to simulate a LIFO (Last In Last Out) queue?
+  Up to now we studied the $G/G/1$ FIFO (First In First Out) queue. How to change the code to simulate a LIFO (Last In First Out) queue?
   \begin{solution}
     This is really easy: change the line \texttt{queue.pop(0)} by  \texttt{queue.pop()}. 
  \end{solution}
