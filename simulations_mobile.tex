@@ -1,0 +1,57 @@
+\documentclass[a5paper]{scrartcl}
+\usepackage[solutionfiles]{optional}
+
+% Als je daarentegen de antwoorden onder de opdracht wil hebben, quote
+% dan bovenstaande uit, en gebruik de regel hieronder
+%\usepackage[nosolutionfiles]{optional}
+
+\opt{nosolutionfiles}{\usepackage[nosolutionfiles]{answers}}
+\opt{solutionfiles}{\usepackage{answers}}
+
+\usepackage[english]{babel}
+
+\usepackage{mathtools,amsthm,amssymb}
+\usepackage{verbatim}
+\usepackage[colorlinks=true]{hyperref}
+
+\usepackage[T1]{fontenc}
+\usepackage{fouriernc}
+\usepackage{fontawesome} % for the linux hint symbol
+\newcommand{\hintsymbol}{\marginpar{\center{\faLinux}}}
+
+
+% I don't know why, pythontext should appear somewhere above some
+% other packages. I don't know which ones, but at this spot it works.
+\usepackage{pythontex}
+
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhead{} % clear all header fields
+\fancyhead[LO, LE]{\rightmark}
+\fancyfoot{} % clear all footer fields
+\fancyfoot[C]{\thepage}
+\setlength{\headheight}{14pt} 
+
+\Newassociation{solution}{Solution}{ans}
+%\Newassociation{sol}{Solution}{ans}
+\Newassociation{hint}{Hint}{hint}
+\renewcommand{\Hintlabel}[1]{\textbf{h.#1}}
+\renewcommand{\Solutionlabel}[1]{\textbf{s.#1}}
+
+\theoremstyle{definition} % font type for theorems and related environments
+\newtheorem{exercise}{Exercise}[section]
+
+\usepackage{etoolbox}% necessary for the command below
+\AtBeginEnvironment{hint}{\hintsymbol} 
+
+\newcommand{\E}[1]{\,\mathsf{E}\left[#1\right]}
+
+
+\usepackage[top=5mm, left=5mm, right=5mm, bottom=2cm]{geometry}
+
+\input{main_text.tex}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:

@@ -1,0 +1,15 @@
+auto/
+*.blg
+*.out
+*.rel
+*.aux
+*.log
+*.gz
+*.toc
+booktest*.*
+ans.tex
+hint.tex
+chunks/*
+*.pytxcode
+pythontex-files*
+progs/testing_ground.pdf
