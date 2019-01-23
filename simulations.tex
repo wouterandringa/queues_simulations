@@ -1,13 +1,12 @@
 \documentclass{scrartcl}
-%\documentclass[a5paper]{article}
 
 % als je de antwoorden aan het eind wil hebben, gebruik dan deze regel
 
-%\usepackage[solutionfiles]{optional}
+\usepackage[solutionfiles]{optional}
 
 % Als je daarentegen de antwoorden onder de opdracht wil hebben, quote
 % dan bovenstaande uit, en gebruik de regel hieronder
-\usepackage[nosolutionfiles]{optional}
+%\usepackage[nosolutionfiles]{optional}
 
 \opt{nosolutionfiles}{\usepackage[nosolutionfiles]{answers}}
 \opt{solutionfiles}{\usepackage{answers}}
@@ -595,6 +594,11 @@ If  $\mu=\sigma=5$ then the analysis should break down. What happens if you set 
 \end{solution}	
 \end{exercise}
 
+\subsection{Summary}
+\label{sec:summary-1}
+
+
+
 \begin{exercise}
   Make a summary of what you have learned from this tutorial.
   \begin{solution}
@@ -1157,7 +1161,7 @@ For this we use two concepts that are essential to simulate any stochastic syste
 We will work in steps towards our goal; along the way you will learn a number of fundamental and highly interesting concepts such as \emph{classes} and efficient \emph{data structures}.
 If you have understood the implementation of the $G/G/1$ queue, discrete event simulators are no longer a black box for you.
 Hence, what you will learn from this practical extends well beyond the simulation of the $G/G/1$ queueing process.
-Once we have built our simulator we apply it to a case in which we analyze the queueing behavior at an intake desk at an airport with a single server.
+Once we have built our simulator we apply it to a case in which we analyze the queueing behavior at an check-in desk at an airport with a single server.
 
 In Section~\ref{sec:ggc-continuous-time} we will generalize the simulator to the $G/G/c$ queue, clean up the code by working with a class for the $G/G/c$ queue. We can then also extend the case accordingly. 
 
@@ -1448,12 +1452,12 @@ Then use this in our simulation. What happens? What happens if you reverse the 2
 \end{exercise}
 
 
-\subsection{The intake process at an airport}
-\label{sec:intake-process-at}
+\subsection{The check-in process at an airport}
+\label{sec:check-in-process-at}
 
 We now have a simulator, and we tested it (although not sufficiently well to use it for real applications).
 We can now start using it.
-A simple application is to analyze the intake process at an airport.
+A simple application is to analyze the check-in process at an airport.
 For ease we constrain the case here to a single server desk.
 In the next tutorials we will extend this to more realistic scenarios---but that will require extra work.
 We assume that demand arrives as a Poisson process with rate $\lambda=1/3$ per minute, and that the service distribution is $U[1,3]$ minute.
@@ -1506,7 +1510,7 @@ Reset to all data and clear all lists.
 To ensure that we do not keep old data, we have to reset all lists. 
 
 \begin{pyblock}
-print("Simulation of intake process, M/G/1 with G=U[2,5]")
+print("Simulation of check-in process, M/G/1 with G=U[2,5]")
 
 
 stack = [] # this is the event stack
@@ -1601,7 +1605,7 @@ Here are some final, more general, questions to deepen your understanding of que
 \end{exercise}
 
 \begin{exercise}
-  In a priority queue  jobs belong to a priority class. Jobs with higher priority are served before jobs with lower priority, and within one priority class jobs are served in FIFO sequence. A concrete example of a priority queue is the intake process of business and economy class customers at airports.  How would you build a $G/G/1$ priority queue?
+  In a priority queue  jobs belong to a priority class. Jobs with higher priority are served before jobs with lower priority, and within one priority class jobs are served in FIFO sequence. A concrete example of a priority queue is the check-in process of business and economy class customers at airports.  How would you build a $G/G/1$ priority queue?
   \hintsymbol\begin{hint}
 We have used a good data structure already. How should this be applied?
   \end{hint}
@@ -1635,7 +1639,8 @@ When you do large scale simulations, involving many hours of simulation time, al
 \end{exercise}
 
 
-
+\subsection{Summary }
+\label{sec:summary-}
 
 \begin{exercise}
   What have you learned in this tutorial?
@@ -1655,8 +1660,12 @@ When you do large scale simulations, involving many hours of simulation time, al
 \section{Simulation of the $G/G/c$ queue in continuous time}
 \label{sec:ggc-continuous-time}
 
-The goal of this tutorial is to  generalize the simulator for the $G/G/1$ to a $G/G/c$ queue. You will see that this is rather easy, once you have the right idea. We will organize the entire simulator into a single class so that our code is organized and we will develop a method to set up a simple method of structured  testing\footnote{If you are interested, check the web on  \emph{python unittest}. Structured testing is enormously important when you use code for real. For instance, I guess you prefer that all code that is used in self-driving cars is tested.} 
+The goal of this tutorial is to  generalize the simulator for the $G/G/1$ to a $G/G/c$ queue. You will see that this is rather easy, once you have the right idea. We will organize the entire simulator into a single class so that our code is organized and we will develop a method to set up structured  tests\footnote{Structured testing is enormously important when you use code for real applications. (I suppose you prefer all code used in self-driving cars to be tested.)  If you are interested, check the web on  \emph{python unittest} and `test-driven coding'. With test-driven coding you first write down a hierarchy of  many simple tests that your program is supposed to pass.  Then you build your program until the first test pass. Then you implement the next step until the second test pass too, and so on.} Once we have a working simulator we apply it to the check-in process of the airport. 
 
+
+
+\subsection{The simulator}
+\label{sec:simulator}
 
 \begin{exercise}
 In the $G/G/1$ we have just one server which is busy or not.
@@ -1788,6 +1797,9 @@ print(ggc.served_jobs)
 \end{solution}
 \end{exercise}
 
+\subsection{Testing}
+\label{sec:testing-1}
+
 \begin{exercise}
 Test the simulator with deterministic interarrival times, for instance a job that arrives every 10 minutes, and each job takes 1 hour of service. Check the departure process for $c=1$, $c=2$, $c=5$, $c=6$, and $c=7$. 
 \end{exercise}
@@ -1915,9 +1927,154 @@ md2_test(num_jobs=10000)
 
 \end{exercise}
 
+\subsection{The check-in process at an airport}
+\label{sec:check-in-process}
+
+We again analyze the check-in process at an airport, but we make it more realistic than the analysis of Section~\ref{sec:check-in-process-at} in that we now allow for multiple check-in desks.
+
+Assume that a flight departing at 11 am  consists of $N=300$ people.  For ease, assume that all $N$ customers arrive between 9 and 10. Suppose that the check-in of a job is $U[1, 3]$ distributed.  
+
+
+\begin{exercise}
+  Model the arrival process.
+
+  \hintsymbol
+  \begin{hint}
+    Most people arrive independently. What is the arrival rate?
+  \end{hint}
+  \begin{solution}
+Since most people arrive independent of each other, it is reasonable that the arrival process in this period of duration $T$ is Poisson with rate $\lambda = N/T$. 
+  \end{solution}
+\end{exercise}
+
+The queueing problem  is evidently to determine the required number of servers $c$ such that the performance is acceptable. 
+
+\begin{exercise}
+  What performance measures are relevant here?
+  \begin{solution}
+    It is reasonable \emph{within the context} that the mean waiting time is less important than the largest waiting time and the fraction of people that wait longer than 10 minutes, say.
+    Note here, \emph{context is crucial} when making models.
+  \end{solution}
+\end{exercise}
+
+\begin{exercise}
+  Define the offered load as $\lambda \E S$ and the load as $\rho = \lambda \E S/ c$. Is it important for the check-in desk that $\rho<1$? 
+
+  \begin{hint}
+    Think hard about the context. Is this queueing process stationary? Is the arrival process stationary? 
+  \end{hint}
+  \begin{solution}
+    There are, by assumption, only arrivals between 9 and 10, hence the arrival process is not stationary, hence the queueing process is not stationary.  It is also not a problem if the system is temporarily in overload. In fact, as long as $c$ is such that the performance measures (maximum delay and fraction of people waiting longer than some threshold) are within reasonable bounds, the system works as it should.
+  \end{solution}
+\end{exercise}
+
+\begin{exercise}
+  Why do we need simulation to analyze this case?
+  \begin{solution}
+    We study the dynamics of a queueing process in which the demand grows and than peters out. Such queueing situations are, typically, mathematically intractable. In fact, we finally have come to a point in which we really need simulation. 
+  \end{solution}
+\end{exercise}
+
+
+\begin{exercise}
+  Search for a good $c$.
+
+   \hintsymbol
+   \begin{hint}
+  For this it is best to write two functions. The first function simulates a scenario for a fixed set of parameters and computes the performance measures. The second  function calls the simulator over a suitable range for $c$ and prints the KPIs. Like this, we use  the second function to fix all parameters so that we always can retrieve the exact scenarios we analyzed. 
+   \end{hint}
+
+  \begin{solution}
+The first function computes the KPIs, the second runs muliple scenarios. 
+
+    \begin{pyblock}
+def intake_process(F, G, c, num):
+
+    ggc = GGc(F, G, c, num)
+    ggc.run()
+
+    max_waiting_time = max(j.waiting_time() for j in ggc.served_jobs)
+    longer_ten = sum((j.waiting_time()>=10)for j in ggc.served_jobs)
+    return max_waiting_time, longer_ten
+
+
+def intake_test_1():
+    labda = 300/60
+    F = expon(scale=1.0 / labda)
+    G = uniform(1, 2)
+    num = 300
+
+    print("Num servers, max waiting time, num longer than 10")
+    for c in range(3, 10):
+        max_waiting_time, longer_ten = intake_process(F, G, c, num)
+        print(c, max_waiting_time, longer_ten)
+
+      
+intake_test_1()
+
+    \end{pyblock}
+  \end{solution}
+  
+\end{exercise}
+
+\begin{exercise}
+  What do you think of the results? If you are not satisfied, propose and analyze an improvement.
+
+  \begin{solution}
+    I get these numbers
+
+\begin{verbatim}
+Num servers, max waiting time, num longer than 10
+3 138.1697966325396 280
+4 82.7792212258584 266
+5 54.741743193174834 227
+6 39.35432320034931 220
+7 22.868514027211248 167
+8 15.77953068102207 102
+9 12.118348481100451 50
+\end{verbatim}
+    
+    Even for 9 servers, 50 people wait longer than 10 minutes. Interestingly, with 9 servers the maximum waiting time is just 12 minutes, so we can at least keep this within bounds.
+
+We could also make a plot of the job waiting time as a function of time, but we skip it here. 
+
+
+Perhaps we should open the check-in desks for a longer time and advise people to come earlier. Let's try 90 minutes instead.
+
+\begin{pyblock}
+
+def intake_test_2():
+    labda = 300/90
+    F = expon(scale=1.0 / labda)
+    G = uniform(1, 2)
+    num = 300
+
+    print("Num servers, max waiting time, num longer than 10")
+    for c in range(3, 10):
+        max_waiting_time, longer_ten = intake_process(F, G, c, num)
+        print(c, max_waiting_time, longer_ten)
+
+  
+\end{pyblock}
+
+If you do the experiment, you'll see that this works much better. It is now also very simple to set up a third experiment in which the desks are open during two hours. Then you'll see that 4 servers  suffice. 
+
+  \end{solution}
+
+\end{exercise}
+
+\begin{exercise}
+  Relate the results of these simulations to you traveling experiences. 
+\end{exercise}
+
+
+\subsection{Summary}
+\label{sec:summary}
+
 
 \begin{exercise}
   What have you learned in this tutorial?
+ Can you extend this work to more general cases? 
   \begin{solution}
     Topics learned.
     \begin{enumerate}
@@ -1925,17 +2082,15 @@ md2_test(num_jobs=10000)
     \item Python classes and, a bit more generally, object oriented programming. 
     \item Organizing cases and experiments by means of  functions. With these functions we can keep a log of what we precisely tested, what parameter values we used and which code we ran. These tests are also useful to show how to actually use/run the code.
     \end{enumerate}
-  \end{solution}
-\end{exercise}
 
-\begin{exercise}
- How can you extend this work to more general cases? 
-  \begin{solution}
 Some  interesting extensions.
     \begin{enumerate}
     \item   Scale up to networks of $G/G/c$ queues.
-    \item In the $G/G/c$ queue the assumption is that all servers have the same service rate. In production settings this is typically not the case. There is a queue of jobs, and these jobs are served by machines with different speeds. For instance, old machines may work at a slower rate than new machines. 
-    \item Above we also mentioned how to deal with priorities. Once we included priorities we can simulate the queueing behavior at the check-in desks at airports. 
+    \item In the $G/G/c$ queue the assumption is that all servers have the same service rate.
+      In production settings this is typically not the case.
+      There is a queue of jobs, and these jobs are served by machines with different speeds.
+      For instance, old machines may work at a slower rate than new machines.
+    % \item Above we also mentioned how to deal with priorities. Once we included priorities we can simulate the queueing behavior at the check-in desks at airports with business and economy class customers. 
     \end{enumerate}
   \end{solution}
 \end{exercise}
@@ -1963,7 +2118,18 @@ Some  interesting extensions.
 \section{Queueing networks and workload control}
 \label{sec:queueing-network}
 
-In many organizations jobs or orders are  processed in various stages. For example,  a case at a court undergoes a number of processing stems. When a new case arrives it is first filed and queued. Then a clerk reads it and sometimes assembles some necessary data. The case is then sent to a judge for further assessment. The judge may send the case back to the clerk, or may play a trial. After some loops, the trial is held. After the trial, the clerk has to write a report, which in turn has to be checked by the judge, and perhaps repaired. In all steps, an (electronic) document is passed on from one station to another, and waits there until the server has time to process the job. In many cases the job is sent to a next station, but the job may also be sent back to the station itself. Other instances of queueing networks are job shops/production networks, hospitals, customs services, and so on. Hence, with the tools we develop in this section it becomes possible to analyze quite difficult business processes in terms of throughput and delay as functions of arrival and service rate, and routing (the rules that determine what sequence of stations jobs have to follow.)
+In many organizations jobs or orders are processed in various stages.
+For example, a case at a court undergoes a number of processing stems.
+When a new case arrives it is first filed and queued.
+Then a clerk reads it and sometimes assembles some necessary data.
+The case is then sent to a judge for further assessment.
+The judge may send the case back to the clerk, or may play a trial.
+After some loops, the trial is held.
+After the trial, the clerk has to write a report, which in turn has to be checked by the judge, and perhaps repaired.
+In all steps, an (electronic) document is passed on from one station to another, and waits there until the server has time to process the job.
+In many cases the job is sent to a next station, but the job may also be sent back to the station itself.
+Other instances of queueing networks are job shops/production networks, hospitals, customs services, and so on.
+Hence, with the tools we develop in this section it becomes possible to analyze quite difficult business processes in terms of throughput and delay as functions of arrival and service rate, and routing (the rules that determine what sequence of stations jobs have to follow.)
 
 In this tutorial we will develop the tools to simulate such queueing networks. Of particular importance in such networks are throughput (the average output of the network), and lead times (the time orders spend in the queueing network itself, but also the time spent before any action can start.) We start with a very simple network. Then we extend the situation to a network in which the number of jobs `on the floor' is limited. (The jobs `on the `floor' are all jobs waiting between two stations or in actual service; jobs waiting at the entrance to get access to the queueing network are not included.) 
 
