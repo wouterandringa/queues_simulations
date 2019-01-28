@@ -1,0 +1,2525 @@
+\usepackage[solutionfiles]{optional}
+
+% Als je daarentegen de antwoorden onder de opdracht wil hebben, quote
+% dan bovenstaande uit, en gebruik de regel hieronder
+%\usepackage[nosolutionfiles]{optional}
+
+\opt{nosolutionfiles}{\usepackage[nosolutionfiles]{answers}}
+\opt{solutionfiles}{\usepackage{answers}}
+
+\usepackage[english]{babel}
+
+\usepackage{mathtools,amsthm,amssymb}
+\usepackage{verbatim}
+\usepackage[colorlinks=true]{hyperref}
+
+\usepackage[T1]{fontenc}
+\usepackage{fouriernc}
+\usepackage{fontawesome} % for the linux hint symbol
+\newcommand{\hintsymbol}{\marginpar{\center{\faLinux}}}
+
+
+% I don't know why, pythontext should appear somewhere above some
+% other packages. I don't know which ones, but at this spot it works.
+\usepackage{pythontex}
+
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhead{} % clear all header fields
+\fancyhead[LO, LE]{\rightmark}
+\fancyfoot{} % clear all footer fields
+\fancyfoot[C]{\thepage}
+\setlength{\headheight}{14pt} 
+
+\Newassociation{solution}{Solution}{ans}
+%\Newassociation{sol}{Solution}{ans}
+\Newassociation{hint}{Hint}{hint}
+\renewcommand{\Hintlabel}[1]{\textbf{h.#1}}
+\renewcommand{\Solutionlabel}[1]{\textbf{s.#1}}
+
+\theoremstyle{definition} % font type for theorems and related environments
+\newtheorem{exercise}{Exercise}[section]
+
+\usepackage{etoolbox}% necessary for the command below
+\AtBeginEnvironment{hint}{\hintsymbol} 
+
+\newcommand{\E}[1]{\,\mathsf{E}\left[#1\right]}
+
+\title{Queueing simulations}
+\author{N.D. Van Foreest and E.R. Van Beesten}
+
+\begin{document}
+\maketitle
+
+%\setcounter{tocdepth}{1}
+\tableofcontents
+
+\clearpage
+
+\Opensolutionfile{hint}
+\Opensolutionfile{ans}
+
+
+\section{Introduction}
+
+Typically a queueing system is subject to rules about when to allow jobs to enter the system or to adapt the service capacity.
+Such a decision rule is called a \emph{policy}.
+The theoretical analysis of the efficacy of policies is often very hard, while with simulation it becomes doable.
+In this document we present a number of cases to see how simulation can be used to analyze and improve queueing systems.
+Besides the fact that these the cases will improve your understanding of queueing systems and probability theory, they will also make clear that simulation is a really creative activity and involves solving many interesting and challenging algorithmic problems.
+
+
+Each case is organized in a number of exercises.
+For each exercise,
+\begin{enumerate}
+\item Make a design of how you want to solve the problem.
+  For instance, make a model of a queueing system, or a control policy structure, or compute relevant KPIs (key performance indicators, such as cost, or utilization of the server, and so on).
+  In other words, think before you type.
+\item Try to translate your ideas into pseudo code or, better yet, python\footnote{Some of you might wonder why we use python rather than R.
+    There are a few reasons for this.
+    Python is more or less the third most used programming language, after C++ and java.
+    It is widely used by companies, while R is hardly used outside academia.
+    Programming OR applications is easier in python; it will also used in other courses.
+    Finally, if you are interested in machine learning and artificial intelligence, python i, hands-down the best choice.}
+  \item If you don't succeed in getting your program to work,  look up the code written by us and type it into your python environment.\footnote{Typing yourself forces you to read the code well.}.
+  \item When an exercise has a hint, its marked in the margin with a penguin symbol\footnote{A penguin is the logo for Linux.
+      As using Linux will make you a happier person overall, it seems fitting to use the Linux logo as the messenger of good news.}.
+    
+  \item Simulate a number of scenarios by varying parameter settings and see what happens.
+\end{enumerate}
+
+We expect you to work in a groups of 2 to 3 students and bring a laptop with an \emph{installed and working} python environment, preferably  the anaconda package available at \url{https://www.anaconda.com/},  as this contains all functionality we will need\footnote{There are also python environments available on the web, such as repl.it., but that is typically a bit less practical than running the code on your own machine.}. You can find a nice tutorial to python programming at  \url{https://www.programiz.com/python-programming}. Note, this site advises to install python just by itself. We instead advise you to download anaconda, as this contains also the required numerical libraries. 
+
+We will use the following libraries of python a lot:
+\begin{itemize}
+\item \pyv{numpy}  provides an enormous amount of functions to handle large (multi-dimensional) arrays with numbers. 
+\item \pyv{scipy} contains numerical recipes, such as solvers for optimization software, solvers for differential equations. \pyv{scipy.stats} contains many probability distributions and numerical methods to operate on these functions. 
+\item \pyv{matplotlib} provides plotting functionality.
+\end{itemize}
+
+Our code is not the most efficient, or fast.
+Rather, we focus on clarity of code so that the underlying reasoning is as clear as possible.
+Once our ideas and code are correct, we can start optimizing, if this is necessary.
+
+Finally, the code is part of the course, hence of the midterms and the exams.
+Unless indicated as not obligatory, you have to be able to read the code and understand it.
+
+
+\clearpage
+\section{Exponential distribution}
+
+The aim of this tutorial is to show, empirically, a fascinating fact: even for very small populations in which individuals decide independently to visit a server (a shop, a hospital, etc), the exponential distribution is a good model for the inter-arrival times as seen by the server.
+We will develop a simulation to motivate this `fact of nature'.
+In particular, our aim is to build analogues to Figure 1.1, 1.2., and 1.3 of the queueing book\footnote{You can find this here: \url{https://github.com/ndvanforeest/queueing_book}}, but in terms of cdfs instead of pdfs.
+(Read the description that underlies these figures.)
+
+
+\begin{exercise}
+  Make a plan of the steps you have to carry out to make Figure 1.1 of the queueing book.
+  In the next set of exercises we'll carry out these steps.
+  So please do not read on before having thought about this problem, but spend some 5 minutes to think about how to approach the problem and how to chop it up into simple steps.
+  Then organize the steps into a logical sequence.
+  Don't worry at first about how to convert your ideas into computer code.
+  Coding is a separate activity.
+  (As a matter of fact, I always start with making a small plan on how to turn an idea into code, and I call this step `modeling'.
+  Typically this is a creative step, and not easy.)
+
+  \begin{solution}
+    \begin{enumerate}
+    \item Generate realizations of a uniformly distributed random variable representing the inter-arrival times of one customer.
+    \item Plot the inter-arrival times.
+    \item Compute the (empirical) distribution function of the simulated inter-arrival times.
+    \item Plot the (empirical) distribution function.
+    \item Generate realizations of uniformly distributed random variables representing the inter-arrival times of multiple customers, e.g., 3. 
+    \item Compute the arrival times for each customer.
+    \item Merge  the arrival times for all customers. This is the arrival process as seen by the shop.
+    \item Compute the inter-arrival times as seen by the shop.
+    \item Plot these inter-arrival times.
+    \item Compare to the exponential distribution function with a suitable arrival rate $\lambda$. 
+    \end{enumerate}
+  \end{solution}
+\end{exercise}
+
+We need some python libraries to make our lives a bit easier. You should copy this code into your editor.
+
+\begin{pyblock}
+import numpy as np
+import scipy
+import matplotlib
+matplotlib.use('pdf') 
+import matplotlib.pyplot as plt
+
+# this is to print not too many digits to the screen
+np.set_printoptions(precision=3) 
+\end{pyblock}
+
+
+\subsection{Empirical distributions}
+\label{sec:empir-distr}
+
+One important step in this process is to compute the empirical distribution. As this is much more interesting (and challenging) than you might think\footnote{If you search the web, you will see that computing the empirical density function is even more challenging.}, we start with this. Once we can compute empirical distribution functions, we are in good shape to set up the rest of the simulation. 
+
+Before designing an algorithm to compute , it is best to start with a simple numerical example and try to formalize the steps we take in the process.
+
+\begin{exercise}
+  Suppose you are given the following numbers:
+  \begin{pyblock}
+a = [3.2, 4, 4, 1.3, 8.5, 9]    
+\end{pyblock}
+
+ What steps do you take to make the empirical distribution function? Recall, this is defined as
+  \begin{equation}
+    \label{eq:1}
+    F(x) = \frac{\# \{i : a_i \leq x\}}{n}, 
+  \end{equation}
+  with $n$ is the length of $a$.
+
+Can you turn it into an algorithm? (Just attempt to design an algorithm. Even if you don't succeed, trying is important. Then read the code in the solution.)
+
+  \begin{solution}
+We put the algorithm in a function so that we can use it later.  The algorithm is useful to study,  but it has some weak points. In the exercises below we will repair the problems. 
+    \begin{pyblock}
+def cdf(a):
+    a = sorted(a)
+    m, M = int(min(a)), int(max(a))+1
+    # Since we know that a is sorted, this next line 
+    # would be better, but less clear perhaps: 
+    # m, M = int(a[0]), int(a[-1])+1 
+
+    F = dict() # store the function i \to F[i]
+    F[m-1]=0  # since F[x] = 0 for all x < m
+    i = 0
+    for x in range(m, M):
+        F[x] = F[x-1]
+        while i< len(a) and a[i] <= x:
+            F[x] += 1
+            i += 1
+
+    # normalize
+    for x in F.keys(): 
+        F[x] /= len(a)
+
+    return F
+    \end{pyblock}
+
+Now run  this to see the result.
+\begin{pyblock}
+F = cdf(a)
+print(F)
+\end{pyblock}
+
+
+  \end{solution}
+\end{exercise}
+
+\begin{exercise}\label{ex:2}
+  The method provided by the (solution of the) previous exercise is simple, but not completely correct. What is wrong?
+  \begin{solution}
+    We have to guess the support of $F$ (the set of points where $F$ makes the jumps) upfront, and we concentrated the support on the integers. However $F$ makes jumps at floats, for instance  at $3.2$. 
+  \end{solution}
+\end{exercise}
+
+A better idea is to consider the sorted version $s$ of $a$. 
+
+\begin{exercise}
+  Sort the numbers in the list $a$; let this be $s$.  Make a plot (by hand) of $s$.  Now observe the important fact that $i\to s_i$ is the inverse of the distribution $F$ (except for the normalization).
+  \begin{solution}
+    In the answer we let the computer do all the work.  
+
+\begin{pyblock}
+I = range(0, len(a))
+s = sorted(a)
+plt.plot(I, s)
+plt.show()
+\end{pyblock}
+  \end{solution}
+\end{exercise}
+
+\begin{exercise}
+  Find now a way to invert $i\to s_i$, normalize the function to get a distribution, and make a new plot. 
+  \begin{solution}
+Here is one way. Note that we already imported \pyv{matplotlib}, so we don't have to that again.
+\begin{pyblock}
+def cdf(a):  
+    y = range(1, len(a)+1)
+    y = [yy/len(a) for yy in y] # normalize
+    x = sorted(a)
+    return x, y
+
+x, y = cdf(a)
+
+plt.plot(x, y)
+plt.show()
+\end{pyblock}
+
+
+  \end{solution}
+\end{exercise}
+
+\begin{exercise}
+In the previous exercise (read the solution), we start $y$ with 1 and end with \pyv{len(a)+1}. Why is that? 
+  \begin{solution}
+    The reason is that at $s_1$ the first observation occurs. Hence, $F$ should make a jump of at least one at $s_1$. Next, the \pyv{range} function works up to, but not including, its second argument. Hence (in code), \pyv{range(10)[-1]/10 = 0.9}, that is, the last element \pyv{range(10)[-]} of the set of numbers $0, 1, \ldots, 9$ is not 10. Hence, when we extend the range to \pyv{len(a)+1} we have a range up to and including the element we want to include.
+  \end{solution}
+\end{exercise}
+
+You should know that for loops in python are quite slow (and for loops in R seem to be really dramatic). For large amounts of data it is better to use \pyv{numpy}. 
+
+
+\begin{exercise}\label{ex:1}
+  Use the \pyv{numpy} functions \pyv{arange}, to replace the \pyv{range}, and \pyv{sort} to speed up the algorithm of the previous exercise. 
+  \begin{solution}
+    This code is much, much faster, and also very clean. Note that we normalize \pyv{y} right away. 
+\begin{pyblock}
+def cdf(a):
+    y = np.arange(1, len(a)+1)/len(a)
+    x = np.sort(a)
+    return x, y
+  
+\end{pyblock}
+  \end{solution}
+\end{exercise}
+
+
+With the algorithm of Exercise~\ref{ex:1} we can compute and plot a distribution function of inter-arrival times specified by a list (vector, array) $a$.
+For our present goals this suffices.
+If, however, you like details, you should notice that our plot of the distribution function is still not entirely OK: the graph should make jumps, but it doesn't.
+Moreover, our cdf is not a real function, it can be of the form $x=(1,1,3)$, $y=(0, 0.5, 1)$.
+In the rest of this subsection we repair these points.
+You can skip this if you are not interested.
+
+\begin{exercise}
+Read about the \pyv{drawstyle} option of the \pyv{plot} function of \pyv{matplotlib} to see how to make jumps.
+  \begin{solution}
+With the \pyv{drawstyle} option: 
+\begin{pyblock}
+plt.plot(x, y,  drawstyle = 'steps-post')
+plt.show()
+\end{pyblock}
+
+
+But now we still have vertical lines. To remove those, we can use \pyv{hlines}.
+
+\begin{pyblock}
+y = range(0, len(a)+1)
+y = [yy/len(a) for yy in y] # normalize
+s = sorted(a)
+left = [min(a)-1] + a
+right = a + [max(a)+1]
+
+plt.hlines(y, left, right)
+plt.show()
+\end{pyblock}
+
+There  we are!.
+  \end{solution}
+\end{exercise}
+
+
+\begin{exercise}
+Finally, we can make the computation of the cdf significantly faster with using the following \pyv{numpy} functions. 
+\begin{enumerate}
+\item \pyv{numpy.unique}
+\item \pyv{numpy.sort}
+\item \pyv{numpy.cumsum}
+\item \pyv{numpy.sum}
+\end{enumerate}
+How can you use these to compute the cdf?
+\begin{solution}
+Here it is.
+\begin{pyblock}
+
+def cdf(X):
+    # remove multiple occurrences of the same value
+    unique, count = np.unique(np.sort(X), return_counts=True)
+    x = unique
+    y = count.cumsum()/count.sum()
+    return x, y
+
+x, y = cdf(a)
+\end{pyblock}
+
+\end{solution}
+\end{exercise}
+
+\subsection{Simulating the arrival process of a single customer}
+\label{sec:simulations}
+
+The next step is to simulate inter-arrival times of a single customer and  make an empirical cdf of these times.  Then we graphically compare this cdf to the exponential distribution. A more formal method to compare cdfs is by means of the Kolmogorov-Smirnov statistic (see Wikipedia) which we develop in passing.
+
+\begin{exercise}
+  Generate 3 random numbers uniformly distributed on $[4,6]$.  Print these numbers to see if you get something decent. Read the documentation of
+the \pyv{uniform} class of in the \pyv{scipy.stats} module\footnote{When coding you should develop the habit to look up things on the web}.  Check in particular the \pyv{rvs()} function. 
+
+\begin{solution}
+Copy this code and run it.
+\begin{pyverbatim}
+from scipy.stats import uniform
+
+# fix the seed
+scipy.random.seed(3) 
+
+# parameters
+L = 3  # number of inter-arrival times
+
+G = uniform(loc=4, scale=2) # G is called a frozen distribution.
+a = G.rvs(L)
+print(a)
+\end{pyverbatim}
+  
+\end{solution}
+
+\end{exercise}
+
+
+\begin{exercise}
+Generate $L=300$ random numbers $\sim U[4,6]$ and make a histogram of these numbers. You should interpret these random numbers as inter-arrival times of one customer at a shop (in hours say.)
+\begin{solution}
+Add this code to the other code and run it.
+\begin{pyverbatim}
+N = 1 # number of customers
+L = 300
+a = G.rvs(L)
+
+plt.hist(a, bins=L/20, label="a")
+plt.title("N = {}, L = {}".format(N, L))
+plt.legend()
+plt.show()
+\end{pyverbatim}
+\end{solution}
+\end{exercise}
+
+\begin{exercise}
+Compute  the empirical distribution function of these inter-arrival times, and plot the cdf.
+\begin{solution}
+Add this to the other code and run it.
+\begin{pyverbatim}
+x, y = cdf(a)
+plt.plot(x,y,  label="d")
+plt.legend()
+plt.show()
+\end{pyverbatim}
+\end{solution}
+\end{exercise}
+
+\begin{exercise}
+We would like to numerically compare the empirical distribution of the inter-arrival times to the theoretical distribution, which is uniform in this case. 
+For this we can use the Kolmogorov-Smirnov statistic. Try to come up with a method to compute this statistic, and then compute it. 
+
+You might find the following functions helpful (read the documentation on the web to see what they do):
+\begin{enumerate}
+\item \pyv{numpy.max}
+\item \pyv{numpy.abs}
+\item \pyv{scipy.stats.uniform}, the \pyv{cdf} function.
+\end{enumerate}
+
+\begin{solution}
+Add this to the other code and run it.
+\begin{pyverbatim}
+def KS(X, F):
+    # Compute the Kolmogorov-Smirnov statistic where
+    # X are the data points
+    # F is the theoretical distribution
+    support, y = cdf(X)
+    y_theo = np.array([F.cdf(x) for x in support])
+    return np.max(np.abs(y-y_theo))
+
+print(KS(a, G))    
+\end{pyverbatim}
+\end{solution}
+\end{exercise}
+
+\begin{exercise}
+  Now compute the KS statistics to compare the simulated inter-arrival times with an exponential distribution with a suitable mean. (What is this suitable mean?).
+
+See \pyv{scipy.stats.expon}.
+
+
+\begin{solution}
+Add this to the other code and run it. Since the mean inter-arrival time is $5$, take $\lambda = 1/5$.
+
+\begin{pyverbatim}
+from scipy.stats import expon
+
+labda = 1./5 # lambda is a function in python
+E = expon(scale=1./labda) 
+print(E.mean()) # to check that we chose the right scale
+print(KS(a, E))    
+\end{pyverbatim}
+\end{solution}
+\end{exercise}
+
+\begin{exercise}
+  Finally, plot the empirical distribution and the exponential distribution in one graph. Explain why these graphs are different.
+\begin{solution}
+Add this to the other code and run it. 
+\begin{pyverbatim}
+x, y = cdf(a)
+dist_name = "U[4,6]"
+def plot_distributions(x, y, N, L, dist_name):
+    # plot the empirical cdf and the theoretical cdf in one figure
+    plt.title("X ~ {} with N = {}, L = {}".format(dist_name,N, L))
+    plt.plot(x, y, label="empirical")
+    plt.plot(x, E.cdf(x), label="exponential")
+    plt.legend()
+    plt.show()
+
+plot_distributions(x, y, N, L, dist_name)	
+\end{pyverbatim}
+
+It is pretty obvious why these graphs must be different: we compare a uniform and an exponential distribution. 
+\end{solution}
+\end{exercise}
+
+
+\subsection{Simulating many customers}
+\label{sec:simul-many-cust}
+
+We would now like to simulate the inter-arrival process as seen by a shop that serves many customers. For ease, we call this the merged, or superposed, inter-arrival process. Again, this requires quite a bit of thought. Thus, we start with a numerical example with two customers, and organize all steps we make to compute the empirical distribution of the merged inter-arrival process. Then we make an algorithm, and scale up to many numbers. 
+
+\begin{exercise}
+
+
+  Suppose we have two customers with inter-arrival times $a=[4, 3, 1.2, 5]$ and $b=[2, 0.5, 9]$. Make, by hand, the empirical cdf of the merged process.
+
+  \begin{hint}
+Note that the shop sees the combined arrival process, so first find a way to merge the arrival times of the customers into one arrival process as observed by the shop. Then convert this into inter-rival times at the shop.
+  \end{hint}
+  \begin{solution}
+    The following steps in code explain the logic.
+    \begin{pyblock}
+a=[4, 3, 1.2, 5]
+b=[2, 0.5, 9]
+
+def compute_arrivaltimes(a):
+    A=[0]
+    i = 1
+    for x in a:
+        A.append(A[i-1] + x)
+        i += 1
+
+    return A
+
+A = compute_arrivaltimes(a)
+B = compute_arrivaltimes(b)
+
+
+times = [0] + sorted(A[1:] + B[1:]) 
+print(times)
+
+shop = []
+for s, t in zip(times[:-1], times[1:]):
+    shop.append(t - s)
+
+print(shop)
+    \end{pyblock}
+  \end{solution}
+\end{exercise}
+
+
+\begin{exercise}
+  The steps of the previous exercise can be summarized by this code:
+\begin{pyverbatim}
+from itertools import chain
+
+def superposition(a):
+    A = np.cumsum(a, axis=1)
+    A = list(sorted(chain.from_iterable(A)))
+    return np.diff(A)
+
+\end{pyverbatim}  
+
+Try to understand this by reading the documentation (on the web) of the following functions.
+\begin{enumerate}
+\item \pyv{numpy.cumsum}, in particular read about the meaning of axis.
+\item \pyv{itertools.chain.from_iterable}
+\item \pyv{numpy.diff}
+\end{enumerate}
+\end{exercise}
+
+
+\begin{exercise}
+  Generate 100 random inter-arrival times for 3 customers, plot the cdf of the merged process, and compare to the exponential distribution with the correct mean. Also compute the Kolmogorov-Smirnov statistic for this case. What is the effect of increasing the number of customers from $N=1$ to $N=3$?
+\begin{solution}
+Add this to the other code and run it. 
+\begin{pyverbatim}
+N, L = 3, 100
+a = superposition(G.rvs((N, L)))
+
+E = expon(scale=1./(N*labda))
+print(E.mean())
+
+x, y = cdf(a)
+dist_name ="U[4,6]"
+plot_distributions(x, y, N, L, dist_name)
+
+print(KS(a, E)) # Compute KS statistic using the function defined earlier
+\end{pyverbatim}
+
+\end{solution}
+\end{exercise}
+
+
+\begin{exercise}
+  Compare  the empirical distribution of the inter-arrival times generated by  $N=10$ customers to the exponential distribution (compute the appropriate arrival rate). Make a plot, and explain what you see.
+\begin{solution}
+Add this to the other code and run it. 
+\begin{pyverbatim}
+N, L = 10, 100
+a = superposition(G.rvs((N, L)))
+
+E = expon(scale=1./(N*labda))
+
+x, y = cdf(a)
+dist_name ="U[4,6]"
+plot_distributions(x, y, N, L, dist_name)
+
+print(KS(a, E)) 
+\end{pyverbatim}
+
+This is great. For just $N=10$ we see that the exponential distribution is a real good fit. 
+\end{solution}
+\end{exercise}
+
+
+
+\begin{exercise}
+Do the same for $N=10$ customers with normally distributed inter-arrival times with $\mu=5$, and $\sigma =1$.
+For this use \pyv{scipy.stats.norm}. What do you see? What is the influence of the distribution of inter-arrival times of an individual customer? 
+\begin{solution}
+Add this to the other code and run it. 
+\begin{pyverbatim}
+from scipy.stats import norm
+
+N, L = 10, 100
+
+N_dist = norm(loc=5, scale=1)
+a = superposition(N_dist.rvs((N, L)))
+x, y = cdf(a)
+dist_name = "N(5,1)"
+plot_distributions(x, y, N, L, dist_name)
+
+print(KS(a, E))
+\end{pyverbatim}
+
+Clearly, whether the distribution of inter-arrival times of an individual customer are uniform, or normal, doesn't really matter. In both cases the exponential distribution is a good model for what the shop sees. We did not analyze what happens if we would merge customers with normal distribution and uniform distribution, but we can suspect that in all these cases the merged process converges to a set of i.i.d. exponentially distributed random variables.
+
+\end{solution}
+\end{exercise}
+
+\begin{exercise}
+If  $\mu=\sigma=5$ then the analysis should break down. What happens if you set $\sigma=5$? If you don't get real strange results, the code itself must be wrong\footnote{When testing code it is also a good idea to see what happens if you use bogus numbers. The program should fail or give very strange results.}.
+\begin{solution}
+  Since $\sigma=\mu=5$, about $15\%$ of the `inter-arrival' times should be negative. This is clearly impossible. 
+\end{solution}	
+\end{exercise}
+
+\subsection{Summary}
+\label{sec:summary-1}
+
+
+
+\begin{exercise}
+  Make a summary of what you have learned from this tutorial.
+  \begin{solution}
+    Here are some ideas you should have learned. 
+    \begin{enumerate}
+    \item Algorithmic thinking, i.e., how to chop up a computational challenge into small steps.
+    \item How to efficiently compute the empirical distribution function
+    \item The Kolmogorov-Smirnov statistic
+    \item The empirical distribution of a  merged inter-arrival arrival process converges, typically, super rapidly to an exponential distribution. Thus,  inter-arrival times at shops, hospitals and so on, are often very well described by an exponential distribution with suitable mean. 
+    \item This convergence is not so sensitive to the distribution of the inter-arrival times of a single customers. For the shop, only the population matters. 
+    \item Using functions (e.g., \pyv{def compute(a)})  to document code  (by the function name), hide complexity, and reuse code so that it can be applied multiple times. Moreover, defining functions is in line with the extremely important Don't-Repeat-Yourself (DRY) principle. 
+    \item Coding skills: python, \pyv{numpy} and \pyv{scipy}.
+    \end{enumerate}
+  \end{solution}
+\end{exercise}
+
+
+%\subsection{Memoryless property}
+
+% It is well known that the exponential distribution has the memoryless property. Does it hold for simulations too? 
+
+% First generate our standard case.
+
+% \begin{pyblock}
+% N = 10
+% runlength = 1000
+% labda = N/m
+% d = m
+% G = stats.uniform(loc = m-d, scale = 2.*d) 
+
+% a = superposition(G, N, runlength)
+% \end{pyblock} 
+
+% Now select the interarrival times that exceed some number $x$ and
+% subtract $x$. These new values should, hopefully, have the same
+% distribution as the initial set of interarrival times.
+
+% \begin{pyblock}
+% x = 0.5 # threshold
+% c = a[a>x] -x # select the interarrival times longer than x
+% \end{pyblock} 
+
+% Let's plot it
+% \begin{pyblock}
+% e = empiricalDistribution(c)
+% plt.plot(e.x, e.cdf , label = "emp")
+% plt.plot(e.x,1.-np.exp(-labda*e.x), label = "th")
+% plt.legend()
+% plt.show()
+% \end{pyblock} 
+
+% This is quite ok. What is the threshold $x$ becomes larger, e.g., 1?
+
+% \begin{pyblock}
+% x = 2. # threshold
+% c = a[a>x] -x # select the interarrival times longer than x
+
+% e = empiricalDistribution(c)
+% plt.plot(e.x, e.cdf , label = "emp")
+% plt.plot(e.x,1.-np.exp(-labda*e.x), label = "th")
+% plt.legend()
+% plt.show()
+% \end{pyblock} 
+
+% Now the result is not as nice. What if we increase the simulation length? 
+% \begin{pyblock}
+% N = 10
+% runlength = 100000
+% labda = N/m
+% d = m
+% G = stats.uniform(loc = m-d, scale = 2.*d) 
+
+% a = superposition(G, N, runlength)
+
+% x = 2. # threshold
+% c = a[a>x] -x # select the interarrival times longer than x
+
+% e = empiricalDistribution(c)
+% plt.plot(e.x, e.cdf , label = "emp")
+% plt.plot(e.x,1.-np.exp(-labda*e.x), label = "th")
+% plt.legend()
+% plt.show()
+% \end{pyblock} 
+
+% It is interesting to see that now the memoryless property seems to
+% hold again. But why do we need so many values to see this? 
+
+
+
+% \subsection{Analysis of the number arrivals in an interval}
+
+% Now I build the same data, but count the number of arrivals that occur in a certain interval. 
+
+% First I compute, as above, a number of arrival times as seen by the counter.
+
+% \begin{pyblock}
+% m = 5.
+% d = 2.
+% G = stats.uniform(loc = m-d, scale = 2.*d) 
+
+% N = 300
+% runlength = 1000
+% a = G.rvs((N, runlength))
+% A = np.cumsum(a, axis = 1)
+% A = np.sort(A.flatten())
+% \end{pyblock} 
+
+% Next, I make a histogram, that, is I chop up the entire simulation
+% interval, from the first arrival time to the last, into a number of
+% bins of equal length. Then I use $np.histogram$ to count the number of
+% arrivals in each such interval.  There are $N*runlength$ arrivals in
+% total.  I like the bins of such size that on average each bin will
+% contain 50 arrivals. Thus, the number of bins, i.e., the number of intervals in which the entire simulation interval needs to chopped, should be $N*runlength/50$. 
+
+% \begin{pyblock}
+% #bins = N*runlength/50
+% #p, x = np.histogram(A, bins = bins)
+% \end{pyblock} 
+
+% Here, $x$ contains the interval boundaries in which the simulation
+% interval is chopped up. Therefore $I=x[1]-x[0]$ is the length of one
+% such interval. The arrival rate in such interval must be $I*N/m$, as
+% $N/m$ is the arrival rate per unit time. Therefore,
+% \begin{pyblock}
+% #I = x[1]- x[0]
+% #labda = float(I)*N/m
+% \end{pyblock} 
+
+% Now I count the number of times a certain number of arrivals occured.
+% \begin{pyblock}
+% P =  np.bincount(p)
+% \end{pyblock} 
+
+% Finally, I want to fit a Poisson distribution to see how well the
+% Poisson distribution fits the data.  I need the support of the
+% measured data, and store in $x$. As $np.bincount$ only counts, it is
+% necessary to normalize $P$.
+% \begin{pyblock}
+% x = range(p.min(), p.max())
+
+% plt.plot(P/float(sum(P)))
+% plt.plot(x, scipy.stats.poisson.pmf(x, labda)) 
+% plt.show()
+% \end{pyblock} 
+
+% Not bad. However, some experimentation shows that when $N$ is small,
+% like 30 or so, and the $runlength$ is short, in the order of 100 or
+% so, the quality of the Poisson approximation is much less. I do not
+% fully understand why that is the case.
+
+% \begin{pyblock}
+% N = 30
+% runlength = 300
+% a = G.rvs((N, runlength))
+% A = np.cumsum(a, axis = 1)
+% A = np.sort(A.flatten())
+
+% bins = N*runlength/50
+% p, x = np.histogram(A, bins = bins)
+
+% I = x[1]- x[0]
+% labda = float(I)*N/m
+
+% P =  np.bincount(p)
+% plt.plot(P/float(sum(P)))
+
+% x = range(p.min(), p.max())
+% plt.plot(x, scipy.stats.poisson.pmf(x, labda)) 
+% plt.show()
+% \end{pyblock} 
+
+\clearpage
+
+
+\section{Simulation of the $G/G/1$ queue in discrete time}
+\label{sec:single-server-queue}
+
+In this tutorial we simulate the queueing behavior of a supermarket or hospital, in fact, for a general service system. We first make a simple model of a queueing system, and then extend this to cover more and more difficult queueing situations. With these models we can provide insight into how to design or improve real-world queueing systems.  You will see, hopefully, how astonishingly easy it is with simulation to evaluate many types of decisions and design problems.  
+
+For ease we  consider a queueing system in discrete time, and don't make a distinction between the number of jobs in the system and the number of jobs in queue. Thus, queue length corresponds here to all jobs in the system, c.f. Section 1.4 of the queueing book. 
+
+\subsection{Set up}
+\label{sec:set-up}
+
+
+\begin{exercise}
+Write down the recursions to compute the queue length at the end of a period based on the number of arrivals $a_i$ during  period $i$, the queue length $Q_i$ at the start, and the number of services $s_i$. Assume that service is provided at the start of the period.  
+
+Use a for-loop to sketch an algorithm (in pseudo code). Then check the solution for the python code.
+
+  \begin{solution}
+    We need a few imports.
+\begin{pyblock}
+import numpy as np
+import scipy
+from scipy.stats import poisson
+import matplotlib.pyplot as plt
+
+scipy.random.seed(3) 
+
+
+def compute_Q_d(a, s, q0=0):
+    d = np.zeros_like(a)
+    Q = np.zeros_like(a)
+    Q[0] = q0 # starting level of the queue
+    for i in range(1, len(a)):
+        d[i] = min(Q[i-1], s[i])
+        Q[i] = Q[i-1] + a[i] - d[i]
+
+    return Q, d
+  
+\end{pyblock}
+
+    One of the nicest things of python is that  the real code and pseudo code resemble each other so much.
+  \end{solution}
+  
+\end{exercise}
+
+
+With the code of the above exercises we can start our experiments.
+
+\begin{exercise}\label{ex:4}
+Copy the code of the previous exercise to a new file in Anaconda. Then add the code below and run it. Here $\lambda$ is the arrival rate, $\mu$ the service rate, $N$ the number of periods, and $q_0$ the starting level of the queue. Explain what the code does. Can you also explain the value of the mean and the standard deviation? 
+
+  \begin{pyverbatim}
+
+labda, mu, q0, N = 5, 6, 0, 100
+
+a = poisson(labda).rvs(N)
+s = poisson(mu).rvs(N)
+print(a.mean(), a.std())
+\end{pyverbatim}
+\begin{solution}
+  Here is the complete code in case you have messed things up.
+
+\begin{pyverbatim}
+import numpy as np
+import scipy
+from scipy.stats import poisson
+import matplotlib.pyplot as plt
+
+scipy.random.seed(3) 
+
+
+def compute_Q_d(a, s, q0=0):
+    d = np.zeros_like(a)
+    Q = np.zeros_like(a)
+    Q[0] = q0 # starting level of the queue
+    for i in range(1, len(a)):
+        d[i] = min(Q[i-1], s[i])
+        Q[i] = Q[i-1] + a[i] - d[i]
+
+    return Q, d
+
+
+labda, mu, q0, N = 5, 6, 0, 100
+a = poisson(labda).rvs(N)
+s = poisson(mu).rvs(N)
+print(a.mean(), a.std())
+\end{pyverbatim}
+
+\end{solution}
+\end{exercise}
+
+\begin{exercise}
+  Modify  the appropriate parts of  code of the previous exercise to the below,  and run it. Explain what you see.
+
+  \begin{pyverbatim}
+labda, mu, q0, N = 5, 6, 0, 100
+a = poisson(labda).rvs(N)
+s = poisson(mu).rvs(N)
+
+Q, d = compute_Q_d(a, s, q0)
+
+plt.plot(Q)
+plt.show()
+  \end{pyverbatim}
+\end{exercise}
+
+
+\begin{exercise}
+  Getting statistics is now really easy. For example,  sketch the empirical distribution function of the queue length process and Compute the mean number of departures per period.
+  \begin{hint}
+For  the empirical distribution function  you can use the code of Exercise~\ref{ex:1}. Before looking it up, try to recall how the cdf is computed.
+  \end{hint}
+
+
+  \begin{solution}
+This it the code.    
+  \begin{pyverbatim}
+print(d.mean())
+    
+x, F = cdf(Q)
+plt.plot(x, F)
+plt.show()
+  \end{pyverbatim}
+  \end{solution}
+\end{exercise}
+
+\begin{exercise}
+  Can you explain the value of the mean number of departures?
+  \begin{solution}
+    The mean number of departures must  be (about) equal  to the mean number arrivals per period. Jobs cannot enter from `nowhere'.
+  \end{solution}
+\end{exercise}
+
+
+\begin{exercise}
+Plot the queue length process for a large initial queue, for instance, with
+
+\begin{pyverbatim}
+q0, N = 1000, 100
+
+a = poisson(labda).rvs(N)
+s = poisson(mu).rvs(N)
+
+Q, d = compute_Q_d(a, s, q0)
+
+plt.plot(Q)
+plt.show()
+  \end{pyverbatim}
+
+Next, set $q_0=10000$ and $N=1000$.  (In Anaconda you can just change the numbers and run the code again, in other words, you don't have to copy all the code.) Finally,  make these values again 10 times larger. 
+
+Explain what you see. What is the drain rate of $Q$?
+\begin{solution}
+  The queue length drains at rate $\mu-\lambda$ when $q_0$ is really large. Thus, for such settings, you might just as well approximate the queue length behavior as $q(t) = q_0 - (\mu-\lambda)t$, i.e., as a deterministic system.
+\end{solution}
+\end{exercise}
+
+\begin{exercise}
+What do you expect to see when $\lambda=6$ and $\mu=5$? Once you formulated your hypothesis, check it.
+
+\begin{pyverbatim}
+N = 10000
+labda = 6
+mu = 5
+q0 = 0
+
+a = poisson(labda).rvs(N)
+s = poisson(mu).rvs(N)
+
+Q, d = compute_Q_d(a, s, q0)
+
+plt.plot(Q)
+plt.show()
+  \end{pyverbatim}
+Explain again what you see.
+\end{exercise}
+
+\subsection{What if analysis}
+\label{sec:what-if-analysis}
+
+Hopefully you  are  convinced by now about how powerful simulation is.  We can start asking all kinds of questions.
+
+\begin{exercise}
+  For instance,  the mean and the sigma of the queue length might be too large, that is, customers complain about long waiting times.  Suppose we are able, with significant technological investment, to make the service time more predictable. What would be the influence of this?
+
+To quantify the effect of regularity of service times we first assume that the service times are exponentially distributed, then we change it to deterministic times.
+ Deterministic service times are the best we can achieve. Thus, if we don't change the mean of the service times, it will not become any better than this.
+
+
+So, let's test. First run this:
+\begin{pyverbatim}
+N = 10000
+lbw = 6
+mu = 5
+q0 = 0
+
+a = poisson(labda).rvs(N)
+s = poisson(mu).rvs(N)
+
+Q, d = compute_Q_d(a, s, q0)
+print(Q.mean(), Q.std())
+\end{pyverbatim}
+Then run the same code with \pyv{s = np.ones_like(a) * mu} rather than the Poisson distribution. Explain the result.
+\begin{solution}
+	You should observe that the variability of the queue length process decreases..
+\end{solution}
+\end{exercise}
+
+
+
+\begin{exercise}
+  Next, we might be able to reduce the average service time by 10\%, say, but reducing the variability is hard. To see the effect of this change, replace \pyv{s} by
+  \begin{pyblock}
+s = poisson(1.1*mu).rvs(N)    
+  \end{pyblock}
+i.e., we increases the service rate with $10\%$. 
+
+Do the computations and compare the results to those of the previous exercise. What change in average service time do we need to get about the same average queue length as the one for the queueing system with deterministic service times? Is an $10\%$ increase enough, or should it be $20\%$, or $30\%$? Just test a few numbers and see what you get. 
+  \begin{solution}
+For our experiments it is about 20\% extra.
+  \end{solution}
+\end{exercise}
+
+You should make the crucial observation now that we can experiment with all kinds of changes (system improvements) and compare their effects. In more general terms: simulation allows us to do `what-if' analysis. 
+
+\subsection{Control }
+\label{sec:control-}
+
+In the previous section we analyzed the effect of the design of the system, such as changing the average service times. These changes are independent of the queue length. In many systems, however, the service rate depends on the dynamics of the queue process. When the queue is large, service rates increase, while when the queue is small, service rates decrease.  You see this type of policy often in supermarkets, extra cashiers will open when the queues increase.
+
+\begin{exercise}
+  Suppose that normally we have 6 servers, each working at rate $1$ per period. When the queue becomes longer than 20 we hire two extra servers, and when the queue is empty again, we send the extra two servers home, until the queue hits 20 again, and so on. Try to write your own code to compute the queue process. (This is pretty challenging, and a good test to see how creative you are in modeling.
+  \begin{hint}
+  As a hint, you need a state variable to track whether the extra servers are present or not. The solution shows the code.) Analyze the effect of the threshold at 20; what happens if you set it to 18, say, or 30? What is the effect of the number of extra servers; what if you would add 3 instead of 2?
+  \end{hint}
+
+  \begin{solution}
+Here is one way.
+    \begin{pyverbatim}
+def compute_Q_d(a, q0=0, mu=6, threshold=20, extra=2):
+    d = np.zeros_like(a)
+    Q = np.zeros_like(a)
+    Q[0] = q0
+    present = False # extra employees are not in
+    for i in range(1, len(a)):
+        rate = mu + extra if present else mu # service rate
+        s = poisson(rate).rvs()
+        d[i] = min(Q[i-1],s)
+        Q[i] = Q[i-1] + a[i] - d[i]
+        if Q[i] == 0:
+            present = False # send employee home
+        elif Q[i] >= threshold:
+            present = True # hire employee for next period
+    
+    return Q, d
+    
+    \end{pyverbatim}
+
+
+    Note that this code runs significantly  slower than the other code. This is because  we now  have to call \pyv{poisson(mu).rvs()} in every step of the for-loop. We could make the program run faster by using the \pyv{scipy} library to generate $N$ random numbers in one step outside of the for loop and then extract numbers from there when needed. However, for clarity we chose not to do so.
+  \end{solution}
+  
+\end{exercise}
+
+
+\begin{exercise}
+Another way to deal with large queues is to simply  block customers if the queue is too long. What if we block at a level of 15? How would that affect the average queue and the distribution of the queue? 
+
+  Modify the code to compute the queue and do an experiment.
+
+\begin{solution}
+Here is an example. What can be the meaning of \pyv{np.inf}? 
+
+\begin{pyverbatim}
+def compute_Q_d(a, s, q0=0, b=np.inf):
+    # b is the blocking level.
+    d = np.zeros_like(a)
+    Q = np.zeros_like(a)
+    Q[0] = q0
+    for i in range(1, len(a)):
+        d[i] = min(Q[i-1], s[i])
+        Q[i] = min(b, Q[i-1] + a[i] - d[i])
+
+    return Q, d
+
+
+N = 10000
+labda = 5
+mu = 6
+q0 = 0
+
+a = poisson(labda).rvs(N)
+s = poisson(mu).rvs(N)
+
+Q, d = compute_Q_d(a, s, q0, b=15)
+print(Q.mean(), Q.std())
+
+x, F = cdf(Q)
+plt.plot(x, F)
+plt.show()
+\end{pyverbatim}
+
+  \end{solution}
+\end{exercise}
+
+As a final case consider a single server queue that can be switched on and off. There is a cost $h$ associated with keeping a job waiting for one period, there is a cost $p$ to hire the server for one period, and it costs $s$ to switch on the server. Given the parameter values of the next exercise,  would what be a good threshold $N$ such that when the queue hits or exceeds $N$, the server is switched on? We assume (and it is easy to prove) that it is optimal to switch off the server when the queue is empty. 
+
+\begin{exercise}
+  Jobs arrive at rate $\lambda=0.3$ per period, if the server is present the service rate is $\mu=1$ per period. The number of arrivals and service are Poisson distributed with the given rates. Then, $h=1$ (without loss of generality), $p=5$ and $S=500$. Write a simulator to compute the average cost for setting $N=100$. Then, change $N$ to find a better value.
+
+\begin{solution}
+Here is all the code.  
+\begin{pyverbatim}
+num_jobs = 10000
+labda = 0.3
+mu = 1
+q0 = 0
+N = 100 # threshold
+
+h = 1
+p = 5
+S = 500
+
+
+def compute_cost(a, q0=0):
+    d = np.zeros_like(a)
+    Q = np.zeros_like(a)
+    Q[0] = q0
+    present = False  # extra employee is not in.
+    queueing_cost = 0
+    server_cost = 0
+    setup_cost = 0
+    for i in range(1, len(a)):
+        if present:
+            server_cost += p
+            s = poisson(mu).rvs()
+        else:
+            s = 0
+        d[i] = min(Q[i-1], s)
+        Q[i] = Q[i-1] + a[i] - d[i]
+        if Q[i] == 0:
+            present = False  # send employee home
+        elif Q[i] >= N:
+            if present == False: 
+	            present = True # server is switched on
+                setup_cost += S            
+        queueing_cost += h * Q[i]
+
+    print(queueing_cost, setup_cost, server_cost)
+
+    total_cost = queueing_cost + server_cost + setup_cost
+    num_periods = len(a) - 1
+    average_cost = total_cost / num_periods
+    return average_cost
+
+a = poisson(labda).rvs(num_jobs)
+av = compute_cost(a, q0)
+print(av)
+\end{pyverbatim}
+After a bit of experimentation, we see that $N=15$ is quite a bit better than $N=100$.
+
+\end{solution}
+
+
+\end{exercise}
+
+
+\begin{exercise}
+  What have you learned from this tutorial? What interesting extensions, relevant for practice,  can you thing of?
+  \begin{solution}
+    Some important points are the following.
+    \begin{enumerate}
+    \item  Making a  simulation requires some ingenuity, but is often not difficult
+    \item With simulation it becomes possible to analyze many difficult queueing situations. The mathematical analysis of often much harder, if possible at all.
+    \item We studied the behavior of queues under certain control policies, typically policies that change the service rate as a function of the queue length.
+    \end{enumerate}
+
+An interesting extension is to incorporate time-varying demand. In many systems, such as supermarkets, the demand is not constant over the day. In such cases the planning of servers should take this into account. 
+
+  \end{solution}
+\end{exercise}
+
+\clearpage
+
+\section{Simulation of the $G/G/1$ queue in continuous time}
+\label{sec:simulation-gg1-queue}
+
+In this tutorial we will write a simulator for the $G/G/1$ queue.
+For this we use two concepts that are essential to simulate any stochastic system of reasonable complexity: an \emph{event stack} (or event schedule) to keep track of the sequence in which events occur, and \emph{classes} to organize data and behavior into single logical units.
+We will work in steps towards our goal; along the way you will learn a number of fundamental and highly interesting concepts such as \emph{classes} and efficient \emph{data structures}.
+If you have understood the implementation of the $G/G/1$ queue, discrete event simulators are no longer a black box for you.
+Hence, what you will learn from this practical extends well beyond the simulation of the $G/G/1$ queueing process.
+Once we have built our simulator we apply it to a case in which we analyze the queueing behavior at an check-in desk at an airport with a single server.
+
+In Section~\ref{sec:ggc-continuous-time} we will generalize the simulator to the $G/G/c$ queue, clean up the code by working with a class for the $G/G/c$ queue. We can then also extend the case accordingly. 
+
+
+\subsection{Sorting with event stacks}
+\label{sec:event-stacks}
+
+If we simulate a stochastic system we like to move from event to event.
+To illustrate this idea, consider a queueing process such as the $M/M/1$ queue.
+It is clear that only at arrival and departure epochs something interesting happens; any time moment in between arrivals and departures can be neglected.
+Hence, in our simulator we prefer not to keep track of the entire time line, but just of the relevant epochs.
+If we can do this, we can jump from event to event.
+
+Clearly, we want to follow the sequence of events in the correct order of time.
+For this we use an \emph{event stack}.
+To see how this works, it is best to consider a simple example first, and then extend to more difficult situations.
+
+Suppose we have 4 students, and we like to sort them in increasing order of age.
+One way to do this is to insert them into a list, but the insertion should respect the ordering right away.
+For this very general problem a number of efficient data structures have been developed, and one of these is the \emph{heap queue}.
+
+\begin{exercise}
+  Search the web on \pyv{python} and \pyv{heap queue}. Study the examples and write some code to sort the students Jan(21), Pete(20), Clair(18), Cynthia(25).
+
+  \begin{solution}
+If you found, and read, the appropriate web page, you must have ended up with this code.
+\begin{pyblock}
+from heapq import heappop, heappush
+
+stack = []
+
+heappush(stack, (21, "Jan"))
+heappush(stack, (20, "Piet"))
+heappush(stack, (18, "Klara"))
+heappush(stack, (25, "Cynthia"))
+
+while stack:
+    age, name = heappop(stack)
+    print(name, age)
+
+  \end{pyblock}
+
+Pushing puts things on the stack in a sorted fashion, popping takes things from the stack. First we put the students on the stack. To print, we remove items from the stack until it is empty.
+\end{solution}
+  
+\end{exercise}
+
+
+
+\begin{exercise}
+  Extend the code of the previous exercise such that we can include more information with the ages than just the name, for instance, also the brand of their mobile phone. 
+\begin{solution}
+We can make the  tuples, i.e., the data between the brackets,  just longer. 
+
+\begin{pyblock}
+from heapq import heappop, heappush
+
+stack = []
+
+heappush(stack, (21, "Jan", "Huawei"))
+heappush(stack, (20, "Piet", "Apple"))
+heappush(stack, (18, "Klara", "Motorola"))
+heappush(stack, (25, "Cynthia", "Nexus"))
+
+while stack:
+    age, name, phone = heappop(stack)
+    print(age, name, phone)
+\end{pyblock}
+
+
+\end{solution}
+\end{exercise}
+
+
+\begin{exercise}
+  It may seem that we have just solved a simple toy problem, but this is not true. In fact, we have established something of real importance: heap queues form the core functionality of (nearly) all discrete event simulators used around the world.  To help you understand this fact, sketch how to use heap queues  to simulate a queueing process. 
+  \begin{solution}
+    For a queueing process we can start with putting a number of job arrivals on the stack and label these events as `arrivals'. Whenever a service starts, compute the departure time of a job, and put this departure moment on the stack. Label this event as a `departure'. Then move to the next event. Since the event stack is sorted in time, the event at the head of the stack is the first moment in time something useful happens. 
+
+More generally, a discrete-time stochastic process moves from event to event. At an event certain actions have to be taken, and these actions may involve the generation of new events or the removal of old events. The new events are put on the stack, the obsolete ones removed, and then the simulator moves to the first event on the stack. 
+  \end{solution}
+\end{exercise}
+
+
+
+\subsection{G/G/1 queue}
+\label{sec:gg1-queue}
+
+In this section we will set up a simulator for the $G/G/1$ queue with  an event stack. Let us work in steps toward the final simulator.
+
+We start with some basic imports, initialize the stack, and define two numbers \pyv{ARRIVAL} and \pyv{DEPARTURE} that will be used to tag the type of event that will be popped from the event stack.
+So, make a new file, and type the following at the top of it.
+
+\begin{pyblock}
+from heapq import heappop, heappush
+import numpy as np 
+from scipy.stats import expon
+
+np.random.seed(3) 
+
+ARRIVAL = 0
+DEPARTURE = 1
+
+stack = [] # this is the event stack
+\end{pyblock}
+
+Note again that we fix the seed so that we get the same random numbers while testing our code. 
+
+
+First of all we need jobs with arrival times and service times. The easiest way to handle jobs in a simulator is by means of a class, as in the code below.
+
+
+\begin{pyblock}
+class Job:
+    def __init__(self):
+        self.arrival_time = 0
+        self.service_time = 0
+        self.departure_time = 0
+        self.queue_length_at_arrival = 0
+
+    def sojourn_time(self):
+        return self.departure_time - self.arrival_time
+
+    def waiting_time(self):
+        return self.sojourn_time() - self.service_time
+
+    def __repr__(self):
+        return (f"{self.arrival_time}, "
+                "{self.service_time}, "
+                "{self.departure_time}\n")
+
+  
+\end{pyblock}
+
+A class has a number of \emph{attributes}, such as \pyv{self.arrival_time}, to capture its state and a number of functions, such as \pyv{def waiting time(self)}, to compute specific information that relates to the class\footnote{In python, functions belonging to a class are called `methods' or `member functions'.}.
+We initialize the arrival time and service time to zero.
+Then we store the departure time and queue length for a statistical analysis at the end of the simulations.
+Finally, we have functions to compute the waiting time and the sojourn time; the \pyv{repr} function is used to print the job.
+Note that our naming of functions also acts as documentation of what the functions do.
+Note also that member variables and functions in python start with the word \pyv{self}; this is to distinguish the (value of the) member variables from variables with the same name but lying outside the scope of the class.
+
+Classes are extremely useful programming concepts, as it enables you to organize state (that is, attributes) and behavior (that is, functions that apply to the attributes) into logical components. Moreover, classes can offer functionality to a programmer without the programmer needing to understand how this functionality is built. Classes offer many more advantages such as inheritance, but we will not discuss that here. 
+
+Once we have a class, making an object is simple with this code.\footnote{The wording is important here. Objects are instances of classes. As an example: Albert Einstein was a human being. Here, `Einstein' is the object, and `human being' is a class.}
+
+\begin{pyblock}
+job = Job()
+job.arrival_time = 3
+job.service_time = 2
+\end{pyblock}
+
+\begin{exercise}\label{ex:3}
+  Make $10$ jobs with exponentially distributed inter-arrival times, with $\lambda=2$,  and exponentially distributed service times with $\mu=3$. Put these jobs on an event stack, and print them in order of arrival time. Tag the events with the job, and event type (which is an arrival).
+  \begin{solution}
+One way is like this.     
+    \begin{pyblock}
+labda = 2.
+mu = 3.
+rho = labda/mu
+F = expon(scale=1./labda)  # interarrival time distributon
+G = expon(scale=1./mu)  # service time distributon
+
+num_jobs = 10
+
+time = 0
+for i in range(num_jobs):
+    time += F.rvs()
+    job = Job()
+    job.arrival_time = time
+    job.service_time = G.rvs()
+    heappush(stack, (job.arrival_time, job, ARRIVAL))
+
+
+while stack:
+    time, job, typ = heappop(stack)
+    print(job)
+    
+    \end{pyblock}
+  \end{solution}
+\end{exercise}
+
+Now that we know how to make jobs and put them on an event stack, we can make a plan to simulate the $G/G/1$ queue. 
+
+  Replace the while loop of the previous exercise by the code below. Observe that we split events into two types\footnote{The word \pyv{type} is a reserved word in python, hence I use \pyv{typ} instead.}: arrivals and departures. 
+
+  \begin{pyblock}
+while stack:
+    time, job, typ = heappop(stack)
+    if typ == ARRIVAL:
+        handle_arrival(time, job)
+    else:
+        handle_departure(time, job)
+    
+  \end{pyblock}
+
+\begin{exercise}
+  With the above idea to make a while loop, make a list of things that have to take place at an arrival event (in particular, what should happen when the server is busy at an arrival epoch, what should happen if the server is idle?)
+  and at a departure event (in particular, what if the queue is empty, or not empty)?
+  Turn your ideas into code and see whether you can get your simulator working.
+  (It's not a problem if you spend some time on this; you will learn a lot in the process.)
+
+\begin{solution}
+We need a server object to keep track of the state of the server, and we also need  a list to queue the jobs. 
+
+  \begin{pyblock}
+class Server:
+    def __init__(self):
+        self.busy = False
+
+server = Server()
+queue = []
+served_jobs = [] # used for statistics
+
+def start_service(time, job):
+    server.busy = True
+    job.departure_time = time + job.service_time
+    heappush(stack, (job.departure_time, job, DEPARTURE))
+
+def handle_arrival(time, job):
+    job.queue_length_at_arrival = len(queue)
+    if server.busy:
+        queue.append(job)
+    else:
+        start_service(time, job)
+        
+def handle_departure(time, job):
+    server.busy = False
+    if queue: # queue is not empty
+        next_job = queue.pop(0) # pop oldest job in queue
+        start_service(time, next_job)
+        
+while stack:
+    time, job, typ = heappop(stack)
+    if typ == ARRIVAL:
+        handle_arrival(time, job)
+    else:
+        handle_departure(time, job)
+        served_jobs.append(job)
+
+  \end{pyblock}
+\end{solution}
+
+\end{exercise}
+
+\subsection{Testing}
+\label{sec:testing}
+
+As a general observation, testing code is very important. For this reason, before we can use our simulator, we should apply it to some cases that we can analyze with theory. 
+
+\begin{exercise}
+  Run a simulation for the $M/M/1$ queue with $\lambda=2$ and $\mu=3$ with 100 jobs and compute the average queue length. Then extend to $1000$, and then to $10^5$. Compare it to the theoretical expected queue length of the $M/M/1$ queue at arrival moments.
+
+  \begin{hint}
+You might want to check Exercise~\ref{ex:3} to see how to generate the jobs.
+    \end{hint}
+  \begin{solution}
+Now we see that we needed to store the jobs in \pyv{served_jobs}. Set \pyv{num_jobs=100} in the code of Exercise~\ref{ex:3}. Put the following code at the end of the simulator to compute the statistics. 
+    \begin{pyblock}
+
+tot_queue = sum(j.queue_length_at_arrival for j in served_jobs)
+av_queue_length = tot_queue/len(served_jobs)
+print("Theoretical avg. queue length: ", rho*rho/(1-rho))
+print("Simulated avg. queue length:", av_queue_length)
+      
+tot_sojourn = sum(j.sojourn_time() for j in served_jobs)
+av_sojourn_time = tot_sojourn/len(served_jobs)
+print("Avg. sojourn time:", av_sojourn_time)
+\end{pyblock}
+
+Now run the simulator.
+
+You should see that you need a real large amount of jobs to obtain a good estimate for the (theoretical) expected queue length\footnote{I have to admit that I don't understand why (at least in my simulation) I need about $1e5$ jobs to get a good estimate.}. 
+
+  \end{solution}
+\end{exercise}
+
+\begin{exercise}
+ Thus, let us get further confidence in our $G/G/1$ simulator by specializing it to the $D/D/1$ queue. Check the documentation of the \pyv{uniform} distribution in \pyv{scipy.stats} to see what the following code does
+  \begin{pyblock}
+from scipy.stats import uniform
+
+F = uniform(3, 0.00001)
+G = uniform(2, 0.00001)
+\end{pyblock}
+
+Then use this in our simulation. What happens? What happens if you reverse the 2 and the 3 in $F$ and $G$?
+\begin{solution}
+  With \pyv{F=uniform(3, 0.00001)} job inter-arrival times are nearly 3.
+  Likewise, the service times are nearly 2.
+  Hence, arriving customers will always see an empty queue, implying that the average queue length upon arrival equals zero.
+  When you reverse the 2 and 3 a queue should build up.
+\end{solution}
+\end{exercise}
+
+
+\subsection{The check-in process at an airport}
+\label{sec:check-in-process-at}
+
+We now have a simulator, and we tested it (although not sufficiently well to use it for real applications).
+We can now start using it.
+A simple application is to analyze the check-in process at an airport.
+For ease we constrain the case here to a single server desk.
+In the next tutorials we will extend this to more realistic scenarios---but that will require extra work.
+We assume that demand arrives as a Poisson process with rate $\lambda=1/3$ per minute, and that the service distribution is $U[1,3]$ minute.
+
+
+\begin{exercise}\label{ex:5}
+  Realize that this case can be modeled as an $M/G/1$ queue.
+  Implement the Pollaczek-Khinchine equation in python and use this to compute the expected queue length.
+
+  
+  \begin{hint}
+Build a function with arguments $\lambda$ and $G$. From from \pyv{scipy.stats} import \pyv{uniform}. (Read the docs to see how to build the uniform distribution in \pyv{scipy.stats}.) Then use \pyv{G.var()} and \pyv{G.mean()} to compute $c_e^2$.  Then use Little's law to convert the expected waiting time to the expected queue length. 
+  \end{hint}
+  \begin{solution}
+
+First we compute the average waiting time.  Then we use Little's law to convert the waiting time to the expected queue length.
+
+    \begin{pyblock}
+
+def pollaczek_khinchine(labda, G):
+    ES = G.mean()
+    rho = labda*ES
+    ce2 = G.var()/ES/ES
+    EW = (1.+ce2)/2 * rho/(1-rho)*ES
+    return EW
+
+    
+labda = 1./3
+F = expon(scale=1./labda)  # interarrival time distributon
+G = uniform(1, 2)
+
+print("PK: ", labda*pollaczek_khinchine(labda,G))
+      
+    \end{pyblock}
+
+  \end{solution}
+
+\end{exercise}
+
+\begin{exercise}
+  Now estimate the average queue length with the $G/G/1$ simulator.
+  Compare it to the theoretical result of the previous exercise.
+  (Observe that this is yet another test for our $G/G/1$ implementation.)
+
+
+  \begin{hint}
+Reset to all data and clear all lists. 
+  \end{hint}
+
+  \begin{solution}
+To ensure that we do not keep old data, we have to reset all lists. 
+
+\begin{pyblock}
+print("Simulation of check-in process, M/G/1 with G=U[2,5]")
+
+
+stack = [] # this is the event stack
+queue = []
+served_jobs = [] # used for statistics
+
+job = Job()
+
+num_jobs = 100000
+
+time = 0
+for i in range(num_jobs):
+    time += F.rvs()
+    job = Job()
+    job.arrival_time = time
+    job.service_time = G.rvs()
+    heappush(stack, (job.arrival_time, job, ARRIVAL))
+
+while stack:
+    time, job, typ = heappop(stack)
+    if typ == ARRIVAL:
+        handle_arrival(time, job)
+    else:
+        handle_departure(time, job)
+        served_jobs.append(job)
+
+tot_queue = sum(j.queue_length_at_arrival for j in served_jobs)
+av_queue_length = tot_queue/len(served_jobs)
+print("Theo avg. queue length: ", labda*pollaczek_khinchine(labda,G))
+print("Simu avg. queue length:", av_queue_length)
+      
+tot_sojourn = sum(j.sojourn_time() for j in served_jobs)
+av_sojourn_time = tot_sojourn/len(served_jobs)
+print("Theo avg. sojourn time: ", pollaczek_khinchine(labda,G) + G.mean())
+print("Simu avg. sojourn time:", av_sojourn_time)
+  
+\end{pyblock}
+
+  \end{solution}
+
+\end{exercise}
+
+\begin{exercise}
+  For the computation of the mean queue length we actually do not need a simulator; the PK-formula suffices. If, however, we are interested in the distribution of the queue length, then we really need the simulator. There are no simple closed-form expressions for the queue length distribution o the  $M/G/1$ queue. With our simulator, this is simple.
+
+  Use the following code to obtain a quick and dirty overview of the queue length distribution.
+
+  \begin{pyblock}
+from collections import Counter
+
+c = Counter([j.queue_length_at_arrival for j in served_jobs])
+print("Queue length distributon, sloppy output") 
+print(c)
+    
+  \end{pyblock}
+
+  What is your opinion? What would you change to the system? 
+  \begin{solution}
+    I ran the code  for $n=100000$ and got this
+
+    \begin{pyblock}
+ Counter({0: 37134, 1: 16558, 2: 12517, 3: 9070, 4: 6725, 5: 4785, 6: 3515, 7: 2631,
+
+   8: 2047, 9: 1433, 10: 1095,  11: 818, 12: 545, 13: 401, 14: 260,
+
+   15: 178, 16: 116, 17: 72, 18: 49, 19: 27, 20: 13, 21: 6, 22: 5})
+
+    \end{pyblock}
+
+    \begin{pyblock}
+    \end{pyblock}
+
+So, about $2\%$ see a queue that is longer than 10, and about $10\%$ (which I get by, so-called-eye balling) of the people see a queue that is longer than 5. It seems that the service capacity is too small, assuming that the customers have a flight to catch.  
+  \end{solution}
+
+\end{exercise}
+
+So, once again, we can use simulation to analyze a practical case and come up with concrete recommendations on how to improve the system.  It would be interesting to change the demand process such that the arrival rate becomes time-dependent. That would make the case more realistic, and would make the  simulator more useful.  In fact, the theoretical models nearly always assume that the arrival and service time distribution are constant. When these become dynamic, simulation is the way to go.  However, let's stop here. 
+
+
+
+\subsection{Extensions}
+\label{sec:extensions}
+
+Here are some final, more general, questions to deepen your understanding of queues systems and simulation. 
+
+\begin{exercise}
+  Up to now we studied the $G/G/1$ FIFO (First In First Out) queue. How to change the code to simulate a LIFO (Last In First Out) queue?
+  \begin{solution}
+    This is really easy: change the line \pyv{queue.pop(0)} by  \pyv{queue.pop()}. 
+ \end{solution}
+\end{exercise}
+
+\begin{exercise}
+  In a priority queue  jobs belong to a priority class. Jobs with higher priority are served before jobs with lower priority, and within one priority class jobs are served in FIFO sequence. A concrete example of a priority queue is the check-in process of business and economy class customers at airports.  How would you build a $G/G/1$ priority queue?
+  \begin{hint}
+We have used a good data structure already. How should this be applied?
+  \end{hint}
+\begin{solution}
+  As in the LIFO example, we only have to change the data structure. First, we give each job an extra attribute corresponding to its priority. Then we use a heap to store the jobs in queue. Specifically,  change the line with
+  \pyv{queue.append(job)} by
+  \begin{pyblock}
+heappush(queue, (job.priority, job))
+  \end{pyblock}
+and \pyv{queue.pop(0)} by \pyv{heappop(queue)}. 
+
+\end{solution}
+\end{exercise}
+
+\begin{exercise}
+
+  We implemented the queue as a python list. Why is a deque\footnote{Search the web to understand what this is.} a more efficient data structure to simulate a queue?  Why is it important to know the efficiency of the data structures and algorithms you use?
+  \begin{hint}
+  Search the web on \pyv{python} and \pyv{deque}.
+  \end{hint}
+  \begin{solution}
+    In a python list the \pyv{pop(0)} function is an $O(n)$ operation, where $n$ is the number of elements in the list. In a deque appending and removing items to either end of the deque is an $O(1)$ operation.
+
+When you do large scale simulations, involving many hours of simulation time, all inefficiencies build up and can make the running time orders of magnitude longer. A famous example is the sorting of numbers. A simple, but stupid, sorting algorithm is $O(n^2)$ while a good algorithm is $O(n \log n)$. The sorting time of $10^6$ numbers is dramatically different. 
+
+    For our code, add the line \pyv{from collections import deque} and replace \pyv{queue = []} by \pyv{queue = deque()}, and \pyv{queue.pop(0)}  by \pyv{queue.popleft()}.
+  \end{solution}
+\end{exercise}
+
+\begin{exercise}
+  Recall that in Exercise~\ref{ex:3} we built all jobs before the queueing simulation starts. Why is this not a good decision? Note that in the simulation of $G/G/c$ queue below we will generate jobs only when needed. 
+  \begin{solution}
+    Typically, generating all jobs at the start is not a real good idea. When running large simulations the amount of computer memory required to store all this data grows out of hand. Also our \pyv{served_jobs} list is not memory efficient. 
+  \end{solution}
+\end{exercise}
+
+
+\subsection{Summary }
+\label{sec:summary-}
+
+\begin{exercise}
+  What have you learned in this tutorial?
+  \begin{solution}
+    Topics learned.
+    \begin{enumerate}
+    \item Efficient data structures such as heap queues. In general, it is important to have some basic knowledge of algorithmic complexity. 
+    \item Event stacks to organize the tracking of events in time. With the concept of event stack, you now know how discrete event simulators work. 
+    \item The simulation of the $G/G/1$ queue
+    \end{enumerate}
+  \end{solution}
+\end{exercise}
+
+
+\clearpage
+
+
+\section{Simulation of the $G/G/c$ queue in continuous time}
+\label{sec:ggc-continuous-time}
+
+The goal of this tutorial is to  generalize the simulator for the $G/G/1$ to a $G/G/c$ queue. You will see that this is rather easy, once you have the right idea. We will organize the entire simulator into a single class so that our code is organized and we will develop a method to set up structured  tests\footnote{Structured testing is enormously important when you use code for real applications. (I suppose you prefer all code used in self-driving cars to be tested.)  If you are interested, check the web on  \pyv{python unittest} and `test-driven coding'. With test-driven coding you first write down a hierarchy of  many simple tests that your program is supposed to pass.  Then you build your program until the first test pass. Then you implement the next step until the second test pass too, and so on.} Once we have a working simulator we apply it to the check-in process of the airport. 
+
+
+
+\subsection{The simulator}
+\label{sec:simulator}
+
+\begin{exercise}
+In the $G/G/1$ we have just one server which is busy or not.
+  Generalize  the \pyv{handle_arrival} function of the $G/G/1$ queue such that it can cope with multiple servers.
+
+  \begin{hint}
+  Introduce a \pyv{num_busy} variable that keeps track of the number of busy servers. What happens if a job arrives and this number is less than $c$; what if this number is equal to $c$?
+  \end{hint}
+  \begin{solution}
+    If the number of busy servers is less than $c$, a service can start. Otherwise a job has to queue. If a service starts, increase \pyv{num_busy} by one. 
+  \end{solution}
+\end{exercise}
+
+
+\begin{exercise}
+Likewise,   generalize  the \pyv{handle_departure} function of the $G/G/1$ queue such that it can cope with multiple servers.
+\begin{hint}
+  Again, use the \pyv{num_busy} variable. 
+\end{hint}
+
+\begin{solution}
+  At a departure, a server becomes free, hence decrease \pyv{num_busy} by one. If there are jobs in queue, start a new service.
+\end{solution}
+\end{exercise}
+
+\begin{exercise}
+  Can you think of some sort of property of the $G/G/c$ queue that must be true at all times? It is important to use such properties  as tests while developing.
+  \begin{hint}
+    There must be a relation between the queue length and the number of busy servers.
+  \end{hint}
+  \begin{solution}
+    Of course, the number of busy servers cannot be negative or larger than $c$. The queue length cannot be negative. Finally, it cannot be that  the queue length is positive and the number of busy servers is less than $c$. 
+  \end{solution}
+\end{exercise}
+
+\begin{exercise}
+  The design of the simulation of $G/G/1$ queue is not entirely satisfactory. For instance, if we want to run different experiments, we have to clean up old experiments before we can start new ones. The current design is not very practical for this. It is better to encapsulate the state and its behavior (i.e., functions) of the simulator into one class. Build a class that simulates the $G/G/c$ queue; use the ideas of the $G/G/1$ simulator.
+
+It is not  problem when you spend considerable time on this exercise. Most of the following exercises are simple numerical experiments, which should take little time. So, just try and see how far you get. All code is in the solution.
+
+\begin{solution}
+Here is the entire class. Read it carefully.   
+
+
+\begin{pyblock}
+from collections import deque
+from heapq import heappop, heappush
+import numpy as np
+from scipy.stats import expon, uniform
+
+np.random.seed(3)
+
+ARRIVAL = 0
+DEPARTURE = 1
+
+
+class Job:
+    def __init__(self):
+        self.arrival_time = 0
+        self.service_time = 0
+        self.departure_time = 0
+        self.queue_length_at_arrival = 0
+
+    def sojourn_time(self):
+        return self.departure_time - self.arrival_time
+
+    def waiting_time(self):
+        return self.sojourn_time() - self.service_time
+
+    def __repr__(self):
+        return (f"{self.arrival_time}, "
+                 "{self.service_time}, "
+                 "{self.departure_time}\n")
+
+
+
+class GGc:
+    def __init__(self, F, G, c, run_length):
+        self.F = F
+        self.G = G
+        self.c = c
+        self.num_busy = 0   # number of busy servers
+        self.run_length = run_length
+        self.stack = [] # event stack
+        self.queue = deque()
+        self.served_jobs = set()
+
+    def handle_arrival(self, time, job):
+        self.generate_new_arrival(time)
+        job.queue_length_at_arrival = len(self.queue)
+        if self.num_busy < self.c:
+            self.start_service(time, job)
+        else:
+            self.queue.append(job)
+
+    def generate_new_arrival(self, time):
+        if self.run_length > 0:
+            self.put_new_arrival_on_stack(time)
+            self.run_length -= 1
+
+    def put_new_arrival_on_stack(self, time):
+        job = Job()
+        job.arrival_time = time + self.F.rvs()  # new arrival time
+        job.service_time = self.G.rvs()  # new service time
+        heappush(self.stack, (job.arrival_time, job, ARRIVAL))
+
+    def start_service(self, time, job):
+        self.num_busy += 1  # server becomes busy.
+        job.departure_time = time + job.service_time
+        heappush(self.stack, (job.departure_time, job, DEPARTURE))
+
+    def handle_departure(self, time, job):
+        self.num_busy -= 1
+        self.served_jobs.add(job)
+        if self.queue:  # not empty
+            next_job = self.queue.popleft()
+            self.start_service(time, next_job)
+
+    def consistency_check(self):
+        if ( self.num_busy < 0 or self.num_busy > self.c \
+            or len(self.queue) < 0 or \
+            (len(self.queue) > 0 and self.num_busy < self.c) ):
+            print("there is something wrong")
+            quit()
+
+    def run(self):
+        time = 0
+        self.put_new_arrival_on_stack(time)
+
+        while self.stack:  # not empty
+            time, job, typ = heappop(self.stack)
+            # self.consistency_check() # only use when testing.
+            if typ == ARRIVAL:
+                self.handle_arrival(time, job)
+            else:
+                self.handle_departure(time, job)
+
+
+\end{pyblock}
+\end{solution}
+  
+\end{exercise}
+
+      
+
+\begin{exercise}
+
+How can we instantiate the \pyv{GGc} simulator, i.e., make an object of a class? How can we run a simulation with exponential inter-arrival times with $\lambda=2$, exponential service times with $\mu=1$, $c=3$, and $10$ jobs?
+\begin{solution}
+First we instantiate, then we run and print. 
+\begin{pyblock}
+labda = 2
+mu = 1  
+ggc = GGc(expon(scale=1./labda), expon(scale=1./mu), 3, 10)
+ggc.run()
+
+print(ggc.served_jobs)
+\end{pyblock}
+\end{solution}
+\end{exercise}
+
+\subsection{Testing}
+\label{sec:testing-1}
+
+\begin{exercise}
+Test the simulator with deterministic inter-arrival times, for instance a job that arrives every 10 minutes, and each job takes 1 hour of service. Check the departure process for $c=1$, $c=2$, $c=5$, $c=6$, and $c=7$. 
+\end{exercise}
+
+\begin{exercise}
+  For testing purposes, implement Sakasegawa's formula.  BTW, why should you use Sakasegawa's formula?
+
+\begin{hint}
+Follow the implementation of Exercise~\ref{ex:5}. 
+
+  \end{hint}
+
+  \begin{solution}
+Recall that Sakasegawa's formula is exact for the $M/G/1$ queue, hence also for the $M/M/1$ queue. 
+
+\begin{pyblock}
+
+def sakasegawa(F, G, c):
+    labda = 1./F.mean()
+    ES = G.mean()
+    rho = labda*ES/c
+    EWQ_1 = rho**(np.sqrt(2*(c+1)) - 1)/(c*(1-rho))*ES
+    ca2 = F.var()*labda*labda
+    ce2 = G.var()/ES/ES
+    return (ca2+ce2)/2 * EWQ_1
+    
+  \end{pyblock}
+    
+    
+  \end{solution}
+\end{exercise}
+
+
+\begin{exercise}
+  Test the code for the $M/M/1$ queue with $\lambda=0.8$ and $\mu=1$. Compute the mean waiting time in queue and compare this to the theoretical value. Test it first for run length $N=100$, then for $N=10000$. Think about how to organize your tests. 
+\begin{hint}
+  Implement the test in a function so that you can organize all your setting in one clean environment. We can use this below for more general cases.
+  \end{hint}
+  \begin{solution}
+  
+In the next function we perform the test. We give this function standard  arguments so that we can  run the function as a standalone test. As such we want to to  contain all parameter values. 
+
+\begin{pyblock}
+def mm1_test(labda=0.8, mu=1, num_jobs=100):
+    c = 1
+    F = expon(scale=1./labda)
+    G = expon(scale=1./mu)
+
+    ggc = GGc(F, G, c, num_jobs)
+    ggc.run()
+    tot_wait_in_q = sum(j.waiting_time() for j in ggc.served_jobs)
+    avg_wait_in_q = tot_wait_in_q/len(ggc.served_jobs)
+	
+    print("M/M/1 TEST")
+    print("Theo avg. waiting time in queue:", sakasegawa(F, G, c))
+    print("Simu avg. waiting time in queue:", avg_wait_in_q)
+
+mm1_test(num_jobs=100)
+mm1_test(num_jobs=10000)
+\end{pyblock}
+
+  \end{solution}
+\end{exercise}
+
+\begin{exercise}
+  Now test it for the $M/D/1$ queue with $\lambda=0.9$ and $S\equiv 1$.
+
+\begin{hint}
+    Implement the deterministic distribution as \pyv{uniform(1, 0.00001)}.
+  \end{hint}
+
+  \begin{solution}
+Here is a function to keep things organized.
+  \begin{pyblock}
+def md1_test(labda=0.9, mu=1, num_jobs=100):
+    c = 1
+    F = expon(scale=1./labda)
+    G = uniform(mu, 0.0001)
+    
+    ggc = GGc(F, G, c, num_jobs)
+    ggc.run()
+    tot_wait_in_q = sum(j.waiting_time() for j in ggc.served_jobs)
+    avg_wait_in_q = tot_wait_in_q/len(ggc.served_jobs)
+        
+    print("M/D/1 TEST")
+    print("Theo avg. waiting time in queue:", sakasegawa(F, G, c))
+    print("Simu avg. waiting time in queue:", avg_wait_in_q)
+    
+md1_test(num_jobs=100)
+md1_test(num_jobs=10000)
+
+  \end{pyblock}
+  \end{solution}
+
+\end{exercise}
+
+\begin{exercise}
+With our simulation we can also check the quality of Sakasegawa's approximation. Try this for the $M/D/2$ queue $\lambda=1.8$ and $S\equiv 1$. 
+
+\begin{solution}
+The code.
+
+  \begin{pyblock}
+    
+def md2_test(labda=1.8, mu=1, num_jobs=100):
+    c = 2
+    F = expon(scale=1./labda)
+    G = uniform(mu, 0.0001)
+    
+    ggc = GGc(F, G, c, num_jobs)
+    ggc.run()
+    tot_wait_in_q = sum(j.waiting_time() for j in ggc.served_jobs)
+    avg_wait_in_q = tot_wait_in_q/len(ggc.served_jobs)
+        
+    print("M/D/2 TEST")
+    print("Theo avg. waiting time in queue:", sakasegawa(F, G, c))
+    print("Simu avg. waiting time in queue:", avg_wait_in_q)
+
+md2_test(num_jobs=100)
+md2_test(num_jobs=10000)
+
+  \end{pyblock}
+  
+\end{solution}
+
+\end{exercise}
+
+\subsection{The check-in process at an airport}
+\label{sec:check-in-process}
+
+We again analyze the check-in process at an airport, but we make it more realistic than the analysis of Section~\ref{sec:check-in-process-at} in that we now allow for multiple check-in desks.
+
+Assume that a flight departing at 11 am  consists of $N=300$ people.  For ease, assume that all $N$ customers arrive between 9 and 10. Suppose that the check-in of a job is $U[1, 3]$ distributed.  
+
+
+\begin{exercise}
+  Model the arrival process.
+
+  
+  \begin{hint}
+    Most people arrive independently. What is the arrival rate?
+  \end{hint}
+  \begin{solution}
+Since most people arrive independent of each other, it is reasonable that the arrival process in this period of duration $T$ is Poisson with rate $\lambda = N/T$. 
+  \end{solution}
+\end{exercise}
+
+The queueing problem  is evidently to determine the required number of servers $c$ such that the performance is acceptable. 
+
+\begin{exercise}
+  What performance measures are relevant here?
+  \begin{solution}
+    It is reasonable \emph{within the context} that the mean waiting time is less important than the largest waiting time and the fraction of people that wait longer than 10 minutes, say.
+    Note here, \emph{context is crucial} when making models.
+  \end{solution}
+\end{exercise}
+
+\begin{exercise}
+  Define the offered load as $\lambda \E S$ and the load as $\rho = \lambda \E S/ c$. Is it important for the check-in desk that $\rho<1$? 
+
+  \begin{hint}
+    Think hard about the context. Is this queueing process stationary? Is the arrival process stationary? 
+  \end{hint}
+  \begin{solution}
+    There are, by assumption, only arrivals between 9 and 10, hence the arrival process is not stationary, hence the queueing process is not stationary.  It is also not a problem if the system is temporarily in overload. In fact, as long as $c$ is such that the performance measures (maximum delay and fraction of people waiting longer than some threshold) are within reasonable bounds, the system works as it should.
+  \end{solution}
+\end{exercise}
+
+\begin{exercise}
+  Why do we need simulation to analyze this case?
+  \begin{solution}
+    We study the dynamics of a queueing process in which the demand grows and than peters out. Such queueing situations are, typically, mathematically intractable. In fact, we finally have come to a point in which we really need simulation. 
+  \end{solution}
+\end{exercise}
+
+
+\begin{exercise}
+  Search for a good $c$.
+
+   
+   \begin{hint}
+  For this it is best to write two functions. The first function simulates a scenario for a fixed set of parameters and computes the performance measures. The second  function calls the simulator over a suitable range for $c$ and prints the KPIs. Like this, we use  the second function to fix all parameters so that we always can retrieve the exact scenarios we analyzed. 
+   \end{hint}
+
+  \begin{solution}
+The first function computes the KPIs, the second runs multiple scenarios. 
+
+    \begin{pyblock}
+def intake_process(F, G, c, num):
+
+    ggc = GGc(F, G, c, num)
+    ggc.run()
+
+    max_waiting_time = max(j.waiting_time() for j in ggc.served_jobs)
+    longer_ten = sum((j.waiting_time()>=10)for j in ggc.served_jobs)
+    return max_waiting_time, longer_ten
+
+
+def intake_test_1():
+    labda = 300/60
+    F = expon(scale=1.0 / labda)
+    G = uniform(1, 2)
+    num = 300
+
+    print("Num servers, max waiting time, num longer than 10")
+    for c in range(3, 10):
+        max_waiting_time, longer_ten = intake_process(F, G, c, num)
+        print(c, max_waiting_time, longer_ten)
+
+      
+intake_test_1()
+
+    \end{pyblock}
+  \end{solution}
+  
+\end{exercise}
+
+\begin{exercise}
+  What do you think of the results? If you are not satisfied, propose and analyze an improvement.
+
+  \begin{solution}
+    I get these numbers
+
+\begin{verbatim}
+Num servers, max waiting time, num longer than 10
+3 138.1697966325396 280
+4 82.7792212258584 266
+5 54.741743193174834 227
+6 39.35432320034931 220
+7 22.868514027211248 167
+8 15.77953068102207 102
+9 12.118348481100451 50
+\end{verbatim}
+    
+    Even for 9 servers, 50 people wait longer than 10 minutes. Interestingly, with 9 servers the maximum waiting time is just 12 minutes, so we can at least keep this within bounds.
+
+We could also make a plot of the job waiting time as a function of time, but we skip it here. 
+
+
+Perhaps we should open the check-in desks for a longer time and advise people to come earlier. Let's try 90 minutes instead.
+
+\begin{pyblock}
+
+def intake_test_2():
+    labda = 300/90
+    F = expon(scale=1.0 / labda)
+    G = uniform(1, 2)
+    num = 300
+
+    print("Num servers, max waiting time, num longer than 10")
+    for c in range(3, 10):
+        max_waiting_time, longer_ten = intake_process(F, G, c, num)
+        print(c, max_waiting_time, longer_ten)
+
+  
+\end{pyblock}
+
+If you do the experiment, you'll see that this works much better. It is now also very simple to set up a third experiment in which the desks are open during two hours. Then you'll see that 4 servers  suffice. 
+
+  \end{solution}
+
+\end{exercise}
+
+\begin{exercise}
+  Relate the results of these simulations to you traveling experiences. 
+\end{exercise}
+
+
+\subsection{Summary}
+\label{sec:summary}
+
+
+\begin{exercise}
+  What have you learned in this tutorial?
+ Can you extend this work to more general cases? 
+  \begin{solution}
+    Topics learned.
+    \begin{enumerate}
+    \item The simulation of the $G/G/c$ queue
+    \item Python classes and, a bit more generally, object oriented programming. 
+    \item Organizing cases and experiments by means of  functions. With these functions we can keep a log of what we precisely tested, what parameter values we used and which code we ran. These tests are also useful to show how to actually use/run the code.
+    \end{enumerate}
+
+Some  interesting extensions.
+    \begin{enumerate}
+    \item   Scale up to networks of $G/G/c$ queues.
+    \item In the $G/G/c$ queue the assumption is that all servers have the same service rate.
+      In production settings this is typically not the case.
+      There is a queue of jobs, and these jobs are served by machines with different speeds.
+      For instance, old machines may work at a slower rate than new machines.
+    % \item Above we also mentioned how to deal with priorities. Once we included priorities we can simulate the queueing behavior at the check-in desks at airports with business and economy class customers. 
+    \end{enumerate}
+  \end{solution}
+\end{exercise}
+
+
+\clearpage
+
+
+\section{Airport Check-in process, TBD}
+\label{sec:simul-check-proc}
+
+As the simulation of this case is somewhat more difficult than the $G/G/c$ queue, testing is also more important. For this reason we followed a \emph{test-driven} procedure. First we design a number of test cases, from very simple to a bit less simple. Then we started building and testing until the first test case passed. Then we tested with the second case, the third, and so on, until all the tests passed. And, indeed, along the way we caught numerous mistakes, from missing \pyv{if} statements (a very big bug) to simple typos.
+
+\begin{exercise}
+  Make a list of extremely simple cases, so simple in fact that you can check the outcome with no effort at all, to a bit harder, but such that you have theoretical tools to validate the outcome.
+  \begin{hint}
+Suppose there is only a server for business customers and also only business customers? What should happen? Suppose further that the inter-arrival times are constant and  1 minutes and service times constant and equal to 0.5 minute? What if the service times are 2 minutes and 10 business customers arrive? What if all 10 customers arrive at time 0; when should the last leave? What if we only have economy customers but only the business server? And so on. Ensure you design cases you can check by hand. These simple tests will catch many, many errors. As a general rule, invest in such tests. 
+  \end{hint}
+  
+\end{exercise}
+
+
+
+This time we follow
+
+We developed quite a large number of simple cases to test our implementation. 
+
+
+
+When we use the $M/M/1$ simulation as a test case, we need to have an idea of what  variance we can expect between, for instance, the theoretical expected waiting time and the mean waiting time obtained by simulation.
+
+
+\begin{exercise}
+Compare the following two cases. In the first case the two customer classes are completely separated:  business customers have one dedicated server and the economy customers have $c$ dedicated servers.  In the second case, the business desk serves economy customers when idle, and vice versa, economy desks serve business customers when idle.  Here are the data. 
+  \begin{pyverbatim}
+labda = 300/90
+F = expon(scale=1.0 / labda)
+G = uniform(1, 2)
+p_business = 0.1
+c = 6
+num_jobs = 300
+  \end{pyverbatim}
+  
+
+
+\end{exercise}
+
+% Grappige observaties. 
+
+
+% In bovenstaand scenario zijn de business klanten slechter af. Kennelijk is die ene server te weinig. Ik kan nu twee business servers maken, of p\_business kleiner kiezen.
+
+\begin{exercise}
+  What remains to be able to apply our simulator to a real check-in process?
+  \begin{solution}
+    \begin{enumerate}
+    \item First we need to check whether the our simulator is indeed correct. Is there a specific queue for business class customers? If so, do the business server(s), when idle, indeed take economy class customers in service? 
+    \item We need real data to see whether our simple arrival process and service distributions are realistic. 
+    \item Perhaps the servers the dynamic, 3 during the first hour, 6 in the second. 
+    \end{enumerate}
+
+However, by and large, we have all tools available to analyze a real business case.
+  \end{solution}
+\end{exercise}
+
+extensions.
+\begin{enumerate}
+\item Service distribution of the business and economy jobs are different.
+\end{enumerate}
+
+
+
+
+
+\Closesolutionfile{hint}
+\Closesolutionfile{ans}
+
+
+\opt{solutionfiles}{
+\clearpage
+\section{Hints}
+\input{hint}
+\clearpage
+\section{Solutions}
+\input{ans}
+}
+
+\end{document}
+
+
+\section{Queueing networks and workload control}
+\label{sec:queueing-network}
+
+In many organizations jobs or orders are processed in various stages.
+For example, a case at a court undergoes a number of processing stems.
+When a new case arrives it is first filed and queued.
+Then a clerk reads it and sometimes assembles some necessary data.
+The case is then sent to a judge for further assessment.
+The judge may send the case back to the clerk, or may play a trial.
+After some loops, the trial is held.
+After the trial, the clerk has to write a report, which in turn has to be checked by the judge, and perhaps repaired.
+In all steps, an (electronic) document is passed on from one station to another, and waits there until the server has time to process the job.
+In many cases the job is sent to a next station, but the job may also be sent back to the station itself.
+Other instances of queueing networks are job shops/production networks, hospitals, customs services, and so on.
+Hence, with the tools we develop in this section it becomes possible to analyze quite difficult business processes in terms of throughput and delay as functions of arrival and service rate, and routing (the rules that determine what sequence of stations jobs have to follow.)
+
+In this tutorial we will develop the tools to simulate such queueing networks. Of particular importance in such networks are throughput (the average output of the network), and lead times (the time orders spend in the queueing network itself, but also the time spent before any action can start.) We start with a very simple network. Then we extend the situation to a network in which the number of jobs `on the floor' is limited. (The jobs `on the `floor' are all jobs waiting between two stations or in actual service; jobs waiting at the entrance to get access to the queueing network are not included.) 
+
+This form of control, known as \emph{CONWIP} (constant work in process), is a very simple but effective way to control queueing networks. To see it working in a simulation is actually quite fascinating. There is also an large amount of literature on this topic. We refer to the book Factory Physics by Hopp and Spearman for further background. 
+
+
+\subsection{A Simple Queueing Network}
+
+
+With recursions it is (nearly) trivial to simulate a so-called feed-forward network, that is, networks without feedback or loops.  In terms of a graph, a feed-forward network is a loop-free directed graph. 
+
+\begin{exercise}
+  Suppose we have a network with two stations such that all the output of station 1 moves to station 2. First think about what information you need in order to simulate the queueing behavior at station 1 and 2. Then write a function to simulate a queueing process in discrete time, and use this to form the required queueing network. Assume that jobs arrive as a Poisson process at the first station with rate $\lambda=3$ per period, and that the service times are exponentially distributed with rate $\mu_1 = 4$ and $\mu_2 = 3.5$ for station 1 and 2, respectively.
+  \begin{hint}
+    Use the code of Exercise~\ref{ex:4} to simulate one queue. The output of this function gives the number of jobs served at station 1 for each period. Then this output forms the input to the next station. 
+  \end{hint}
+  \begin{solution}
+Here is the code.
+\begin{pyblock}
+import numpy as np
+from scipy.stats import poisson
+import matplotlib.pyplot as plt
+
+def compute_Q_d(a, s, q0=0):
+    d = np.zeros_like(a)
+    Q = np.zeros_like(a)
+    Q[0] = q0  # starting level of the queue
+    for i in range(1, len(a)):
+        d[i] = min(Q[i - 1], s[i])
+        Q[i] = Q[i - 1] + a[i] - d[i]
+
+    return Q, d
+
+N = 1000
+labda = 3
+mu1 = 4
+a1 = poisson(labda).rvs(N)
+s1 = poisson(mu1).rvs(N)
+q1, d1 = compute_Q_d(a1, s1)
+
+# station 2
+a2 = d1
+mu2 = 3.5
+s2 = poisson(mu2).rvs(N)
+q2, d2 = compute_Q_d(a2, s2)
+
+plt.plot(q1, label="Q1")
+plt.plot(q2, label="Q2")
+plt.legend()
+plt.show()
+  
+\end{pyblock}
+    
+  \end{solution}
+\end{exercise}
+
+\begin{exercise}
+  Suppose station 2 gets some extra external jobs arriving as $\sim P(0.3)$. Include this in your simulator. What happens to the queue length process at station 2? 
+  \begin{solution}
+Build the arrival process at station 2 like this. 
+    \begin{pyblock}
+gamma2 = 0.3
+g2 = poisson(gamma2).rvs(N)
+a2 = d1 + g2
+    \end{pyblock}
+
+The queue at the second station becomes quite a bit larger. This is evident as the load at station 2 becomes higher. 
+    
+  \end{solution}
+\end{exercise}
+
+
+\begin{exercise}
+  Suppose we have seven stations such that the output of station 1 and 2 feed into station 3, the output of stations 3 and 4 into 5. Then, one third of the jobs of station 5 go to station 6, and the rest to station 7. Assume that external jobs arrive as Poisson processes with $\gamma_1 = 3$, $\gamma_2=2$ and $\gamma_4=1$. The service processes are Poisson with rates are $\mu_1=3.5, \mu_2 = 2.5, \mu_3=5.5, \mu_4 = 2.5, \mu_5 = 5.5, \mu_6=4, \mu_7 = 4$. Connect the stations and make plots of the queue length processes. Note in particular that node 3 is a `join' node, and node 5 a `fork' node. 
+  \begin{solution}
+When you run the code below, you'll see that the capacity at one node is too small. 
+    \begin{pyblock}
+N = 1000
+
+def network():
+    # station 1
+    a1 = poisson(3).rvs(N)
+    s1 = poisson(3.5).rvs(N)
+    q1, d1 = compute_Q_d(a1, s1)
+    
+    # station 2
+    a2 = poisson(2).rvs(N)
+    s2 = poisson(2.5).rvs(N)
+    q2, d2 = compute_Q_d(a2, s2)
+    
+    # station 3 
+    a3 = d1+d2
+    s3 = poisson(5.5).rvs(N)
+    q3, d3 = compute_Q_d(a3, s3)
+
+
+    # station 4
+    a4 = poisson(1).rvs(N)
+    s4 = poisson(2.5).rvs(N)
+    q4, d4 = compute_Q_d(a4, s4)
+    
+    # station 5
+    a5 = d3+d4
+    s5 = poisson(5.5).rvs(N)
+    q5, d5 = compute_Q_d(a5, s5)
+
+    # station 6 
+    a6 = d5//3    #fork 1/3, and round to int 
+    # a6 = a6.astype(int)
+    s6 = poisson(4).rvs(N)
+    q6, d6 = compute_Q_d(a6, s6)
+
+    # station 7
+    a7 = d5 - a6   #rest of the station 5
+    s7 = poisson(4).rvs(N)
+    q7, d7 = compute_Q_d(a7, s7)
+
+    plt.plot(q1, label="Q1")
+    plt.plot(q2, label="Q2")
+    plt.plot(q3, label="Q3")
+    plt.plot(q4, label="Q4")
+    plt.plot(q5, label="Q5")
+    plt.plot(q6, label="Q6")
+    plt.plot(q7, label="Q7")
+    plt.legend()
+    plt.show()
+
+
+network()    
+    \end{pyblock}
+  \end{solution}
+\end{exercise}
+
+\begin{exercise}
+  It should be clear that the capacity of station 5 is too small. Suppose you would set it to 7.4. What happens now?
+  \begin{solution}
+Station 7 becomes now a bottleneck. Interestingly, when station 5 was a bottleneck, there was not a long queue at station 7. Hence, in general, `up-stream' bottlenecks prevent long queues to form at potential bottleneck downstream. Once we added capacity to station 5, a big queue started to form in front of station 7. Hence, the capacity at station 7 also has to be increased. 
+  \end{solution}
+\end{exercise}
+
+
+\subsection{CONWIP}
+\label{sec:conwip}
+
+A simple, but very important, observation is that if we have a choice where to queue jobs, we typically prefer them to queue at the start of the network.
+
+\begin{exercise}
+  Why is it, typically, preferable to have jobs wait at the start of the network? This is a very important question; if you ever need to design logistic processes (hospitals, production processes, and so on), the answer to this question will serve you a life time. 
+  \begin{solution}
+    If we can limit the lead time on the floor, we limit the amount of time and raw material invested in unfinished goods. Realize that unfinished goods required investments but did not result in an income. Next, orders may change, so unfinished products can become obsolete. They can also break, spoil, etc. Finally, physical queues require physical floor space, hence need investments in buildings, transportation, heating, etc. So, all in all, we only want to release jobs into the network when there is actual capacity to serve the job.
+
+
+
+  \end{solution}
+\end{exercise}
+
+A good idea is to  install an order book at the front of the network. Here we let orders wait until the lead time in the network is below some amount of time, $T$ say. 
+  
+
+\begin{exercise}
+  Can you come up with an estimate of the total time the job spends in the entire system, that is, the time in the order book and the time on the floor?
+  \begin{solution}
+The rate at which the order book drains must be about equal to the service rate $r_b$ of the bottleneck station. Of course, not all jobs include the bottleneck in their routing, but, given that there is a bottleneck, many jobs must pass the bottleneck. So, as an approximation, the time spent in the order book must be about equal to the total work in the order book divided by $r_b$ plus the time on the floor.      
+  \end{solution}
+\end{exercise}
+
+Often it is not easy to obtain precise estimates of the amount of work on the floor.
+However, counting jobs is easy.
+So, an easy control is to limit the number of orders on the floor.
+Then, if the amount of work on the floor, i.e., the WIP, is quite small, the lea dime, i.e., the total time a job spends on the floor from start to end, must also be quite small.
+In this section we will analyze the effect of putting a cap on the amount of work on the floor.
+In other works, we will study the effects of installing a CONWIP control.
+
+You should note that a network under CONWIP control is a so-called semi-closed queueing network.
+In an open network, jobs can enter and leave the network; in a closed network, the amount of jobs is kept constant; in a semi-closed (or semi-open) network, the number of jobs in part of the network is limited.
+
+Setting up a discrete-time simulation of a CONWIP network is in essence quite simple, but getting the details right is considerably less so.
+For this reason we start with nearly the simplest possible case and, once this is correct, we scale up to a larger network.
+(Recall, once we have the correct equations, the conversion to python code is pretty simple.
+Thus, the real work is to get the equations, i.e., the model, right.)
+
+Consider the following network.
+There are two production stations in tandem, each with deterministic capacity of 1 job per period.
+New jobs are first sent to the order book, which also acts as a queue.
+Whenever all the work $w(t)$ at stations 1 and 2 in period $t$ becomes less than the CONWIP level $W$, an amount $W-w(t)$ of orders will be released from the order book and sent to the first station.
+Jobs served at the first station move on to the second station.
+After being processed at this last station, jobs depart from the network.
+
+
+Let, for $i=0, 1, 2$, 
+\begin{align*}
+a_i(t) & \text{the number of arrivals at station $i$  at the start of period $t$} \\
+d_i(t) & \text{the number of jobs at depart from station $i$  at the end of period $t$} \\
+q_i(t) & \text{the amount of jobs at station $i$  at the end of period $t$} \\
+c_i(t) & \text{the amount of jobs that station $i$  can serve during  period $t$}, \\
+w(t) & \text{the amount of jobs in the network at the end of period $t$}, \\
+\end{align*}
+Thus, we call the order book station $0$. 
+
+Assuming that jobs that arrive at the start of a period $t$ can also be served during period $t$, the queues behave according to the standard equations
+\begin{align*}
+  d_i(t) &= \min\{q_i(t-1) + a_i(t), c_i(t)\} \\
+  q_i(t) &= q_i(t-1) + a_i(t) - d_i(t).
+\end{align*}
+
+
+\begin{exercise} Relate $d_0$ to $a_1$ and $d_1$ to $a_2$, assuming that the jobs released at period $t$ become available at the next station in the next period.
+  \begin{solution}
+    Given the timing, we take $a_i(t) = d_{i-1}(t-1)$ for $i=1,2$.
+    That this holds for stations 0 and 1 is a bit disputable, because the release of an order from the order book does not take any time, hence, we might say that $a_1(t) = d_0(t)$.
+    However, typically, to start working on an order, it is required to assemble raw materials.
+    Thus, we simply assume that this takes one period.
+    Hence, orders released from the order book become available for production in the next period.
+  \end{solution}
+\end{exercise}
+
+\begin{exercise}
+  Implement CONWIP by relating $c_0(t)$, i.e., the amount of jobs that can be released from the order book during period $t$, to the other variables.
+  In particular, assume for the moment that $w(t)$ is known.
+  In the next exercise we will deal with the computation of $w(t)$.
+  \begin{solution}
+    At the end of period $t$ there is room $W-w(t)$.
+    Hence, we release $c_0(t+1) = W-w(t)$ in the next period to the network.
+    Note that this is just the amount of orders that we are willing to release.
+    To actually release this amount, these orders should of course be available in the order book.
+    For this reason we also use the queueing equations to model the behavior of the order book.
+  \end{solution}
+\end{exercise}
+
+
+\begin{exercise}
+  Find an expression for $w(t)$ in terms of the other variables. 
+
+  
+\begin{hint}
+
+  Explain why $w(t) \neq q_1(t) + q_2(t)$.
+  Also, why $w(t) \neq q_0(t) + q_1(t) + q_2(t)$.
+\end{hint}
+
+\begin{solution}
+    We must have this: $w(t) = d_0(t) + q_1(t) + d_1(t) + q_2(t)$.
+    We released $d_0(t)$ orders into the network and assembled raw material for these orders during period $t$.
+    Thus, $d_0(t)$ jobs lie on the floor, waiting in the queue before station 1.
+    Then, the departures of station 1 are in transit to station 2.
+    Hence, they must also count as WIP.
+
+
+    Of course $w(t) \neq q_0(t) + q_1(t) + q_2(t)$.
+    The whole point of CONWIP is to limit the amount of work on the floor.
+    Hence, including $q_0$, i.e., the orders in the order book, is completely wrong.
+    Orders in the order book are meant to be \emph{not} on the floor.
+    \end{solution}
+\end{exercise}
+
+
+The next step is to convert this model into code. 
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:
