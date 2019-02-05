@@ -66,7 +66,7 @@ Typically a queueing system is subject to rules about when to allow jobs to ente
 Such a decision rule is called a \emph{policy}.
 The theoretical analysis of the efficacy of policies is often very hard, while with simulation it becomes doable.
 In this document we present a number of cases to see how simulation can be used to analyze and improve queueing systems.
-Besides the fact that these the cases will improve your understanding of queueing systems and probability theory, they will also make clear that simulation is a really creative activity and involves solving many interesting and challenging algorithmic problems.
+Besides the fact that these cases will improve your understanding of queueing systems and probability theory, they will also make clear that simulation is a really creative activity and involves solving many interesting and challenging algorithmic problems.
 
 
 Each case is organized in a number of exercises.
@@ -79,8 +79,9 @@ For each exercise,
     There are a few reasons for this.
     Python is more or less the third most used programming language, after C++ and java.
     It is widely used by companies, while R is hardly used outside academia.
-    Programming OR applications is easier in python; it will also used in other courses.
-    Finally, if you are interested in machine learning and artificial intelligence, python i, hands-down the best choice.}
+    Programming OR applications is easier in python; it will also be used in other courses.
+    In general, Python is very easy to learn.
+    Finally, if you are interested in machine learning and artificial intelligence, python is, hands-down, the best choice.}
   \item If you don't succeed in getting your program to work,  look up the code written by us and type it into your python environment.\footnote{Typing yourself forces you to read the code well.}.
   \item When an exercise has a hint, its marked in the margin with a penguin symbol\footnote{A penguin is the logo for Linux.
       As using Linux will make you a happier person overall, it seems fitting to use the Linux logo as the messenger of good news.}.
@@ -97,7 +98,7 @@ We will use the following libraries of python a lot:
 \item \pyv{matplotlib} provides plotting functionality.
 \end{itemize}
 
-Our code is not the most efficient, or fast.
+Our code is not the fastest or most efficient.
 Rather, we focus on clarity of code so that the underlying reasoning is as clear as possible.
 Once our ideas and code are correct, we can start optimizing, if this is necessary.
 
@@ -115,7 +116,7 @@ In particular, our aim is to build analogues to Figure 1.1, 1.2., and 1.3 of the
 
 
 \begin{exercise}
-  Make a plan of the steps you have to carry out to make Figure 1.1 of the queueing book.
+  Make a plan of the steps you have to carry out to make an analogue of Figure 1.1 of the queueing book in terms of a cdf.
   In the next set of exercises we'll carry out these steps.
   So please do not read on before having thought about this problem, but spend some 5 minutes to think about how to approach the problem and how to chop it up into simple steps.
   Then organize the steps into a logical sequence.
@@ -159,20 +160,20 @@ np.set_printoptions(precision=3)
 
 One important step in this process is to compute the empirical distribution. As this is much more interesting (and challenging) than you might think\footnote{If you search the web, you will see that computing the empirical density function is even more challenging.}, we start with this. Once we can compute empirical distribution functions, we are in good shape to set up the rest of the simulation. 
 
-Before designing an algorithm to compute , it is best to start with a simple numerical example and try to formalize the steps we take in the process.
+Before designing an algorithm to compute, it is best to start with a simple numerical example and try to formalize the steps we take in the process.
 
 \begin{exercise}
-  Suppose you are given the following numbers:
+  Suppose you are given the following sample from a population:
   \begin{pyblock}
 a = [3.2, 4, 4, 1.3, 8.5, 9]    
 \end{pyblock}
 
- What steps do you take to make the empirical distribution function? Recall, this is defined as
+What steps do you take to make the empirical distribution function? Recall, this is defined as
   \begin{equation}
     \label{eq:1}
     F(x) = \frac{\# \{i : a_i \leq x\}}{n}, 
   \end{equation}
-  with $n$ is the length of $a$.
+  with $n$ is the size of the sample.
 
 Can you turn it into an algorithm? (Just attempt to design an algorithm. Even if you don't succeed, trying is important. Then read the code in the solution.)
 
@@ -329,14 +330,25 @@ How can you use these to compute the cdf?
 Here it is.
 \begin{pyblock}
 
-def cdf(X):
-    # remove multiple occurrences of the same value
-    unique, count = np.unique(np.sort(X), return_counts=True)
+def cdf(X, make_plot=False):
+    #remove multiple occurrences and count them
+    unique, count = np.unique(np.sort(X), return_counts = True)
     x = unique
     y = count.cumsum()/count.sum()
+    
+    if make_plot:
+        #make a plot like before
+        yy = [0] + list(y)
+        left = [min(x)-1] + list(x)
+        right = list(x) + [max(x) + 1]
+        
+        plt.hlines(yy, left, right)
+        plt.show()
+    
     return x, y
+    
 
-x, y = cdf(a)
+cdf(a, True)
 \end{pyblock}
 
 \end{solution}
@@ -378,10 +390,10 @@ Generate $L=300$ random numbers $\sim U[4,6]$ and make a histogram of these numb
 Add this code to the other code and run it.
 \begin{pyverbatim}
 N = 1 # number of customers
-L = 300
+L = 300 # number of interarrival times
 a = G.rvs(L)
 
-plt.hist(a, bins=L/20, label="a")
+plt.hist(a, bins=int(L/20), label="a") #bins of size 20
 plt.title("N = {}, L = {}".format(N, L))
 plt.legend()
 plt.show()
@@ -405,6 +417,8 @@ plt.show()
 \begin{exercise}
 We would like to numerically compare the empirical distribution of the inter-arrival times to the theoretical distribution, which is uniform in this case. 
 For this we can use the Kolmogorov-Smirnov statistic. Try to come up with a method to compute this statistic, and then compute it. 
+Look up a table with critical values for the Kolmogorov-Smirnov test statistic.
+Given a 5\% confidence level, do we reject the hypothesis that our sample is drawn from a $U[4,6]$ distribution?
 
 You might find the following functions helpful (read the documentation on the web to see what they do):
 \begin{enumerate}
@@ -431,6 +445,7 @@ print(KS(a, G))
 
 \begin{exercise}
   Now compute the KS statistics to compare the simulated inter-arrival times with an exponential distribution with a suitable mean. (What is this suitable mean?).
+  Do we reject the hypothesis that our sample is drawn from this exponential distribution?
 
 See \pyv{scipy.stats.expon}.
 
@@ -518,7 +533,7 @@ print(shop)
 
 
 \begin{exercise}
-  The steps of the previous exercise can be summarized by this code:
+The steps of the previous exercise can be summarized by the following code:
 \begin{pyverbatim}
 from itertools import chain
 
@@ -526,10 +541,10 @@ def superposition(a):
     A = np.cumsum(a, axis=1)
     A = list(sorted(chain.from_iterable(A)))
     return np.diff(A)
-
 \end{pyverbatim}  
+Note that the input \pyv{a} in the function \pyv{superposition} is a matrix of interarrival times of several customers.
 
-Try to understand this by reading the documentation (on the web) of the following functions.
+Try to understand this code by reading the documentation (on the web) of the following functions.
 \begin{enumerate}
 \item \pyv{numpy.cumsum}, in particular read about the meaning of axis.
 \item \pyv{itertools.chain.from_iterable}
