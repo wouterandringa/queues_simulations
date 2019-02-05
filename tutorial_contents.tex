@@ -142,7 +142,7 @@ In particular, our aim is to build analogues to Figure 1.1, 1.2., and 1.3 of the
 
 We need some python libraries to make our lives a bit easier. You should copy this code into your editor.
 
-\begin{pyblock}
+\begin{pyverbatim}
 import numpy as np
 import scipy
 import matplotlib
@@ -151,7 +151,7 @@ import matplotlib.pyplot as plt
 
 # this is to print not too many digits to the screen
 np.set_printoptions(precision=3) 
-\end{pyblock}
+\end{pyverbatim}
 
 
 \subsection{Empirical distributions}
@@ -163,9 +163,9 @@ Before designing an algorithm to compute , it is best to start with a simple num
 
 \begin{exercise}
   Suppose you are given the following numbers:
-  \begin{pyblock}
+  \begin{pyverbatim}
 a = [3.2, 4, 4, 1.3, 8.5, 9]    
-\end{pyblock}
+\end{pyverbatim}
 
  What steps do you take to make the empirical distribution function? Recall, this is defined as
   \begin{equation}
@@ -178,7 +178,7 @@ Can you turn it into an algorithm? (Just attempt to design an algorithm. Even if
 
   \begin{solution}
 We put the algorithm in a function so that we can use it later.  The algorithm is useful to study,  but it has some weak points. In the exercises below we will repair the problems. 
-    \begin{pyblock}
+    \begin{pyverbatim}
 def cdf(a):
     a = sorted(a)
     m, M = int(min(a)), int(max(a))+1
@@ -200,13 +200,13 @@ def cdf(a):
         F[x] /= len(a)
 
     return F
-    \end{pyblock}
+    \end{pyverbatim}
 
 Now run  this to see the result.
-\begin{pyblock}
+\begin{pyverbatim}
 F = cdf(a)
 print(F)
-\end{pyblock}
+\end{pyverbatim}
 
 
   \end{solution}
@@ -226,12 +226,12 @@ A better idea is to consider the sorted version $s$ of $a$.
   \begin{solution}
     In the answer we let the computer do all the work.  
 
-\begin{pyblock}
+\begin{pyverbatim}
 I = range(0, len(a))
 s = sorted(a)
 plt.plot(I, s)
 plt.show()
-\end{pyblock}
+\end{pyverbatim}
   \end{solution}
 \end{exercise}
 
@@ -239,7 +239,7 @@ plt.show()
   Find now a way to invert $i\to s_i$, normalize the function to get a distribution, and make a new plot. 
   \begin{solution}
 Here is one way. Note that we already imported \pyv{matplotlib}, so we don't have to that again.
-\begin{pyblock}
+\begin{pyverbatim}
 def cdf(a):  
     y = range(1, len(a)+1)
     y = [yy/len(a) for yy in y] # normalize
@@ -250,7 +250,7 @@ x, y = cdf(a)
 
 plt.plot(x, y)
 plt.show()
-\end{pyblock}
+\end{pyverbatim}
 
 
   \end{solution}
@@ -270,13 +270,13 @@ You should know that for loops in python are quite slow (and for loops in R seem
   Use the \pyv{numpy} functions \pyv{arange}, to replace the \pyv{range}, and \pyv{sort} to speed up the algorithm of the previous exercise. 
   \begin{solution}
     This code is much, much faster, and also very clean. Note that we normalize \pyv{y} right away. 
-\begin{pyblock}
+\begin{pyverbatim}
 def cdf(a):
     y = np.arange(1, len(a)+1)/len(a)
     x = np.sort(a)
     return x, y
   
-\end{pyblock}
+\end{pyverbatim}
   \end{solution}
 \end{exercise}
 
@@ -292,15 +292,15 @@ You can skip this if you are not interested.
 Read about the \pyv{drawstyle} option of the \pyv{plot} function of \pyv{matplotlib} to see how to make jumps.
   \begin{solution}
 With the \pyv{drawstyle} option: 
-\begin{pyblock}
+\begin{pyverbatim}
 plt.plot(x, y,  drawstyle = 'steps-post')
 plt.show()
-\end{pyblock}
+\end{pyverbatim}
 
 
 But now we still have vertical lines. To remove those, we can use \pyv{hlines}.
 
-\begin{pyblock}
+\begin{pyverbatim}
 y = range(0, len(a)+1)
 y = [yy/len(a) for yy in y] # normalize
 s = sorted(a)
@@ -309,7 +309,7 @@ right = a + [max(a)+1]
 
 plt.hlines(y, left, right)
 plt.show()
-\end{pyblock}
+\end{pyverbatim}
 
 There  we are!.
   \end{solution}
@@ -327,7 +327,7 @@ Finally, we can make the computation of the cdf significantly faster with using 
 How can you use these to compute the cdf?
 \begin{solution}
 Here it is.
-\begin{pyblock}
+\begin{pyverbatim}
 
 def cdf(X):
     # remove multiple occurrences of the same value
@@ -337,7 +337,7 @@ def cdf(X):
     return x, y
 
 x, y = cdf(a)
-\end{pyblock}
+\end{pyverbatim}
 
 \end{solution}
 \end{exercise}
@@ -487,7 +487,7 @@ Note that the shop sees the combined arrival process, so first find a way to mer
   \end{hint}
   \begin{solution}
     The following steps in code explain the logic.
-    \begin{pyblock}
+    \begin{pyverbatim}
 a=[4, 3, 1.2, 5]
 b=[2, 0.5, 9]
 
@@ -512,7 +512,7 @@ for s, t in zip(times[:-1], times[1:]):
     shop.append(t - s)
 
 print(shop)
-    \end{pyblock}
+    \end{pyverbatim}
   \end{solution}
 \end{exercise}
 
@@ -642,7 +642,7 @@ If  $\mu=\sigma=5$ then the analysis should break down. What happens if you set 
 
 % First generate our standard case.
 
-% \begin{pyblock}
+% \begin{pyverbatim}
 % N = 10
 % runlength = 1000
 % labda = N/m
@@ -650,29 +650,29 @@ If  $\mu=\sigma=5$ then the analysis should break down. What happens if you set 
 % G = stats.uniform(loc = m-d, scale = 2.*d) 
 
 % a = superposition(G, N, runlength)
-% \end{pyblock} 
+% \end{pyverbatim} 
 
 % Now select the interarrival times that exceed some number $x$ and
 % subtract $x$. These new values should, hopefully, have the same
 % distribution as the initial set of interarrival times.
 
-% \begin{pyblock}
+% \begin{pyverbatim}
 % x = 0.5 # threshold
 % c = a[a>x] -x # select the interarrival times longer than x
-% \end{pyblock} 
+% \end{pyverbatim} 
 
 % Let's plot it
-% \begin{pyblock}
+% \begin{pyverbatim}
 % e = empiricalDistribution(c)
 % plt.plot(e.x, e.cdf , label = "emp")
 % plt.plot(e.x,1.-np.exp(-labda*e.x), label = "th")
 % plt.legend()
 % plt.show()
-% \end{pyblock} 
+% \end{pyverbatim} 
 
 % This is quite ok. What is the threshold $x$ becomes larger, e.g., 1?
 
-% \begin{pyblock}
+% \begin{pyverbatim}
 % x = 2. # threshold
 % c = a[a>x] -x # select the interarrival times longer than x
 
@@ -681,10 +681,10 @@ If  $\mu=\sigma=5$ then the analysis should break down. What happens if you set 
 % plt.plot(e.x,1.-np.exp(-labda*e.x), label = "th")
 % plt.legend()
 % plt.show()
-% \end{pyblock} 
+% \end{pyverbatim} 
 
 % Now the result is not as nice. What if we increase the simulation length? 
-% \begin{pyblock}
+% \begin{pyverbatim}
 % N = 10
 % runlength = 100000
 % labda = N/m
@@ -701,7 +701,7 @@ If  $\mu=\sigma=5$ then the analysis should break down. What happens if you set 
 % plt.plot(e.x,1.-np.exp(-labda*e.x), label = "th")
 % plt.legend()
 % plt.show()
-% \end{pyblock} 
+% \end{pyverbatim} 
 
 % It is interesting to see that now the memoryless property seems to
 % hold again. But why do we need so many values to see this? 
@@ -714,7 +714,7 @@ If  $\mu=\sigma=5$ then the analysis should break down. What happens if you set 
 
 % First I compute, as above, a number of arrival times as seen by the counter.
 
-% \begin{pyblock}
+% \begin{pyverbatim}
 % m = 5.
 % d = 2.
 % G = stats.uniform(loc = m-d, scale = 2.*d) 
@@ -724,7 +724,7 @@ If  $\mu=\sigma=5$ then the analysis should break down. What happens if you set 
 % a = G.rvs((N, runlength))
 % A = np.cumsum(a, axis = 1)
 % A = np.sort(A.flatten())
-% \end{pyblock} 
+% \end{pyverbatim} 
 
 % Next, I make a histogram, that, is I chop up the entire simulation
 % interval, from the first arrival time to the last, into a number of
@@ -733,43 +733,43 @@ If  $\mu=\sigma=5$ then the analysis should break down. What happens if you set 
 % total.  I like the bins of such size that on average each bin will
 % contain 50 arrivals. Thus, the number of bins, i.e., the number of intervals in which the entire simulation interval needs to chopped, should be $N*runlength/50$. 
 
-% \begin{pyblock}
+% \begin{pyverbatim}
 % #bins = N*runlength/50
 % #p, x = np.histogram(A, bins = bins)
-% \end{pyblock} 
+% \end{pyverbatim} 
 
 % Here, $x$ contains the interval boundaries in which the simulation
 % interval is chopped up. Therefore $I=x[1]-x[0]$ is the length of one
 % such interval. The arrival rate in such interval must be $I*N/m$, as
 % $N/m$ is the arrival rate per unit time. Therefore,
-% \begin{pyblock}
+% \begin{pyverbatim}
 % #I = x[1]- x[0]
 % #labda = float(I)*N/m
-% \end{pyblock} 
+% \end{pyverbatim} 
 
 % Now I count the number of times a certain number of arrivals occured.
-% \begin{pyblock}
+% \begin{pyverbatim}
 % P =  np.bincount(p)
-% \end{pyblock} 
+% \end{pyverbatim} 
 
 % Finally, I want to fit a Poisson distribution to see how well the
 % Poisson distribution fits the data.  I need the support of the
 % measured data, and store in $x$. As $np.bincount$ only counts, it is
 % necessary to normalize $P$.
-% \begin{pyblock}
+% \begin{pyverbatim}
 % x = range(p.min(), p.max())
 
 % plt.plot(P/float(sum(P)))
 % plt.plot(x, scipy.stats.poisson.pmf(x, labda)) 
 % plt.show()
-% \end{pyblock} 
+% \end{pyverbatim} 
 
 % Not bad. However, some experimentation shows that when $N$ is small,
 % like 30 or so, and the $runlength$ is short, in the order of 100 or
 % so, the quality of the Poisson approximation is much less. I do not
 % fully understand why that is the case.
 
-% \begin{pyblock}
+% \begin{pyverbatim}
 % N = 30
 % runlength = 300
 % a = G.rvs((N, runlength))
@@ -788,7 +788,7 @@ If  $\mu=\sigma=5$ then the analysis should break down. What happens if you set 
 % x = range(p.min(), p.max())
 % plt.plot(x, scipy.stats.poisson.pmf(x, labda)) 
 % plt.show()
-% \end{pyblock} 
+% \end{pyverbatim} 
 
 \clearpage
 
@@ -811,7 +811,7 @@ Use a for-loop to sketch an algorithm (in pseudo code). Then check the solution 
 
   \begin{solution}
     We need a few imports.
-\begin{pyblock}
+\begin{pyverbatim}
 import numpy as np
 import scipy
 from scipy.stats import poisson
@@ -830,7 +830,7 @@ def compute_Q_d(a, s, q0=0):
 
     return Q, d
   
-\end{pyblock}
+\end{pyverbatim}
 
     One of the nicest things of python is that  the real code and pseudo code resemble each other so much.
   \end{solution}
@@ -1004,9 +1004,9 @@ Then run the same code with \pyv{s = np.ones_like(a) * mu} rather than the Poiss
 
 \begin{exercise}
   Next, we might be able to reduce the average service time by 10\%, say, but reducing the variability is hard. To see the effect of this change, replace \pyv{s} by
-  \begin{pyblock}
+  \begin{pyverbatim}
 s = poisson(1.1*mu).rvs(N)    
-  \end{pyblock}
+  \end{pyverbatim}
 i.e., we increases the service rate with $10\%$. 
 
 Do the computations and compare the results to those of the previous exercise. What change in average service time do we need to get about the same average queue length as the one for the queueing system with deterministic service times? Is an $10\%$ increase enough, or should it be $20\%$, or $30\%$? Just test a few numbers and see what you get. 
@@ -1211,7 +1211,7 @@ For this very general problem a number of efficient data structures have been de
 
   \begin{solution}
 If you found, and read, the appropriate web page, you must have ended up with this code.
-\begin{pyblock}
+\begin{pyverbatim}
 from heapq import heappop, heappush
 
 stack = []
@@ -1225,7 +1225,7 @@ while stack:
     age, name = heappop(stack)
     print(name, age)
 
-  \end{pyblock}
+  \end{pyverbatim}
 
 Pushing puts things on the stack in a sorted fashion, popping takes things from the stack. First we put the students on the stack. To print, we remove items from the stack until it is empty.
 \end{solution}
@@ -1239,7 +1239,7 @@ Pushing puts things on the stack in a sorted fashion, popping takes things from 
 \begin{solution}
 We can make the  tuples, i.e., the data between the brackets,  just longer. 
 
-\begin{pyblock}
+\begin{pyverbatim}
 from heapq import heappop, heappush
 
 stack = []
@@ -1252,7 +1252,7 @@ heappush(stack, (25, "Cynthia", "Nexus"))
 while stack:
     age, name, phone = heappop(stack)
     print(age, name, phone)
-\end{pyblock}
+\end{pyverbatim}
 
 
 \end{solution}
@@ -1278,7 +1278,7 @@ In this section we will set up a simulator for the $G/G/1$ queue with  an event 
 We start with some basic imports, initialize the stack, and define two numbers \pyv{ARRIVAL} and \pyv{DEPARTURE} that will be used to tag the type of event that will be popped from the event stack.
 So, make a new file, and type the following at the top of it.
 
-\begin{pyblock}
+\begin{pyverbatim}
 from heapq import heappop, heappush
 import numpy as np 
 from scipy.stats import expon
@@ -1289,7 +1289,7 @@ ARRIVAL = 0
 DEPARTURE = 1
 
 stack = [] # this is the event stack
-\end{pyblock}
+\end{pyverbatim}
 
 Note again that we fix the seed so that we get the same random numbers while testing our code. 
 
@@ -1297,7 +1297,7 @@ Note again that we fix the seed so that we get the same random numbers while tes
 First of all we need jobs with arrival times and service times. The easiest way to handle jobs in a simulator is by means of a class, as in the code below.
 
 
-\begin{pyblock}
+\begin{pyverbatim}
 class Job:
     def __init__(self):
         self.arrival_time = 0
@@ -1317,7 +1317,7 @@ class Job:
                 "{self.departure_time}\n")
 
   
-\end{pyblock}
+\end{pyverbatim}
 
 A class has a number of \emph{attributes}, such as \pyv{self.arrival_time}, to capture its state and a number of functions, such as \pyv{def waiting time(self)}, to compute specific information that relates to the class\footnote{In python, functions belonging to a class are called `methods' or `member functions'.}.
 We initialize the arrival time and service time to zero.
@@ -1330,17 +1330,17 @@ Classes are extremely useful programming concepts, as it enables you to organize
 
 Once we have a class, making an object is simple with this code.\footnote{The wording is important here. Objects are instances of classes. As an example: Albert Einstein was a human being. Here, `Einstein' is the object, and `human being' is a class.}
 
-\begin{pyblock}
+\begin{pyverbatim}
 job = Job()
 job.arrival_time = 3
 job.service_time = 2
-\end{pyblock}
+\end{pyverbatim}
 
 \begin{exercise}\label{ex:3}
   Make $10$ jobs with exponentially distributed inter-arrival times, with $\lambda=2$,  and exponentially distributed service times with $\mu=3$. Put these jobs on an event stack, and print them in order of arrival time. Tag the events with the job, and event type (which is an arrival).
   \begin{solution}
 One way is like this.     
-    \begin{pyblock}
+    \begin{pyverbatim}
 labda = 2.
 mu = 3.
 rho = labda/mu
@@ -1362,7 +1362,7 @@ while stack:
     time, job, typ = heappop(stack)
     print(job)
     
-    \end{pyblock}
+    \end{pyverbatim}
   \end{solution}
 \end{exercise}
 
@@ -1370,7 +1370,7 @@ Now that we know how to make jobs and put them on an event stack, we can make a 
 
   Replace the while loop of the previous exercise by the code below. Observe that we split events into two types\footnote{The word \pyv{type} is a reserved word in python, hence I use \pyv{typ} instead.}: arrivals and departures. 
 
-  \begin{pyblock}
+  \begin{pyverbatim}
 while stack:
     time, job, typ = heappop(stack)
     if typ == ARRIVAL:
@@ -1378,7 +1378,7 @@ while stack:
     else:
         handle_departure(time, job)
     
-  \end{pyblock}
+  \end{pyverbatim}
 
 \begin{exercise}
   With the above idea to make a while loop, make a list of things that have to take place at an arrival event (in particular, what should happen when the server is busy at an arrival epoch, what should happen if the server is idle?)
@@ -1389,7 +1389,7 @@ while stack:
 \begin{solution}
 We need a server object to keep track of the state of the server, and we also need  a list to queue the jobs. 
 
-  \begin{pyblock}
+  \begin{pyverbatim}
 class Server:
     def __init__(self):
         self.busy = False
@@ -1424,7 +1424,7 @@ while stack:
         handle_departure(time, job)
         served_jobs.append(job)
 
-  \end{pyblock}
+  \end{pyverbatim}
 \end{solution}
 
 \end{exercise}
@@ -1442,7 +1442,7 @@ You might want to check Exercise~\ref{ex:3} to see how to generate the jobs.
     \end{hint}
   \begin{solution}
 Now we see that we needed to store the jobs in \pyv{served_jobs}. Set \pyv{num_jobs=100} in the code of Exercise~\ref{ex:3}. Put the following code at the end of the simulator to compute the statistics. 
-    \begin{pyblock}
+    \begin{pyverbatim}
 
 tot_queue = sum(j.queue_length_at_arrival for j in served_jobs)
 av_queue_length = tot_queue/len(served_jobs)
@@ -1452,7 +1452,7 @@ print("Simulated avg. queue length:", av_queue_length)
 tot_sojourn = sum(j.sojourn_time() for j in served_jobs)
 av_sojourn_time = tot_sojourn/len(served_jobs)
 print("Avg. sojourn time:", av_sojourn_time)
-\end{pyblock}
+\end{pyverbatim}
 
 Now run the simulator.
 
@@ -1463,12 +1463,12 @@ You should see that you need a real large amount of jobs to obtain a good estima
 
 \begin{exercise}
  Thus, let us get further confidence in our $G/G/1$ simulator by specializing it to the $D/D/1$ queue. Check the documentation of the \pyv{uniform} distribution in \pyv{scipy.stats} to see what the following code does
-  \begin{pyblock}
+  \begin{pyverbatim}
 from scipy.stats import uniform
 
 F = uniform(3, 0.00001)
 G = uniform(2, 0.00001)
-\end{pyblock}
+\end{pyverbatim}
 
 Then use this in our simulation. What happens? What happens if you reverse the 2 and the 3 in $F$ and $G$?
 \begin{solution}
@@ -1503,7 +1503,7 @@ Build a function with arguments $\lambda$ and $G$. From from \pyv{scipy.stats} i
 
 First we compute the average waiting time.  Then we use Little's law to convert the waiting time to the expected queue length.
 
-    \begin{pyblock}
+    \begin{pyverbatim}
 
 def pollaczek_khinchine(labda, G):
     ES = G.mean()
@@ -1519,7 +1519,7 @@ G = uniform(1, 2)
 
 print("PK: ", labda*pollaczek_khinchine(labda,G))
       
-    \end{pyblock}
+    \end{pyverbatim}
 
   \end{solution}
 
@@ -1538,7 +1538,7 @@ Reset to all data and clear all lists.
   \begin{solution}
 To ensure that we do not keep old data, we have to reset all lists. 
 
-\begin{pyblock}
+\begin{pyverbatim}
 print("Simulation of check-in process, M/G/1 with G=U[2,5]")
 
 
@@ -1576,7 +1576,7 @@ av_sojourn_time = tot_sojourn/len(served_jobs)
 print("Theo avg. sojourn time: ", pollaczek_khinchine(labda,G) + G.mean())
 print("Simu avg. sojourn time:", av_sojourn_time)
   
-\end{pyblock}
+\end{pyverbatim}
 
   \end{solution}
 
@@ -1587,30 +1587,30 @@ print("Simu avg. sojourn time:", av_sojourn_time)
 
   Use the following code to obtain a quick and dirty overview of the queue length distribution.
 
-  \begin{pyblock}
+  \begin{pyverbatim}
 from collections import Counter
 
 c = Counter([j.queue_length_at_arrival for j in served_jobs])
 print("Queue length distributon, sloppy output") 
 print(c)
     
-  \end{pyblock}
+  \end{pyverbatim}
 
   What is your opinion? What would you change to the system? 
   \begin{solution}
     I ran the code  for $n=100000$ and got this
 
-    \begin{pyblock}
- Counter({0: 37134, 1: 16558, 2: 12517, 3: 9070, 4: 6725, 5: 4785, 6: 3515, 7: 2631,
+\begin{pyverbatim}
+Counter({0: 37134, 1: 16558, 2: 12517, 3: 9070, 4: 6725, 5: 4785, 6: 3515, 7: 2631,
 
    8: 2047, 9: 1433, 10: 1095,  11: 818, 12: 545, 13: 401, 14: 260,
 
    15: 178, 16: 116, 17: 72, 18: 49, 19: 27, 20: 13, 21: 6, 22: 5})
 
-    \end{pyblock}
+\end{pyverbatim}
 
-    \begin{pyblock}
-    \end{pyblock}
+    \begin{pyverbatim}
+    \end{pyverbatim}
 
 So, about $2\%$ see a queue that is longer than 10, and about $10\%$ (which I get by, so-called-eye balling) of the people see a queue that is longer than 5. It seems that the service capacity is too small, assuming that the customers have a flight to catch.  
   \end{solution}
@@ -1641,9 +1641,9 @@ We have used a good data structure already. How should this be applied?
 \begin{solution}
   As in the LIFO example, we only have to change the data structure. First, we give each job an extra attribute corresponding to its priority. Then we use a heap to store the jobs in queue. Specifically,  change the line with
   \pyv{queue.append(job)} by
-  \begin{pyblock}
+  \begin{pyverbatim}
 heappush(queue, (job.priority, job))
-  \end{pyblock}
+  \end{pyverbatim}
 and \pyv{queue.pop(0)} by \pyv{heappop(queue)}. 
 
 \end{solution}
@@ -1744,7 +1744,7 @@ It is not  problem when you spend considerable time on this exercise. Most of th
 Here is the entire class. Read it carefully.   
 
 
-\begin{pyblock}
+\begin{pyverbatim}
 from collections import deque
 from heapq import heappop, heappush
 import numpy as np
@@ -1838,7 +1838,7 @@ class GGc:
                 self.handle_departure(time, job)
 
 
-\end{pyblock}
+\end{pyverbatim}
 \end{solution}
   
 \end{exercise}
@@ -1850,14 +1850,14 @@ class GGc:
 How can we instantiate the \pyv{GGc} simulator, i.e., make an object of a class? How can we run a simulation with exponential inter-arrival times with $\lambda=2$, exponential service times with $\mu=1$, $c=3$, and $10$ jobs?
 \begin{solution}
 First we instantiate, then we run and print. 
-\begin{pyblock}
+\begin{pyverbatim}
 labda = 2
 mu = 1  
 ggc = GGc(expon(scale=1./labda), expon(scale=1./mu), 3, 10)
 ggc.run()
 
 print(ggc.served_jobs)
-\end{pyblock}
+\end{pyverbatim}
 \end{solution}
 \end{exercise}
 
@@ -1879,7 +1879,7 @@ Follow the implementation of Exercise~\ref{ex:5}.
   \begin{solution}
 Recall that Sakasegawa's formula is exact for the $M/G/1$ queue, hence also for the $M/M/1$ queue. 
 
-\begin{pyblock}
+\begin{pyverbatim}
 
 def sakasegawa(F, G, c):
     labda = 1./F.mean()
@@ -1890,7 +1890,7 @@ def sakasegawa(F, G, c):
     ce2 = G.var()/ES/ES
     return (ca2+ce2)/2 * EWQ_1
     
-  \end{pyblock}
+  \end{pyverbatim}
     
     
   \end{solution}
@@ -1906,7 +1906,7 @@ def sakasegawa(F, G, c):
   
 In the next function we perform the test. We give this function standard  arguments so that we can  run the function as a standalone test. As such we want to to  contain all parameter values. 
 
-\begin{pyblock}
+\begin{pyverbatim}
 def mm1_test(labda=0.8, mu=1, num_jobs=100):
     c = 1
     F = expon(scale=1./labda)
@@ -1923,7 +1923,7 @@ def mm1_test(labda=0.8, mu=1, num_jobs=100):
 
 mm1_test(num_jobs=100)
 mm1_test(num_jobs=10000)
-\end{pyblock}
+\end{pyverbatim}
 
   \end{solution}
 \end{exercise}
@@ -1937,7 +1937,7 @@ mm1_test(num_jobs=10000)
 
   \begin{solution}
 Here is a function to keep things organized.
-  \begin{pyblock}
+  \begin{pyverbatim}
 def md1_test(labda=0.9, mu=1, num_jobs=100):
     c = 1
     F = expon(scale=1./labda)
@@ -1955,7 +1955,7 @@ def md1_test(labda=0.9, mu=1, num_jobs=100):
 md1_test(num_jobs=100)
 md1_test(num_jobs=10000)
 
-  \end{pyblock}
+  \end{pyverbatim}
   \end{solution}
 
 \end{exercise}
@@ -1966,7 +1966,7 @@ With our simulation we can also check the quality of Sakasegawa's approximation.
 \begin{solution}
 The code.
 
-  \begin{pyblock}
+  \begin{pyverbatim}
     
 def md2_test(labda=1.8, mu=1, num_jobs=100):
     c = 2
@@ -1985,7 +1985,7 @@ def md2_test(labda=1.8, mu=1, num_jobs=100):
 md2_test(num_jobs=100)
 md2_test(num_jobs=10000)
 
-  \end{pyblock}
+  \end{pyverbatim}
   
 \end{solution}
 
@@ -2051,7 +2051,7 @@ The queueing problem  is evidently to determine the required number of servers $
   \begin{solution}
 The first function computes the KPIs, the second runs multiple scenarios. 
 
-    \begin{pyblock}
+    \begin{pyverbatim}
 def intake_process(F, G, c, num):
 
     ggc = GGc(F, G, c, num)
@@ -2076,7 +2076,7 @@ def intake_test_1():
       
 intake_test_1()
 
-    \end{pyblock}
+    \end{pyverbatim}
   \end{solution}
   
 \end{exercise}
@@ -2105,7 +2105,7 @@ We could also make a plot of the job waiting time as a function of time, but we 
 
 Perhaps we should open the check-in desks for a longer time and advise people to come earlier. Let's try 90 minutes instead.
 
-\begin{pyblock}
+\begin{pyverbatim}
 
 def intake_test_2():
     labda = 300/90
@@ -2119,7 +2119,7 @@ def intake_test_2():
         print(c, max_waiting_time, longer_ten)
 
   
-\end{pyblock}
+\end{pyverbatim}
 
 If you do the experiment, you'll see that this works much better. It is now also very simple to set up a third experiment in which the desks are open during two hours. Then you'll see that 4 servers  suffice. 
 
@@ -2168,17 +2168,241 @@ Some  interesting extensions.
 
 As the simulation of this case is somewhat more difficult than the $G/G/c$ queue, testing is also more important. For this reason we followed a \emph{test-driven} procedure. First we design a number of test cases, from very simple to a bit less simple. Then we started building and testing until the first test case passed. Then we tested with the second case, the third, and so on, until all the tests passed. And, indeed, along the way we caught numerous mistakes, from missing \pyv{if} statements (a very big bug) to simple typos.
 
+\subsection{The simulator}
+\label{sec:simulator-1}
+
 \begin{exercise}
-  Make a list of extremely simple cases, so simple in fact that you can check the outcome with no effort at all, to a bit harder, but such that you have theoretical tools to validate the outcome.
+  Make a list of  simple cases whose outcome you can check by hand to a bit harder for which  you can use theoretical tools to validate the outcome.
   \begin{hint}
 Suppose there is only a server for business customers and also only business customers? What should happen? Suppose further that the inter-arrival times are constant and  1 minutes and service times constant and equal to 0.5 minute? What if the service times are 2 minutes and 10 business customers arrive? What if all 10 customers arrive at time 0; when should the last leave? What if we only have economy customers but only the business server? And so on. Ensure you design cases you can check by hand. These simple tests will catch many, many errors. As a general rule, invest in such tests. 
   \end{hint}
   
+
+  \begin{solution}
+Here are two tests. The tests will not yet work since we have not yet made the \pyv{GGc_with_business} class. 
+
+    \begin{pyverbatim}
+def DD1_test_1():
+    # test with only business customers
+    c = 0
+    F = uniform(1, 0.0001)
+    G = expon(0.5, 0.0001)
+    p_business = 1
+    num_jobs = 5
+    jobs = generate_jobs(F, G, p_business, num_jobs)
+    ggc = GGc_with_business(c, jobs)
+    ggc.run()
+    ggc.print_served_job()
+    
+
+def DD1_test_2():
+    # test with only economy customers
+    c = 1
+    F = uniform(1, 0.0001)
+    G = expon(0.5, 0.0001)
+    p_business = 0
+    num_jobs = 5
+    jobs = generate_jobs(F, G, p_business, num_jobs)
+    ggc = GGc_with_business(c, jobs)
+    ggc.run()
+    ggc.print_served_job()
+
+def do_tests():
+    DD1_test_1()
+    #DD1_test_2()
+
+do_tests()
+    \end{pyverbatim}
+
+  \end{solution}
+
+We assemble all tests into the function \pyv{do_tests()}, and quote out the tests we do not want to do.Like this we can keep all the specific values of all tests. If we modify our code later, we can run all tests again, or just  one, whatever is suitable. 
 \end{exercise}
 
 
+Before we build the class for the queues we observe that the implementation of the $G/G/c$ of Section~\ref{sec:ggc-continuous-time} suffers from a performance penalty. The problem is that  we create a new object to generate the quasi-random inter-arrival and service times\footnote{You only know such things if you have some general knowledge of python. Hence, it pays to invest in knowledge of the computer language you use.}. Specifically,  code like this runs very slow:
+\begin{pyverbatim}
+def generate_jobs_bad_implementation(F, G, p_business, num_jobs):
+    # the difference in performance is tremendous
+    for n in range(num_jobs):
+        job = Job()
+        job.arrival_time = time + F.rvs()  
+        job.service_time = G.rvs()  
+        if uniform(0,1).rvs() < p_business:
+            job.customer_type = BUSINESS
+        else:
+            job.customer_type = ECONOMY
 
-This time we follow
+        jobs.add(job)
+        time = job.arrival_time
+
+    return jobs
+\end{pyverbatim}
+Note that we generate \pyv{num_jobs} jobs. Then, with probability $p$ (\pyv{p_business} in our code) the job is a business customer. 
+
+To repair this problem it is better let \pyv{scipy} call a random number generator in C++ just once and generate all random numbers in one pass.
+Here is one way to obtain a factor of 100 or so speed up.
+\begin{pyverbatim}
+def generate_jobs(F, G, p_business, num_jobs):
+    jobs = set()
+    time = 0
+    a = F.rvs(num_jobs)
+    b = G.rvs(num_jobs)
+    p = uniform(0, 1).rvs(num_jobs)
+
+    for n in range(num_jobs):
+        job = Job()
+        job.arrival_time = time + a[n]
+        job.service_time = b[n]
+        if p[n] <  p_business:
+            job.customer_type = BUSINESS
+        else:
+            job.customer_type = ECONOMY
+
+        jobs.add(job)
+        time = job.arrival_time
+
+    return jobs
+\end{pyverbatim}
+
+We assume that the service distribution is the same for all job classes. If we do not want this, we can make the service time dependent on the job type. 
+
+\begin{exercise}
+  How to implement the dependence of job service time on job type?
+
+  \begin{solution}
+The code explains all. Note, we will not use it in our simulation. 
+
+
+\begin{pyverbatim}
+def generate_jobs_bad_implementation(F, Ge, Gb, p_business, num_jobs):
+    # the difference in performance is tremendous
+    for n in range(num_jobs):
+        job = Job()
+        job.arrival_time = time + F.rvs()  
+        if uniform(0,1).rvs() < p_business:
+            job.customer_type = BUSINESS
+            job.service_time = Gb.rvs()  
+        else:
+            job.customer_type = ECONOMY
+            job.service_time = Ge.rvs()  
+
+        jobs.add(job)
+        time = job.arrival_time
+
+    return jobs
+        
+\end{pyverbatim}
+  \end{solution}
+\end{exercise}
+
+\begin{exercise}
+  Try to implement the $G/G/c$ queue with business customers. The rules must be like this. Business and economy class customers have separate queues and separate, dedicated servers. There is one business server and there are $c$ economy class servers. If the business (economy) server becomes  idle and there is an economy (business)class customer in queue, the business (economy) server takes an economy (business) customer into service.\footnote{If you lack time, then just study the code.}
+
+  \begin{solution}
+    Check the code carefully so that you understand all details. 
+\begin{pyverbatim}
+class GGc_with_business:
+    def __init__(self, c, jobs):
+        self.b = 1  # number of b servers
+        self.c = c  # number of e servers
+        self.jobs = jobs
+
+        self.num_b_busy = 0  
+        self.num_e_busy = 0  
+        self.stack = []  
+        self.b_queue = deque()
+        self.e_queue = deque()
+
+        self.fill_stack()
+
+    def fill_stack(self):
+        for job in sorted(self.jobs, key=lambda j: j.arrival_time):
+            heappush(self.stack, (job.arrival_time, job, ARRIVAL))
+
+    def handle_arrival(self, time, job):
+        if job.customer_type == BUSINESS:
+            job.queue_length_at_arrival = len(self.b_queue)
+        else:
+            job.queue_length_at_arrival = len(self.e_queue)
+
+        if job.customer_type == ECONOMY:
+            if self.num_e_busy < self.c:
+                job.server_type = ECONOMY
+                self.start_service(time, job)
+            elif self.num_b_busy < self.b:
+                job.server_type = BUSINESS
+                self.start_service(time, job)
+            else:
+                self.e_queue.append(job)
+        else: # business customer
+            if self.num_b_busy < self.b:
+                job.server_type = BUSINESS
+                self.start_service(time, job)
+            elif self.num_e_busy < self.c:
+                job.server_type = ECONOMY
+                self.start_service(time, job)
+            else:
+                self.b_queue.append(job)
+            
+    def start_service(self, time, job):
+        if job.server_type == BUSINESS:
+            self.num_b_busy += 1 
+        else:
+            self.num_e_busy += 1 
+        job.departure_time = time + job.service_time
+        heappush(self.stack, (job.departure_time, job, DEPARTURE))
+
+    def pop_from_queue_set_server_and_start(self, time, queue, server_type):
+        next_job = queue.popleft()
+        next_job.server_type = server_type
+        self.start_service(time, next_job)
+
+    def handle_departure(self, time, job):
+        if job.server_type == BUSINESS:
+            self.num_b_busy -= 1
+            if self.b_queue:
+                self.pop_from_queue_set_server_and_start(time, self.b_queue, BUSINESS)
+            elif self.e_queue:
+                self.pop_from_queue_set_server_and_start(time, self.e_queue, BUSINESS)
+        else:  # economy server free
+            self.num_e_busy -= 1
+            if self.e_queue:
+                self.pop_from_queue_set_server_and_start(time, self.e_queue, ECONOMY)
+            elif self.b_queue:  
+                self.pop_from_queue_set_server_and_start(time, self.b_queue, ECONOMY)
+
+    def run(self):
+        time = 0
+        while self.stack:  # not empty
+            time, job, epoch_type = heappop(self.stack)
+            if epoch_type == ARRIVAL:
+                self.handle_arrival(time, job)
+            else:
+                self.handle_departure(time, job)
+
+    def print_served_job(self):
+        for j in sorted(self.jobs, key=lambda j: j.arrival_time):
+            print(j)
+
+    def mean_waiting_time(self, customer_type=None):
+        if customer_type is None:
+            jobs = self.jobs
+        else:
+            jobs = set(j for j in self.jobs if j.customer_type == customer_type)
+        return sum(j.waiting_time() for j in jobs)/len(jobs)
+
+    def max_waiting_time(self, customer_type=None):
+        if customer_type is None:
+            return max(j.waiting_time() for j in self.jobs)
+        else:
+            return max(j.waiting_time() for j in self.jobs if j.customer_type == customer_type)
+              
+\end{pyverbatim}
+  \end{solution}
+\end{exercise}
+
+
 
 We developed quite a large number of simple cases to test our implementation. 
 
@@ -2245,278 +2469,6 @@ extensions.
 \end{document}
 
 
-\section{Queueing networks and workload control}
-\label{sec:queueing-network}
-
-In many organizations jobs or orders are processed in various stages.
-For example, a case at a court undergoes a number of processing stems.
-When a new case arrives it is first filed and queued.
-Then a clerk reads it and sometimes assembles some necessary data.
-The case is then sent to a judge for further assessment.
-The judge may send the case back to the clerk, or may play a trial.
-After some loops, the trial is held.
-After the trial, the clerk has to write a report, which in turn has to be checked by the judge, and perhaps repaired.
-In all steps, an (electronic) document is passed on from one station to another, and waits there until the server has time to process the job.
-In many cases the job is sent to a next station, but the job may also be sent back to the station itself.
-Other instances of queueing networks are job shops/production networks, hospitals, customs services, and so on.
-Hence, with the tools we develop in this section it becomes possible to analyze quite difficult business processes in terms of throughput and delay as functions of arrival and service rate, and routing (the rules that determine what sequence of stations jobs have to follow.)
-
-In this tutorial we will develop the tools to simulate such queueing networks. Of particular importance in such networks are throughput (the average output of the network), and lead times (the time orders spend in the queueing network itself, but also the time spent before any action can start.) We start with a very simple network. Then we extend the situation to a network in which the number of jobs `on the floor' is limited. (The jobs `on the `floor' are all jobs waiting between two stations or in actual service; jobs waiting at the entrance to get access to the queueing network are not included.) 
-
-This form of control, known as \emph{CONWIP} (constant work in process), is a very simple but effective way to control queueing networks. To see it working in a simulation is actually quite fascinating. There is also an large amount of literature on this topic. We refer to the book Factory Physics by Hopp and Spearman for further background. 
-
-
-\subsection{A Simple Queueing Network}
-
-
-With recursions it is (nearly) trivial to simulate a so-called feed-forward network, that is, networks without feedback or loops.  In terms of a graph, a feed-forward network is a loop-free directed graph. 
-
-\begin{exercise}
-  Suppose we have a network with two stations such that all the output of station 1 moves to station 2. First think about what information you need in order to simulate the queueing behavior at station 1 and 2. Then write a function to simulate a queueing process in discrete time, and use this to form the required queueing network. Assume that jobs arrive as a Poisson process at the first station with rate $\lambda=3$ per period, and that the service times are exponentially distributed with rate $\mu_1 = 4$ and $\mu_2 = 3.5$ for station 1 and 2, respectively.
-  \begin{hint}
-    Use the code of Exercise~\ref{ex:4} to simulate one queue. The output of this function gives the number of jobs served at station 1 for each period. Then this output forms the input to the next station. 
-  \end{hint}
-  \begin{solution}
-Here is the code.
-\begin{pyblock}
-import numpy as np
-from scipy.stats import poisson
-import matplotlib.pyplot as plt
-
-def compute_Q_d(a, s, q0=0):
-    d = np.zeros_like(a)
-    Q = np.zeros_like(a)
-    Q[0] = q0  # starting level of the queue
-    for i in range(1, len(a)):
-        d[i] = min(Q[i - 1], s[i])
-        Q[i] = Q[i - 1] + a[i] - d[i]
-
-    return Q, d
-
-N = 1000
-labda = 3
-mu1 = 4
-a1 = poisson(labda).rvs(N)
-s1 = poisson(mu1).rvs(N)
-q1, d1 = compute_Q_d(a1, s1)
-
-# station 2
-a2 = d1
-mu2 = 3.5
-s2 = poisson(mu2).rvs(N)
-q2, d2 = compute_Q_d(a2, s2)
-
-plt.plot(q1, label="Q1")
-plt.plot(q2, label="Q2")
-plt.legend()
-plt.show()
-  
-\end{pyblock}
-    
-  \end{solution}
-\end{exercise}
-
-\begin{exercise}
-  Suppose station 2 gets some extra external jobs arriving as $\sim P(0.3)$. Include this in your simulator. What happens to the queue length process at station 2? 
-  \begin{solution}
-Build the arrival process at station 2 like this. 
-    \begin{pyblock}
-gamma2 = 0.3
-g2 = poisson(gamma2).rvs(N)
-a2 = d1 + g2
-    \end{pyblock}
-
-The queue at the second station becomes quite a bit larger. This is evident as the load at station 2 becomes higher. 
-    
-  \end{solution}
-\end{exercise}
-
-
-\begin{exercise}
-  Suppose we have seven stations such that the output of station 1 and 2 feed into station 3, the output of stations 3 and 4 into 5. Then, one third of the jobs of station 5 go to station 6, and the rest to station 7. Assume that external jobs arrive as Poisson processes with $\gamma_1 = 3$, $\gamma_2=2$ and $\gamma_4=1$. The service processes are Poisson with rates are $\mu_1=3.5, \mu_2 = 2.5, \mu_3=5.5, \mu_4 = 2.5, \mu_5 = 5.5, \mu_6=4, \mu_7 = 4$. Connect the stations and make plots of the queue length processes. Note in particular that node 3 is a `join' node, and node 5 a `fork' node. 
-  \begin{solution}
-When you run the code below, you'll see that the capacity at one node is too small. 
-    \begin{pyblock}
-N = 1000
-
-def network():
-    # station 1
-    a1 = poisson(3).rvs(N)
-    s1 = poisson(3.5).rvs(N)
-    q1, d1 = compute_Q_d(a1, s1)
-    
-    # station 2
-    a2 = poisson(2).rvs(N)
-    s2 = poisson(2.5).rvs(N)
-    q2, d2 = compute_Q_d(a2, s2)
-    
-    # station 3 
-    a3 = d1+d2
-    s3 = poisson(5.5).rvs(N)
-    q3, d3 = compute_Q_d(a3, s3)
-
-
-    # station 4
-    a4 = poisson(1).rvs(N)
-    s4 = poisson(2.5).rvs(N)
-    q4, d4 = compute_Q_d(a4, s4)
-    
-    # station 5
-    a5 = d3+d4
-    s5 = poisson(5.5).rvs(N)
-    q5, d5 = compute_Q_d(a5, s5)
-
-    # station 6 
-    a6 = d5//3    #fork 1/3, and round to int 
-    # a6 = a6.astype(int)
-    s6 = poisson(4).rvs(N)
-    q6, d6 = compute_Q_d(a6, s6)
-
-    # station 7
-    a7 = d5 - a6   #rest of the station 5
-    s7 = poisson(4).rvs(N)
-    q7, d7 = compute_Q_d(a7, s7)
-
-    plt.plot(q1, label="Q1")
-    plt.plot(q2, label="Q2")
-    plt.plot(q3, label="Q3")
-    plt.plot(q4, label="Q4")
-    plt.plot(q5, label="Q5")
-    plt.plot(q6, label="Q6")
-    plt.plot(q7, label="Q7")
-    plt.legend()
-    plt.show()
-
-
-network()    
-    \end{pyblock}
-  \end{solution}
-\end{exercise}
-
-\begin{exercise}
-  It should be clear that the capacity of station 5 is too small. Suppose you would set it to 7.4. What happens now?
-  \begin{solution}
-Station 7 becomes now a bottleneck. Interestingly, when station 5 was a bottleneck, there was not a long queue at station 7. Hence, in general, `up-stream' bottlenecks prevent long queues to form at potential bottleneck downstream. Once we added capacity to station 5, a big queue started to form in front of station 7. Hence, the capacity at station 7 also has to be increased. 
-  \end{solution}
-\end{exercise}
-
-
-\subsection{CONWIP}
-\label{sec:conwip}
-
-A simple, but very important, observation is that if we have a choice where to queue jobs, we typically prefer them to queue at the start of the network.
-
-\begin{exercise}
-  Why is it, typically, preferable to have jobs wait at the start of the network? This is a very important question; if you ever need to design logistic processes (hospitals, production processes, and so on), the answer to this question will serve you a life time. 
-  \begin{solution}
-    If we can limit the lead time on the floor, we limit the amount of time and raw material invested in unfinished goods. Realize that unfinished goods required investments but did not result in an income. Next, orders may change, so unfinished products can become obsolete. They can also break, spoil, etc. Finally, physical queues require physical floor space, hence need investments in buildings, transportation, heating, etc. So, all in all, we only want to release jobs into the network when there is actual capacity to serve the job.
-
-
-
-  \end{solution}
-\end{exercise}
-
-A good idea is to  install an order book at the front of the network. Here we let orders wait until the lead time in the network is below some amount of time, $T$ say. 
-  
-
-\begin{exercise}
-  Can you come up with an estimate of the total time the job spends in the entire system, that is, the time in the order book and the time on the floor?
-  \begin{solution}
-The rate at which the order book drains must be about equal to the service rate $r_b$ of the bottleneck station. Of course, not all jobs include the bottleneck in their routing, but, given that there is a bottleneck, many jobs must pass the bottleneck. So, as an approximation, the time spent in the order book must be about equal to the total work in the order book divided by $r_b$ plus the time on the floor.      
-  \end{solution}
-\end{exercise}
-
-Often it is not easy to obtain precise estimates of the amount of work on the floor.
-However, counting jobs is easy.
-So, an easy control is to limit the number of orders on the floor.
-Then, if the amount of work on the floor, i.e., the WIP, is quite small, the lea dime, i.e., the total time a job spends on the floor from start to end, must also be quite small.
-In this section we will analyze the effect of putting a cap on the amount of work on the floor.
-In other works, we will study the effects of installing a CONWIP control.
-
-You should note that a network under CONWIP control is a so-called semi-closed queueing network.
-In an open network, jobs can enter and leave the network; in a closed network, the amount of jobs is kept constant; in a semi-closed (or semi-open) network, the number of jobs in part of the network is limited.
-
-Setting up a discrete-time simulation of a CONWIP network is in essence quite simple, but getting the details right is considerably less so.
-For this reason we start with nearly the simplest possible case and, once this is correct, we scale up to a larger network.
-(Recall, once we have the correct equations, the conversion to python code is pretty simple.
-Thus, the real work is to get the equations, i.e., the model, right.)
-
-Consider the following network.
-There are two production stations in tandem, each with deterministic capacity of 1 job per period.
-New jobs are first sent to the order book, which also acts as a queue.
-Whenever all the work $w(t)$ at stations 1 and 2 in period $t$ becomes less than the CONWIP level $W$, an amount $W-w(t)$ of orders will be released from the order book and sent to the first station.
-Jobs served at the first station move on to the second station.
-After being processed at this last station, jobs depart from the network.
-
-
-Let, for $i=0, 1, 2$, 
-\begin{align*}
-a_i(t) & \text{the number of arrivals at station $i$  at the start of period $t$} \\
-d_i(t) & \text{the number of jobs at depart from station $i$  at the end of period $t$} \\
-q_i(t) & \text{the amount of jobs at station $i$  at the end of period $t$} \\
-c_i(t) & \text{the amount of jobs that station $i$  can serve during  period $t$}, \\
-w(t) & \text{the amount of jobs in the network at the end of period $t$}, \\
-\end{align*}
-Thus, we call the order book station $0$. 
-
-Assuming that jobs that arrive at the start of a period $t$ can also be served during period $t$, the queues behave according to the standard equations
-\begin{align*}
-  d_i(t) &= \min\{q_i(t-1) + a_i(t), c_i(t)\} \\
-  q_i(t) &= q_i(t-1) + a_i(t) - d_i(t).
-\end{align*}
-
-
-\begin{exercise} Relate $d_0$ to $a_1$ and $d_1$ to $a_2$, assuming that the jobs released at period $t$ become available at the next station in the next period.
-  \begin{solution}
-    Given the timing, we take $a_i(t) = d_{i-1}(t-1)$ for $i=1,2$.
-    That this holds for stations 0 and 1 is a bit disputable, because the release of an order from the order book does not take any time, hence, we might say that $a_1(t) = d_0(t)$.
-    However, typically, to start working on an order, it is required to assemble raw materials.
-    Thus, we simply assume that this takes one period.
-    Hence, orders released from the order book become available for production in the next period.
-  \end{solution}
-\end{exercise}
-
-\begin{exercise}
-  Implement CONWIP by relating $c_0(t)$, i.e., the amount of jobs that can be released from the order book during period $t$, to the other variables.
-  In particular, assume for the moment that $w(t)$ is known.
-  In the next exercise we will deal with the computation of $w(t)$.
-  \begin{solution}
-    At the end of period $t$ there is room $W-w(t)$.
-    Hence, we release $c_0(t+1) = W-w(t)$ in the next period to the network.
-    Note that this is just the amount of orders that we are willing to release.
-    To actually release this amount, these orders should of course be available in the order book.
-    For this reason we also use the queueing equations to model the behavior of the order book.
-  \end{solution}
-\end{exercise}
-
-
-\begin{exercise}
-  Find an expression for $w(t)$ in terms of the other variables. 
-
-  
-\begin{hint}
-
-  Explain why $w(t) \neq q_1(t) + q_2(t)$.
-  Also, why $w(t) \neq q_0(t) + q_1(t) + q_2(t)$.
-\end{hint}
-
-\begin{solution}
-    We must have this: $w(t) = d_0(t) + q_1(t) + d_1(t) + q_2(t)$.
-    We released $d_0(t)$ orders into the network and assembled raw material for these orders during period $t$.
-    Thus, $d_0(t)$ jobs lie on the floor, waiting in the queue before station 1.
-    Then, the departures of station 1 are in transit to station 2.
-    Hence, they must also count as WIP.
-
-
-    Of course $w(t) \neq q_0(t) + q_1(t) + q_2(t)$.
-    The whole point of CONWIP is to limit the amount of work on the floor.
-    Hence, including $q_0$, i.e., the orders in the order book, is completely wrong.
-    Orders in the order book are meant to be \emph{not} on the floor.
-    \end{solution}
-\end{exercise}
-
-
-The next step is to convert this model into code. 
 
 
 %%% Local Variables:
