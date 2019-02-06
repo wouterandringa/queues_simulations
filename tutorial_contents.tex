@@ -60,7 +60,7 @@
 \Opensolutionfile{ans}
 
 
-\section{Introduction}
+\section*{Introduction}
 
 Typically a queueing system is subject to rules about when to allow jobs to enter the system or to adapt the service capacity.
 Such a decision rule is called a \emph{policy}.
@@ -102,12 +102,67 @@ Our code is not the fastest or most efficient.
 Rather, we focus on clarity of code so that the underlying reasoning is as clear as possible.
 Once our ideas and code are correct, we can start optimizing, if this is necessary.
 
-Finally, the code is part of the course, hence of the midterms and the exams.
+Note that the code is part of the course, hence of the midterms and the exams.
 Unless indicated as not obligatory, you have to be able to read the code and understand it.
+
+The two subsections below provide some  extra information regarding the use of Python in this course. Please read it carefully.
+
+\subsection*{Python: online tutorial}
+
+For the computer simulation assignments in this course it is important that you have a basic understanding of the programming language \emph{Python}. Python is arguably easier to learn than R, which you already know, but you have to get used to the syntax. Therefore, in order to get started with Python, we strongly advise you to do the online introductory tutorial on the following website: \url{https://www.programiz.com/python-programming}.
+
+Although coding skills are necessary in order to successfully make the assignments, they are not the main focus of this course. Therefore, we outline below which parts of the online tutorial are essential. It is certainly not a bad idea to do the entire tutorial; you will need to develop your programming skills anyway. However, for the assignments, the parts outlined below should be sufficient.
+
+Essential topics in the tutorial:
+\begin{itemize}
+\item INTRODUCTION: completely
+\item FLOW CONTROL: completely
+\item FUNCTIONS: 
+	\begin{itemize}
+	\item Python Function
+	\item Function argument
+	\item Python Global, Local and Nonlocal
+	\item Python Modules
+	\item Python Package
+	\end{itemize}
+\item DATATYPES: everything except for Python Nested Dictionary
+\item FILE HANDLING: nothing
+\item OBJECT \& CLASS: 
+\begin{itemize}
+\item Python Class (For assignment 4: \emph{Simulation of the G/G/1 queue in continuous time})
+\end{itemize}
+\end{itemize}
+
+\subsection*{Remarks}
+A couple of remarks regarding the use of Python on your own laptop:
+\begin{itemize}
+\item Please install Python through the \emph{Anaconda} package (website: \url{https://www.anaconda.com/distribution/#download-section}), since this comes with all the necessary documentation. Select your operating system, click ``Download'' under ``Python 3.7 version'' and follow the steps.
+\item After installing, use \emph{Spyder} to work with Python. Spyder is a graphical user interface that allows you to write and compile Python code. It is similar to RStudio (which allows you to work with the language R) and TexStudio (which allows you to work with the language LaTeX). 
+\item You might have issues with making plots That is, you tried something like
+\begin{verbatim}
+import matplotlib
+matplotlib.use('pdf')
+import matplotlib.pyplot as plt
+
+x = range(0, 10)
+y = range(0, 10)
+plt.plot(x, y)
+plt.show()
+\end{verbatim}
+but nothing happens. This issue can be solved by the following steps
+\begin{enumerate}
+\item Restart the kernel (i.e. the thing/screen in which your output is presented. In Windows you can click on a small red cross. In macOS you need to click on the options symbol and select ``restart kernel'')
+\item Remove the line \verb|matplotlib.use('pdf')|, or comment it by putting a \# at the start of the line.
+\item Now it should work!
+\end{enumerate} 
+\end{itemize}
 
 
 \clearpage
-\section{Exponential distribution}
+
+
+
+\section{Tutorial 1: Exponential distribution}
 
 The aim of this tutorial is to show, empirically, a fascinating fact: even for very small populations in which individuals decide independently to visit a server (a shop, a hospital, etc), the exponential distribution is a good model for the inter-arrival times as seen by the server.
 We will develop a simulation to motivate this `fact of nature'.
@@ -808,7 +863,7 @@ If  $\mu=\sigma=5$ then the analysis should break down. What happens if you set 
 \clearpage
 
 
-\section{Simulation of the $G/G/1$ queue in discrete time}
+\section{Tutorial 2: Simulation of the $G/G/1$ queue in discrete time}
 \label{sec:single-server-queue}
 
 In this tutorial we simulate the queueing behavior of a supermarket or hospital, in fact, for a general service system. We first make a simple model of a queueing system, and then extend this to cover more and more difficult queueing situations. With these models we can provide insight into how to design or improve real-world queueing systems.  You will see, hopefully, how astonishingly easy it is with simulation to evaluate many types of decisions and design problems.  
@@ -1191,7 +1246,7 @@ An interesting extension is to incorporate time-varying demand. In many systems,
 
 \clearpage
 
-\section{Simulation of the $G/G/1$ queue in continuous time}
+\section{Tutorial 3: Simulation of the $G/G/1$ queue in continuous time}
 \label{sec:simulation-gg1-queue}
 
 In this tutorial we will write a simulator for the $G/G/1$ queue.
@@ -1706,7 +1761,7 @@ When you do large scale simulations, involving many hours of simulation time, al
 \clearpage
 
 
-\section{Simulation of the $G/G/c$ queue in continuous time}
+\section{Tutorial 4: Simulation of the $G/G/c$ queue in continuous time}
 \label{sec:ggc-continuous-time}
 
 The goal of this tutorial is to  generalize the simulator for the $G/G/1$ to a $G/G/c$ queue. You will see that this is rather easy, once you have the right idea. We will organize the entire simulator into a single class so that our code is organized and we will develop a method to set up structured  tests\footnote{Structured testing is enormously important when you use code for real applications. (I suppose you prefer all code used in self-driving cars to be tested.)  If you are interested, check the web on  \pyv{python unittest} and `test-driven coding'. With test-driven coding you first write down a hierarchy of  many simple tests that your program is supposed to pass.  Then you build your program until the first test pass. Then you implement the next step until the second test pass too, and so on.} Once we have a working simulator we apply it to the check-in process of the airport. 
@@ -2178,7 +2233,7 @@ Some  interesting extensions.
 \clearpage
 
 
-\section{Airport Check-in process, TBD}
+\section{Tutorial 5: Airport Check-in process, TBD}
 \label{sec:simul-check-proc}
 
 As the simulation of this case is somewhat more difficult than the $G/G/c$ queue, testing is also more important. For this reason we followed a \emph{test-driven} procedure. First we design a number of test cases, from very simple to a bit less simple. Then we started building and testing until the first test case passed. Then we tested with the second case, the third, and so on, until all the tests passed. And, indeed, along the way we caught numerous mistakes, from missing \pyv{if} statements (a very big bug) to simple typos.
