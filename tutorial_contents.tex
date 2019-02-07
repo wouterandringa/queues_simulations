@@ -1,8 +1,8 @@
-%\usepackage[solutionfiles]{optional}
+\usepackage[solutionfiles]{optional}
 
 % Als je daarentegen de antwoorden onder de opdracht wil hebben, quote
 % dan bovenstaande uit, en gebruik de regel hieronder
-\usepackage[nosolutionfiles]{optional}
+%\usepackage[nosolutionfiles]{optional}
 
 \opt{nosolutionfiles}{\usepackage[nosolutionfiles]{answers}}
 \opt{solutionfiles}{\usepackage{answers}}
@@ -61,6 +61,7 @@
 
 
 \section*{Introduction}
+\addcontentsline{toc}{section}{Introduction}
 
 Typically a queueing system is subject to rules about when to allow jobs to enter the system or to adapt the service capacity.
 Such a decision rule is called a \emph{policy}.
@@ -78,7 +79,7 @@ For each exercise,
 \item Try to translate your ideas into pseudo code or, better yet, python\footnote{Some of you might wonder why we use python rather than R.
     There are a few reasons for this.
     Python is more or less the third most used programming language, after C++ and java.
-    It is widely used by companies, while R is hardly used outside academia.
+    It is widely used by companies, while R is a niche language and hardly used outside academia.
     Programming OR applications is easier in python; it will also be used in other courses.
     In general, Python is very easy to learn.
     Finally, if you are interested in machine learning and artificial intelligence, python is, hands-down, the best choice.}
@@ -89,29 +90,31 @@ For each exercise,
   \item Simulate a number of scenarios by varying parameter settings and see what happens.
 \end{enumerate}
 
-We expect you to work in a groups of 2 to 3 students and bring a laptop with an \emph{installed and working} python environment, preferably  the anaconda package available at \url{https://www.anaconda.com/},  as this contains all functionality we will need\footnote{There are also python environments available on the web, such as repl.it., but that is typically a bit less practical than running the code on your own machine.}. You can find a nice tutorial to python programming at  \url{https://www.programiz.com/python-programming}. Note, this site advises to install python just by itself. We instead advise you to download anaconda, as this contains also the required numerical libraries. 
-
-We will use the following libraries of python a lot:
-\begin{itemize}
-\item \pyv{numpy}  provides an enormous amount of functions to handle large (multi-dimensional) arrays with numbers. 
-\item \pyv{scipy} contains numerical recipes, such as solvers for optimization software, solvers for differential equations. \pyv{scipy.stats} contains many probability distributions and numerical methods to operate on these functions. 
-\item \pyv{matplotlib} provides plotting functionality.
-\end{itemize}
-
-Our code is not the fastest or most efficient.
-Rather, we focus on clarity of code so that the underlying reasoning is as clear as possible.
-Once our ideas and code are correct, we can start optimizing, if this is necessary.
+We expect you to work in a groups of 2 to 3 students and bring a laptop with an \emph{installed and working} python environment, preferably the anaconda package available at \url{https://www.anaconda.com/}, as this contains all functionality we will need\footnote{There are also python environments available on the web, such as repl.it., but that is typically a bit less practical than running the code on your own machine.}.
 
 Note that the code is part of the course, hence of the midterms and the exams.
 Unless indicated as not obligatory, you have to be able to read the code and understand it.
+Our code is not the fastest or most efficient, rather, we focus on clarity of code so that the underlying reasoning is as clear as possible.
+Once our ideas and code are correct, we can start optimizing, if this is necessary.
 
-The two subsections below provide some  extra information regarding the use of Python in this course. Please read it carefully.
 
-\subsection*{Python: online tutorial}
+The subsections below provide some  extra information regarding the use of Python in this course. Please read it carefully.
 
-For the computer simulation assignments in this course it is important that you have a basic understanding of the programming language \emph{Python}. Python is arguably easier to learn than R, which you already know, but you have to get used to the syntax. Therefore, in order to get started with Python, we strongly advise you to do the online introductory tutorial on the following website: \url{https://www.programiz.com/python-programming}.
 
-Although coding skills are necessary in order to successfully make the assignments, they are not the main focus of this course. Therefore, we outline below which parts of the online tutorial are essential. It is certainly not a bad idea to do the entire tutorial; you will need to develop your programming skills anyway. However, for the assignments, the parts outlined below should be sufficient.
+\section*{Python background}
+\addcontentsline{toc}{section}{Python background}
+
+
+For the computer simulation assignments in this course it is important that you have a basic understanding of the programming language \emph{Python}.
+Python is arguably easier to learn than R, which you already know, but you have to get used to the syntax.
+Therefore, in order to get started with Python, we strongly advise you to do the online introductory tutorial on the following website: \url{https://www.programiz.com/python-programming}.
+Note, this site advises to install python just by itself.
+We instead advise you to download anaconda, as this contains also the required numerical libraries.
+
+Although coding skills are necessary in order to successfully make the assignments, they are not the main focus of this course.
+Therefore, we outline below which parts of the online tutorial are essential.
+It is certainly not a bad idea to do the entire tutorial; you will need to develop your programming skills anyway (in your studies now but also, with very high probability, in your later professional life).
+However, for the assignments, the parts outlined below should be sufficient.
 
 Essential topics in the tutorial:
 \begin{itemize}
@@ -133,7 +136,14 @@ Essential topics in the tutorial:
 \end{itemize}
 \end{itemize}
 
-\subsection*{Remarks}
+We will use the following libraries of python a lot:
+\begin{itemize}
+\item \pyv{numpy}  provides an enormous amount of functions to handle large (multi-dimensional) arrays with numbers. 
+\item \pyv{scipy} contains numerical recipes, such as solvers for optimization software, solvers for differential equations. \pyv{scipy.stats} contains many probability distributions and numerical methods to operate on these functions. 
+\item \pyv{matplotlib} provides plotting functionality.
+\end{itemize}
+We expect you to use google to search for relevant documentation of \pyv{numpy} and so on.
+
 A couple of remarks regarding the use of Python on your own laptop:
 \begin{itemize}
 \item Please install Python through the \emph{Anaconda} package (website: \url{https://www.anaconda.com/distribution/#download-section}), since this comes with all the necessary documentation. Select your operating system, click ``Download'' under ``Python 3.7 version'' and follow the steps.
@@ -2320,10 +2330,13 @@ extensions.
 
 \opt{solutionfiles}{
 \clearpage
-\section{Hints}
+\section*{Hints}
+\addcontentsline{toc}{section}{Hints}
+
 \input{hint}
 \clearpage
-\section{Solutions}
+\section*{Solutions}
+\addcontentsline{toc}{section}{Solutions}
 \input{ans}
 }
 
