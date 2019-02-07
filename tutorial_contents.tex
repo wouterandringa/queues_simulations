@@ -137,9 +137,9 @@ Essential topics in the tutorial:
 A couple of remarks regarding the use of Python on your own laptop:
 \begin{itemize}
 \item Please install Python through the \emph{Anaconda} package (website: \url{https://www.anaconda.com/distribution/#download-section}), since this comes with all the necessary documentation. Select your operating system, click ``Download'' under ``Python 3.7 version'' and follow the steps.
-\item After installing, use \emph{Spyder} to work with Python. Spyder is a graphical user interface that allows you to write and compile Python code. It is similar to RStudio (which allows you to work with the language R) and TexStudio (which allows you to work with the language LaTeX). 
+\item After installing, use \emph{Spyder} to work with Python. Spyder is a graphical user interface that allows you to write and compile Python code. It is similar to RStudio (which allows you to work with the language R) and TexStudio (which allows you to work with the language \LaTeX\/). 
 \item You might have issues with making plots That is, you tried something like
-\begin{verbatim}
+\begin{pyverbatim}
 import matplotlib
 matplotlib.use('pdf')
 import matplotlib.pyplot as plt
@@ -148,11 +148,11 @@ x = range(0, 10)
 y = range(0, 10)
 plt.plot(x, y)
 plt.show()
-\end{verbatim}
+\end{pyverbatim}
 but nothing happens. This issue can be solved by the following steps
 \begin{enumerate}
 \item Restart the kernel (i.e. the thing/screen in which your output is presented. In Windows you can click on a small red cross. In macOS you need to click on the options symbol and select ``restart kernel'')
-\item Remove the line \verb|matplotlib.use('pdf')|, or comment it by putting a \# at the start of the line.
+\item Remove the line \pyv{matplotlib.use('pdf')}, or comment it by putting a \pyv{#} symbol the start of the line.
 \item Now it should work!
 \end{enumerate} 
 \end{itemize}
@@ -597,7 +597,7 @@ def superposition(a):
     A = list(sorted(chain.from_iterable(A)))
     return np.diff(A)
 \end{pyverbatim}  
-Note that the input \pyv{a} in the function \pyv{superposition} is a matrix of interarrival times of several customers.
+Note that the input \pyv{a} in the function \pyv{superposition} is a matrix of inter-arrival times of several customers.
 
 Try to understand this code by reading the documentation (on the web) of the following functions.
 \begin{enumerate}
@@ -875,9 +875,7 @@ For ease we  consider a queueing system in discrete time, and don't make a disti
 
 
 \begin{exercise}
-Write down the recursions to compute the queue length at the end of a period based on the number of arrivals $a_i$ during  period $i$, the queue length $Q_i$ at the start, and the number of services $s_i$. Assume that service is provided at the start of the period.  
-
-Use a for-loop to sketch an algorithm (in pseudo code). Then check the solution for the python code.
+Write down the recursions to compute the queue length at the end of a period based on the number of arrivals $a_i$ during  period $i$, the queue length $Q_i$ at the start, and the number of services $s_i$. Assume that service is provided at the start of the period.   Then sketch an  algorithm (in pseudo code) to carry out the computations (use a for loop). Then check this exercise's solution for the python code.
 
   \begin{solution}
     We need a few imports.
@@ -970,7 +968,7 @@ plt.show()
 
 
 \begin{exercise}
-  Getting statistics is now really easy. For example,  sketch the empirical distribution function of the queue length process and Compute the mean number of departures per period.
+  Getting statistics is now really easy. For example,  try to plot the empirical distribution function of the queue length process.
   \begin{hint}
 For  the empirical distribution function  you can use the code of Exercise~\ref{ex:1}. Before looking it up, try to recall how the cdf is computed.
   \end{hint}
@@ -1009,13 +1007,20 @@ Q, d = compute_Q_d(a, s, q0)
 
 plt.plot(Q)
 plt.show()
-  \end{pyverbatim}
+\end{pyverbatim}
+Explain what you see.
+\begin{solution}
+  The queue length drains at rate $\mu-\lambda$ when $q_0$ is really large. Thus, for such settings, you might just as well approximate the queue length behavior as $q(t) = q_0 - (\mu-\lambda)t$, i.e., as a deterministic system.
+\end{solution}
+\end{exercise}
 
-Next, set $q_0=10000$ and $N=1000$.  (In Anaconda you can just change the numbers and run the code again, in other words, you don't have to copy all the code.) Finally,  make these values again 10 times larger. 
+
+\begin{exercise}
+Set $q_0=10000$ and $N=1000$.  (In Anaconda you can just change the numbers and run the code again, in other words, you don't have to copy all the code.) Finally,  make these values again 10 times larger. 
 
 Explain what you see. What is the drain rate of $Q$?
 \begin{solution}
-  The queue length drains at rate $\mu-\lambda$ when $q_0$ is really large. Thus, for such settings, you might just as well approximate the queue length behavior as $q(t) = q_0 - (\mu-\lambda)t$, i.e., as a deterministic system.
+  You should see that the queue drains with relatively less variations. The `line' becomes `straighter'. 
 \end{solution}
 \end{exercise}
 
@@ -1042,31 +1047,30 @@ Explain again what you see.
 \subsection{What if analysis}
 \label{sec:what-if-analysis}
 
-Hopefully you  are  convinced by now about how powerful simulation is.  We can start asking all kinds of questions.
+With simulation we can do all kinds of experiments to see whether the performance of a queueing system improves in the way we want. Here is a simple example of the type of experiments we can run now. 
 
-\begin{exercise}
-  For instance,  the mean and the sigma of the queue length might be too large, that is, customers complain about long waiting times.  Suppose we are able, with significant technological investment, to make the service time more predictable. What would be the influence of this?
+For instance,  the mean and the sigma of the queue length  might be too large, that is, customers complain about long waiting times.  Suppose we are able, with significant technological investment, to make the service times more predictable. Then we would like to know  the influence of this change on the queue length.
 
 To quantify the effect of regularity of service times we first assume that the service times are exponentially distributed, then we change it to deterministic times.
- Deterministic service times are the best we can achieve. Thus, if we don't change the mean of the service times, it will not become any better than this.
+As deterministic service times are the best we can achieve,  we cannot do any better than this by just making the service times more regular. If we are unhappy about its effect, we have to make service times shorter on average, or add extra servers, or block demand so that the inflow reduces. 
 
-
-So, let's test. First run this:
+\begin{exercise}
+Let's test the influence of service time variability. First run this:
 \begin{pyverbatim}
 N = 10000
-lbw = 6
+labda = 6
 mu = 5
 q0 = 0
 
 a = poisson(labda).rvs(N)
-s = poisson(mu).rvs(N)
+s = poisson(mu).rvs(N)  # marked
 
 Q, d = compute_Q_d(a, s, q0)
 print(Q.mean(), Q.std())
 \end{pyverbatim}
-Then run the same code with \pyv{s = np.ones_like(a) * mu} rather than the Poisson distribution. Explain the result.
+Then run the same code but with the line with \pyv{# marked} replaced by with \pyv{s = np.ones_like(a) * mu} (Read the docs of \pyv{numpy} to see what \pyv{np.ones_like} does).  Explain the result.
 \begin{solution}
-	You should observe that the variability of the queue length process decreases..
+	You should observe that the mean and the variability of the queue length process decrease.
 \end{solution}
 \end{exercise}
 
@@ -1090,10 +1094,11 @@ You should make the crucial observation now that we can experiment with all kind
 \subsection{Control }
 \label{sec:control-}
 
-In the previous section we analyzed the effect of the design of the system, such as changing the average service times. These changes are independent of the queue length. In many systems, however, the service rate depends on the dynamics of the queue process. When the queue is large, service rates increase, while when the queue is small, service rates decrease.  You see this type of policy often in supermarkets, extra cashiers will open when the queues increase.
+In the previous section we analyzed the effect of the design of the system, such as changing the average service times. These changes are independent of the queue length. In many systems, however, the service rate depends on the dynamics of the queue process. When the queue is large, service rates increase, while when the queue is small, service rates decrease.  You see this type of policy often in supermarkets: extra cashiers will open when the queue length increases.
 
+ Suppose that normally we have 6 servers, each working at rate $1$ per period. When the queue becomes longer than 20 we hire two extra servers, and when the queue is empty again, we send the extra two servers home, until the queue hits 20 again, and so on.
 \begin{exercise}
-  Suppose that normally we have 6 servers, each working at rate $1$ per period. When the queue becomes longer than 20 we hire two extra servers, and when the queue is empty again, we send the extra two servers home, until the queue hits 20 again, and so on. Try to write your own code to compute the queue process. (This is pretty challenging, and a good test to see how creative you are in modeling.
+  Try to write pseudo-code (or a  python program) to simulate the queue process. (This is pretty challenging; it's not a problem if you spend quite some time on this.)
   \begin{hint}
   As a hint, you need a state variable to track whether the extra servers are present or not. The solution shows the code.) Analyze the effect of the threshold at 20; what happens if you set it to 18, say, or 30? What is the effect of the number of extra servers; what if you would add 3 instead of 2?
   \end{hint}
@@ -1120,17 +1125,15 @@ def compute_Q_d(a, q0=0, mu=6, threshold=20, extra=2):
     
     \end{pyverbatim}
 
-
     Note that this code runs significantly  slower than the other code. This is because  we now  have to call \pyv{poisson(mu).rvs()} in every step of the for-loop. We could make the program run faster by using the \pyv{scipy} library to generate $N$ random numbers in one step outside of the for loop and then extract numbers from there when needed. However, for clarity we chose not to do so.
   \end{solution}
   
 \end{exercise}
 
 
-\begin{exercise}
 Another way to deal with large queues is to simply  block customers if the queue is too long. What if we block at a level of 15? How would that affect the average queue and the distribution of the queue? 
-
-  Modify the code to compute the queue and do an experiment.
+\begin{exercise}
+  Modify the code to include blocking and do an experiment to see the effect on the queue length. 
 
 \begin{solution}
 Here is an example. What can be the meaning of \pyv{np.inf}? 
@@ -1170,7 +1173,7 @@ plt.show()
 As a final case consider a single server queue that can be switched on and off. There is a cost $h$ associated with keeping a job waiting for one period, there is a cost $p$ to hire the server for one period, and it costs $s$ to switch on the server. Given the parameter values of the next exercise,  would what be a good threshold $N$ such that when the queue hits or exceeds $N$, the server is switched on? We assume (and it is easy to prove) that it is optimal to switch off the server when the queue is empty. 
 
 \begin{exercise}
-  Jobs arrive at rate $\lambda=0.3$ per period, if the server is present the service rate is $\mu=1$ per period. The number of arrivals and service are Poisson distributed with the given rates. Then, $h=1$ (without loss of generality), $p=5$ and $S=500$. Write a simulator to compute the average cost for setting $N=100$. Then, change $N$ to find a better value.
+  Jobs arrive at rate $\lambda=0.3$ per period; if the server is present the service rate is $\mu=1$ per period. The number of arrivals and service are Poisson distributed with the given rates. Then, $h=1$ (without loss of generality), $p=5$ and $S=500$. Write a simulator to compute the average cost for setting $N=100$. Then, change $N$ to find a better value.
 
 \begin{solution}
 Here is all the code.  
@@ -1230,13 +1233,13 @@ After a bit of experimentation, we see that $N=15$ is quite a bit better than $N
 
 
 \begin{exercise}
-  What have you learned from this tutorial? What interesting extensions, relevant for practice,  can you thing of?
+  What have you learned from this tutorial? What interesting extensions, relevant for practice,  can you think of?
   \begin{solution}
     Some important points are the following.
     \begin{enumerate}
     \item  Making a  simulation requires some ingenuity, but is often not difficult
     \item With simulation it becomes possible to analyze many difficult queueing situations. The mathematical analysis of often much harder, if possible at all.
-    \item We studied the behavior of queues under certain control policies, typically policies that change the service rate as a function of the queue length.
+    \item We studied the behavior of queues under certain control policies, typically policies that change the service rate as a function of the queue length. Such policies are used in practice, such as in supermarkets, hospitals, the customs services at airports, and so on. Hence, you now have some tools to design and analyze such systems. 
     \end{enumerate}
 
 An interesting extension is to incorporate time-varying demand. In many systems, such as supermarkets, the demand is not constant over the day. In such cases the planning of servers should take this into account. 
