@@ -1,8 +1,8 @@
-\usepackage[solutionfiles]{optional}
+%\usepackage[solutionfiles]{optional}
 
 % Als je daarentegen de antwoorden onder de opdracht wil hebben, quote
 % dan bovenstaande uit, en gebruik de regel hieronder
-%\usepackage[nosolutionfiles]{optional}
+\usepackage[nosolutionfiles]{optional}
 
 \opt{nosolutionfiles}{\usepackage[nosolutionfiles]{answers}}
 \opt{solutionfiles}{\usepackage{answers}}
@@ -1256,10 +1256,11 @@ In this tutorial we will write a simulator for the $G/G/1$ queue.
 For this we use two concepts that are essential to simulate any stochastic system of reasonable complexity: an \emph{event stack} (or event schedule) to keep track of the sequence in which events occur, and \emph{classes} to organize data and behavior into single logical units.
 We will work in steps towards our goal; along the way you will learn a number of fundamental and highly interesting concepts such as \emph{classes} and efficient \emph{data structures}.
 If you have understood the implementation of the $G/G/1$ queue, discrete event simulators are no longer a black box for you.
-Hence, what you will learn from this practical extends well beyond the simulation of the $G/G/1$ queueing process.
+Hence, what you will learn from this tutorial extends well beyond the simulation of the $G/G/1$ queueing process.
+
 Once we have built our simulator we apply it to a case in which we analyze the queueing behavior at an check-in desk at an airport with a single server.
 
-In Section~\ref{sec:ggc-continuous-time} we will generalize the simulator to the $G/G/c$ queue, clean up the code by working with a class for the $G/G/c$ queue. We can then also extend the case accordingly. 
+In Section~\ref{sec:ggc-continuous-time} we will generalize the simulator to the $G/G/c$ queue and clean up the code by working with a class for the $G/G/c$ queue. We can then also extend the case accordingly. 
 
 
 \subsection{Sorting with event stacks}
@@ -1267,7 +1268,7 @@ In Section~\ref{sec:ggc-continuous-time} we will generalize the simulator to the
 
 If we simulate a stochastic system we like to move from event to event.
 To illustrate this idea, consider a queueing process such as the $M/M/1$ queue.
-It is clear that only at arrival and departure epochs something interesting happens; any time moment in between arrivals and departures can be neglected.
+It is clear that only at arrival and departure epochs something interesting happens; any time in between arrival and departure epochs can be neglected.
 Hence, in our simulator we prefer not to keep track of the entire time line, but just of the relevant epochs.
 If we can do this, we can jump from event to event.
 
@@ -1280,7 +1281,7 @@ One way to do this is to insert them into a list, but the insertion should respe
 For this very general problem a number of efficient data structures have been developed, and one of these is the \emph{heap queue}.
 
 \begin{exercise}
-  Search the web on \pyv{python} and \pyv{heap queue}. Study the examples and write some code to sort the students Jan(21), Pete(20), Clair(18), Cynthia(25).
+  Search the web on \pyv{python} and \pyv{heap queue}. Study the examples and write some code to sort the students Jan(21), Pete(20), Clair(18), Cynthia(25) in order of increasing age.
 
   \begin{solution}
 If you found, and read, the appropriate web page, you must have ended up with this code.
@@ -1410,7 +1411,7 @@ job.service_time = 2
 \end{pyverbatim}
 
 \begin{exercise}\label{ex:3}
-  Make $10$ jobs with exponentially distributed inter-arrival times, with $\lambda=2$,  and exponentially distributed service times with $\mu=3$. Put these jobs on an event stack, and print them in order of arrival time. Tag the events with the job, and event type (which is an arrival).
+  Make $10$ jobs with exponentially distributed inter-arrival times, with $\lambda=2$,  and exponentially distributed service times with $\mu=3$. Put these jobs on an event stack, and print them in order of arrival time. Tag the events with the job and event type (which is an arrival).
   \begin{solution}
 One way is like this.     
     \begin{pyverbatim}
@@ -1612,9 +1613,6 @@ Reset to all data and clear all lists.
 To ensure that we do not keep old data, we have to reset all lists. 
 
 \begin{pyverbatim}
-print("Simulation of check-in process, M/G/1 with G=U[2,5]")
-
-
 stack = [] # this is the event stack
 queue = []
 served_jobs = [] # used for statistics
@@ -1764,7 +1762,7 @@ When you do large scale simulations, involving many hours of simulation time, al
 \clearpage
 
 
-\section{Tutorial 4: Simulation of the $G/G/c$ queue in continuous time}
+\section{Tutorial 4: $G/G/c$ queue in continuous time}
 \label{sec:ggc-continuous-time}
 
 The goal of this tutorial is to  generalize the simulator for the $G/G/1$ to a $G/G/c$ queue. You will see that this is rather easy, once you have the right idea. We will organize the entire simulator into a single class so that our code is organized and we will develop a method to set up structured  tests\footnote{Structured testing is enormously important when you use code for real applications. (I suppose you prefer all code used in self-driving cars to be tested.)  If you are interested, check the web on  \pyv{python unittest} and `test-driven coding'. With test-driven coding you first write down a hierarchy of  many simple tests that your program is supposed to pass.  Then you build your program until the first test pass. Then you implement the next step until the second test pass too, and so on.} Once we have a working simulator we apply it to the check-in process of the airport. 
@@ -1814,108 +1812,10 @@ Likewise,   generalize  the \pyv{handle_departure} function of the $G/G/1$ queue
 It is not  problem when you spend considerable time on this exercise. Most of the following exercises are simple numerical experiments, which should take little time. So, just try and see how far you get. All code is in the solution.
 
 \begin{solution}
-Here is the entire class. Read it carefully.   
-
-
-\begin{pyverbatim}
-from collections import deque
-from heapq import heappop, heappush
-import numpy as np
-from scipy.stats import expon, uniform
-
-np.random.seed(3)
-
-ARRIVAL = 0
-DEPARTURE = 1
-
-
-class Job:
-    def __init__(self):
-        self.arrival_time = 0
-        self.service_time = 0
-        self.departure_time = 0
-        self.queue_length_at_arrival = 0
-
-    def sojourn_time(self):
-        return self.departure_time - self.arrival_time
-
-    def waiting_time(self):
-        return self.sojourn_time() - self.service_time
-
-    def __repr__(self):
-        return (f"{self.arrival_time}, "
-                 "{self.service_time}, "
-                 "{self.departure_time}\n")
-
-
-
-class GGc:
-    def __init__(self, F, G, c, run_length):
-        self.F = F
-        self.G = G
-        self.c = c
-        self.num_busy = 0   # number of busy servers
-        self.run_length = run_length
-        self.stack = [] # event stack
-        self.queue = deque()
-        self.served_jobs = set()
-
-    def handle_arrival(self, time, job):
-        self.generate_new_arrival(time)
-        job.queue_length_at_arrival = len(self.queue)
-        if self.num_busy < self.c:
-            self.start_service(time, job)
-        else:
-            self.queue.append(job)
-
-    def generate_new_arrival(self, time):
-        if self.run_length > 0:
-            self.put_new_arrival_on_stack(time)
-            self.run_length -= 1
-
-    def put_new_arrival_on_stack(self, time):
-        job = Job()
-        job.arrival_time = time + self.F.rvs()  # new arrival time
-        job.service_time = self.G.rvs()  # new service time
-        heappush(self.stack, (job.arrival_time, job, ARRIVAL))
-
-    def start_service(self, time, job):
-        self.num_busy += 1  # server becomes busy.
-        job.departure_time = time + job.service_time
-        heappush(self.stack, (job.departure_time, job, DEPARTURE))
-
-    def handle_departure(self, time, job):
-        self.num_busy -= 1
-        self.served_jobs.add(job)
-        if self.queue:  # not empty
-            next_job = self.queue.popleft()
-            self.start_service(time, next_job)
-
-    def consistency_check(self):
-        if ( self.num_busy < 0 or self.num_busy > self.c \
-            or len(self.queue) < 0 or \
-            (len(self.queue) > 0 and self.num_busy < self.c) ):
-            print("there is something wrong")
-            quit()
-
-    def run(self):
-        time = 0
-        self.put_new_arrival_on_stack(time)
-
-        while self.stack:  # not empty
-            time, job, typ = heappop(self.stack)
-            # self.consistency_check() # only use when testing.
-            if typ == ARRIVAL:
-                self.handle_arrival(time, job)
-            else:
-                self.handle_departure(time, job)
-
-
-\end{pyverbatim}
+See \pyv{tutorial_4.py}. Study it in detail so that you really understand how it works. 
 \end{solution}
   
 \end{exercise}
-
       
 
 \begin{exercise}
@@ -2293,7 +2193,7 @@ We assemble all tests into the function \pyv{do_tests()}, and quote out the test
 \end{exercise}
 
 
-Before we build the class for the queues we observe that the implementation of the $G/G/c$ of Section~\ref{sec:ggc-continuous-time} suffers from a performance penalty. The problem is that  we create a new object to generate the quasi-random inter-arrival and service times\footnote{You only know such things if you have some general knowledge of python. Hence, it pays to invest in knowledge of the computer language you use.}. Specifically,  code like this runs very slow:
+Before we build the class for the queues we observe that the implementation of the $G/G/c$ of Section~\ref{sec:ggc-continuous-time} suffers from a performance penalty. The problem is that  we create  time and again  new objects in the calls \pyv{F.rvs()} and \pyv{G.rvs()}  to generate the quasi-random inter-arrival and service times\footnote{You only know such things if you have some general knowledge of python. Hence, it pays to invest in knowledge of the computer language you use.}. Specifically,  code like this runs very slow:
 \begin{pyverbatim}
 def generate_jobs_bad_implementation(F, G, p_business, num_jobs):
     # the difference in performance is tremendous
@@ -2370,134 +2270,22 @@ def generate_jobs_bad_implementation(F, Ge, Gb, p_business, num_jobs):
 \end{exercise}
 
 \begin{exercise}
-  Try to implement the $G/G/c$ queue with business customers. The rules must be like this. Business and economy class customers have separate queues and separate, dedicated servers. There is one business server and there are $c$ economy class servers. If the business (economy) server becomes  idle and there is an economy (business)class customer in queue, the business (economy) server takes an economy (business) customer into service.\footnote{If you lack time, then just study the code.}
+  Try to implement (or design) the $G/G/c$ queue with business customers. The rules must be like this. Business and economy class customers have separate queues and separate, dedicated servers. There is one business server and there are $c$ economy class servers. If the business (economy) server becomes  idle and there is an economy (business) class customer in queue, the business (economy) server takes an economy (business) customer into service.
 
-  \begin{solution}
-    Check the code carefully so that you understand all details. 
-\begin{pyverbatim}
-class GGc_with_business:
-    def __init__(self, c, jobs):
-        self.b = 1  # number of b servers
-        self.c = c  # number of e servers
-        self.jobs = jobs
-
-        self.num_b_busy = 0  
-        self.num_e_busy = 0  
-        self.stack = []  
-        self.b_queue = deque()
-        self.e_queue = deque()
-
-        self.fill_stack()
-
-    def fill_stack(self):
-        for job in sorted(self.jobs, key=lambda j: j.arrival_time):
-            heappush(self.stack, (job.arrival_time, job, ARRIVAL))
-
-    def handle_arrival(self, time, job):
-        if job.customer_type == BUSINESS:
-            job.queue_length_at_arrival = len(self.b_queue)
-        else:
-            job.queue_length_at_arrival = len(self.e_queue)
-
-        if job.customer_type == ECONOMY:
-            if self.num_e_busy < self.c:
-                job.server_type = ECONOMY
-                self.start_service(time, job)
-            elif self.num_b_busy < self.b:
-                job.server_type = BUSINESS
-                self.start_service(time, job)
-            else:
-                self.e_queue.append(job)
-        else: # business customer
-            if self.num_b_busy < self.b:
-                job.server_type = BUSINESS
-                self.start_service(time, job)
-            elif self.num_e_busy < self.c:
-                job.server_type = ECONOMY
-                self.start_service(time, job)
-            else:
-                self.b_queue.append(job)
-            
-    def start_service(self, time, job):
-        if job.server_type == BUSINESS:
-            self.num_b_busy += 1 
-        else:
-            self.num_e_busy += 1 
-        job.departure_time = time + job.service_time
-        heappush(self.stack, (job.departure_time, job, DEPARTURE))
-
-    def pop_from_queue_set_server_and_start(self, time, queue, server_type):
-        next_job = queue.popleft()
-        next_job.server_type = server_type
-        self.start_service(time, next_job)
-
-    def handle_departure(self, time, job):
-        if job.server_type == BUSINESS:
-            self.num_b_busy -= 1
-            if self.b_queue:
-                self.pop_from_queue_set_server_and_start(time, self.b_queue, BUSINESS)
-            elif self.e_queue:
-                self.pop_from_queue_set_server_and_start(time, self.e_queue, BUSINESS)
-        else:  # economy server free
-            self.num_e_busy -= 1
-            if self.e_queue:
-                self.pop_from_queue_set_server_and_start(time, self.e_queue, ECONOMY)
-            elif self.b_queue:  
-                self.pop_from_queue_set_server_and_start(time, self.b_queue, ECONOMY)
-
-    def run(self):
-        time = 0
-        while self.stack:  # not empty
-            time, job, epoch_type = heappop(self.stack)
-            if epoch_type == ARRIVAL:
-                self.handle_arrival(time, job)
-            else:
-                self.handle_departure(time, job)
-
-    def print_served_job(self):
-        for j in sorted(self.jobs, key=lambda j: j.arrival_time):
-            print(j)
-
-    def mean_waiting_time(self, customer_type=None):
-        if customer_type is None:
-            jobs = self.jobs
-        else:
-            jobs = set(j for j in self.jobs if j.customer_type == customer_type)
-        return sum(j.waiting_time() for j in jobs)/len(jobs)
-
-    def max_waiting_time(self, customer_type=None):
-        if customer_type is None:
-            return max(j.waiting_time() for j in self.jobs)
-        else:
-            return max(j.waiting_time() for j in self.jobs if j.customer_type == customer_type)
-              
-\end{pyverbatim}
-  \end{solution}
+You can find the code in \pyv{tutorial_5.py}. Read it carefully so that you understand all details. 
 \end{exercise}
-
-
-
-We developed quite a large number of simple cases to test our implementation. 
-
-
-
-When we use the $M/M/1$ simulation as a test case, we need to have an idea of what  variance we can expect between, for instance, the theoretical expected waiting time and the mean waiting time obtained by simulation.
 
 
 \begin{exercise}
-Compare the following two cases. In the first case the two customer classes are completely separated:  business customers have one dedicated server and the economy customers have $c$ dedicated servers.  In the second case, the business desk serves economy customers when idle, and vice versa, economy desks serve business customers when idle.  Here are the data. 
-  \begin{pyverbatim}
-labda = 300/90
-F = expon(scale=1.0 / labda)
-G = uniform(1, 2)
-p_business = 0.1
-c = 6
-num_jobs = 300
-  \end{pyverbatim}
-  
-
-
+  To design some further test cases: think about what happens if two customer classes are completely separated:  business customers have one dedicated server and the economy customers have $c$ dedicated servers.  How would you implement this in the code? 
 \end{exercise}
+
+\begin{exercise}
+  Suppose there are no business customers, then all servers should be available for the economy class customers. With this idea you can implement the $M/M/c$ queue and check whether the simulator gives the same results as the theoretical values. 
+\end{exercise}
+
+\subsection{Cases}
+\label{sec:cases}
 
 % Grappige observaties. 
 

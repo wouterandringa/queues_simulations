@@ -27,9 +27,11 @@ def experiment_1():
     a = poisson(labda).rvs(N)
     s = poisson(mu).rvs(N)
     print(a.mean(), a.std())
+    quit()
 
 
-#experiment_1(); quit()
+# experiment_1()
+
 
 def experiment_2():
     labda, mu, q0, N = 5, 6, 0, 100
@@ -40,8 +42,10 @@ def experiment_2():
     plt.plot(Q)
     plt.show()
     print(d.mean())
+    quit()
 
-#experiment_2(); quit()
+
+# experiment_2()
 
 
 def experiment_3():
@@ -53,8 +57,11 @@ def experiment_3():
     x, F = cdf(Q)
     plt.plot(x, F)
     plt.show()
+    quit()
 
-#experiment_3(); quit()
+
+# experiment_3()
+
 
 def experiment_4():
     labda, mu = 5, 6
@@ -64,9 +71,10 @@ def experiment_4():
     Q, d = compute_Q_d(a, s, q0)
     plt.plot(Q)
     plt.show()
+    quit()
 
 
-#experiment_4(); quit()
+# experiment_4()
 
 
 def experiment_5():
@@ -82,9 +90,10 @@ def experiment_5():
 
     plt.plot(Q)
     plt.show()
+    quit()
 
 
-#experiment_5(); quit()
+# experiment_5()
 
 
 def experiment_6():
@@ -94,13 +103,15 @@ def experiment_6():
     q0 = 0
 
     a = poisson(labda).rvs(N)
-    s = poisson(mu).rvs(N) # marked
+    s = poisson(mu).rvs(N)  # marked
 
     Q, d = compute_Q_d(a, s, q0)
     print(Q.mean(), Q.std())
+    quit()
 
 
-#experiment_6(); quit()
+# experiment_6()
+
 
 def experiment_6a():
     N = 10000
@@ -109,13 +120,15 @@ def experiment_6a():
     q0 = 0
 
     a = poisson(labda).rvs(N)
-    s = np.ones_like(a)*mu
+    s = np.ones_like(a) * mu
 
     Q, d = compute_Q_d(a, s, q0)
     print(Q.mean(), Q.std())
+    quit()
 
 
-#experiment_6a(); quit()
+# experiment_6a()
+
 
 def experiment_6b():
     N = 10000
@@ -124,13 +137,15 @@ def experiment_6b():
     q0 = 0
 
     a = poisson(labda).rvs(N)
-    s = poisson(1.1*mu).rvs(N) 
+    s = poisson(1.1 * mu).rvs(N)
 
     Q, d = compute_Q_d(a, s, q0)
     print(Q.mean(), Q.std())
+    quit()
 
 
-#experiment_6b(); quit()
+# experiment_6b()
+
 
 def compute_Q_d_with_extra_servers(a, q0=0, mu=6, threshold=np.inf, extra=0):
     d = np.zeros_like(a)
@@ -149,6 +164,7 @@ def compute_Q_d_with_extra_servers(a, q0=0, mu=6, threshold=np.inf, extra=0):
 
     return Q, d
 
+
 def experiment_7():
     N = 10000
     labda = 5
@@ -163,8 +179,10 @@ def experiment_7():
     x, F = cdf(Q)
     plt.plot(x, F)
     plt.show()
+    quit()
 
-#experiment_7(); quit()
+
+# experiment_7()
 
 
 def compute_Q_d_blocking(a, s, q0=0, b=np.inf):
@@ -177,6 +195,7 @@ def compute_Q_d_blocking(a, s, q0=0, b=np.inf):
         Q[i] = min(b, Q[i - 1] + a[i] - d[i])
 
     return Q, d
+
 
 def experiment_7a():
     N = 10000
@@ -193,11 +212,13 @@ def experiment_7a():
     x, F = cdf(Q)
     plt.plot(x, F)
     plt.show()
+    quit()
 
-#experiment_7a(); quit()
+
+# experiment_7a()
 
 
-def compute_cost(a, mu, q0=0, threshold = np.inf, h=0, p = 0, S = 0):
+def compute_cost(a, mu, q0=0, threshold=np.inf, h=0, p=0, S=0):
     d = np.zeros_like(a)
     Q = np.zeros_like(a)
     Q[0] = q0
@@ -210,7 +231,7 @@ def compute_cost(a, mu, q0=0, threshold = np.inf, h=0, p = 0, S = 0):
             server_cost += p
             c = poisson(mu).rvs()
         else:
-            c = 0 # server not present, hence no service
+            c = 0  # server not present, hence no service
         d[i] = min(Q[i - 1], c)
         Q[i] = Q[i - 1] + a[i] - d[i]
         if Q[i] == 0:
@@ -242,6 +263,7 @@ def experiment_8():
     a = poisson(labda).rvs(num_jobs)
     av = compute_cost(a, mu, q0, threshold, h, p, S)
     print(av)
+    quit()
 
-experiment_8(); quit()
-    
+
+# experiment_8()
