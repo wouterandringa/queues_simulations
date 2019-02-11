@@ -98,8 +98,8 @@ def experiment_5():
 
 def experiment_6():
     N = 10000
-    labda = 6
-    mu = 5
+    labda = 5
+    mu = 6
     q0 = 0
 
     a = poisson(labda).rvs(N)
@@ -115,8 +115,8 @@ def experiment_6():
 
 def experiment_6a():
     N = 10000
-    labda = 6
-    mu = 5
+    labda = 5
+    mu = 6
     q0 = 0
 
     a = poisson(labda).rvs(N)
@@ -132,8 +132,8 @@ def experiment_6a():
 
 def experiment_6b():
     N = 10000
-    labda = 6
-    mu = 5
+    labda = 5
+    mu = 6
     q0 = 0
 
     a = poisson(labda).rvs(N)
