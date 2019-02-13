@@ -199,6 +199,18 @@ def DD1_test_1():
     
 
 #DD1_test_1()
+"""
+
+We can assemble all tests into a function do_tests(), and quote
+out the tests we do not want to do. Like this we can keep all the
+specific values of all tests. If we modify our code later, we can run
+all tests again, or just one, whatever is suitable.
+
+However, for the tutorial its easiest to work at one test at a time. 
+
+"""
+
+
 
 def DD1_test_2():
     # test with only economy customers
@@ -354,7 +366,7 @@ def mm2_test_2():
 
 # CASE ANALYSIS
 
-import copy
+import copy # to copy the simulation data
 
 
 def case_analysis(jobs, c):
@@ -390,7 +402,8 @@ def case_analysis(jobs, c):
 
 def case1():
     num_jobs = 300
-    labda = num_jobs / 90
+    opening_time_of_desks = 60 # minutes
+    labda = num_jobs / opening_time_of_desks
     F = expon(scale=1.0 / labda)
     G = uniform(1, 2)
     p_business = 0.1
@@ -399,7 +412,7 @@ def case1():
     case_analysis(jobs, c)
     
 
-#case1()
+case1()
 
 def case2():
     num_jobs = 300

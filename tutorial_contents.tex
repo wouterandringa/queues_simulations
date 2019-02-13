@@ -45,13 +45,13 @@
 
 \newcommand{\E}[1]{\,\mathsf{E}\left[#1\right]}
 
-\title{Queueing simulations}
+\title{Tutorials for queueing simulations}
 \author{N.D. Van Foreest and E.R. Van Beesten}
 
 \begin{document}
 \maketitle
 
-%\setcounter{tocdepth}{1}
+\setcounter{tocdepth}{1}
 \tableofcontents
 
 \clearpage
@@ -1078,7 +1078,11 @@ s = poisson(mu).rvs(N)  # marked
 Q, d = compute_Q_d(a, s, q0)
 print(Q.mean(), Q.std())
 \end{pyverbatim}
-Then run the same code but with the line with \pyv{# marked} replaced by with \pyv{s = np.ones_like(a) * mu} (Read the docs of \pyv{numpy} to see what \pyv{np.ones_like} does).  Explain the result.
+Then run the same code but with the line with \pyv{# marked} replaced by with
+\begin{pyverbatim}
+\pyv{s = np.ones_like(a) * mu}  
+\end{pyverbatim}
+Read the docs of \pyv{numpy} to see what \pyv{np.ones_like} does.  Explain the result.
 \begin{solution}
 	You should observe that the mean and the variability of the queue length process decrease.
 \end{solution}
@@ -1104,9 +1108,14 @@ You should make the crucial observation now that we can experiment with all kind
 \subsection{Control }
 \label{sec:control-}
 
-In the previous section we analyzed the effect of the design of the system, such as changing the average service times. These changes are independent of the queue length. In many systems, however, the service rate depends on the dynamics of the queue process. When the queue is large, service rates increase; when the queue is small, service rates decrease. This type of policy can often be seen in supermarkets: extra cashiers will open when the queue length increases.
+In the previous section we analyzed the effect of the design of the system, such as changing the average service times.
+These changes are independent of the queue length.
+In many systems, however, the service rate depends on the dynamics of the queue process.
+When the queue is large, service rates increase; when the queue is small, service rates decrease.
+This type of policy can often be seen in supermarkets: extra cashiers will open when the queue length increases.
 
- Suppose that normally we have 6 servers, each working at rate $1$ per period. When the queue becomes longer than 20 we hire two extra servers, and when the queue is empty again, we send the extra two servers home, until the queue hits 20 again, and so on.
+Suppose that normally we have 6 servers, each working at rate $1$ per period.
+When the queue becomes longer than 20 we hire two extra servers, and when the queue is empty again, we send the extra two servers home, until the queue hits 20 again, and so on.
 \begin{exercise}
   Try to write pseudo-code (or a  python program) to simulate the queue process. (This is pretty challenging; it's not a problem if you spend quite some time on this.)
   \begin{hint}
@@ -2146,18 +2155,32 @@ Some  interesting extensions.
 \clearpage
 
 
-\section{Tutorial 5: Airport Check-in process, TBD}
+\section{Tutorial 5: Airport Check-in process}
 \label{sec:simul-check-proc}
 
-As the simulation of this case is somewhat more difficult than the $G/G/c$ queue, testing is also more important. For this reason we followed a \emph{test-driven} procedure. First we design a number of test cases, from very simple to a bit less simple. Then we started building and testing until the first test case passed. Then we tested with the second case, the third, and so on, until all the tests passed. And, indeed, along the way we caught numerous mistakes, from missing \pyv{if} statements (a very big bug) to simple typos.
+As the simulation of this case is somewhat more difficult than the $G/G/c$ queue, testing is also more important.
+For this reason we will follow a \emph{test-driven} procedure, which works like this.
+First we design a number of test cases, from very simple to a bit less simple.
+Then we  build and test until the first test case passes.
+Then we build and test until also the second case passes, and so on, until all the tests pass.
+And, indeed, along the way we caught numerous mistakes, from missing \pyv{if} statements (a very big bug) to simple typos.
 
 \subsection{The simulator}
 \label{sec:simulator-1}
 
 \begin{exercise}
-  Make a list of  simple cases whose outcome you can check by hand to a bit harder for which  you can use theoretical tools to validate the outcome.
+  Make a list of  simple cases whose outcome you can check by hand, to cases that are a bit harder but for which  you can use theoretical tools to validate the outcome.
   \begin{hint}
-Suppose there is only a server for business customers and also only business customers? What should happen? Suppose further that the inter-arrival times are constant and  1 minutes and service times constant and equal to 0.5 minute? What if the service times are 2 minutes and 10 business customers arrive? What if all 10 customers arrive at time 0; when should the last leave? What if we only have economy customers but only the business server? And so on. Ensure you design cases you can check by hand. These simple tests will catch many, many errors. As a general rule, invest in such tests. 
+    Suppose there is only a server for business customers and also only business customers?
+    What should happen?
+    Suppose further that the inter-arrival times are constant and 1 minutes and service times constant and equal to 0.5 minute?
+    What if the service times are 2 minutes and 10 business customers arrive?
+    What if all 10 customers arrive at time 0; when should the last leave?
+    What if we only have economy customers but only the business server?
+    And so on.
+    Ensure you design cases you can check by hand.
+    These simple tests will catch many, many errors.
+    As a general rule, invest in such tests.
   \end{hint}
   
 
@@ -2199,11 +2222,10 @@ do_tests()
 
   \end{solution}
 
-We assemble all tests into the function \pyv{do_tests()}, and quote out the tests we do not want to do.Like this we can keep all the specific values of all tests. If we modify our code later, we can run all tests again, or just  one, whatever is suitable. 
 \end{exercise}
 
 
-Before we build the class for the queues we observe that the implementation of the $G/G/c$ of Section~\ref{sec:ggc-continuous-time} suffers from a performance penalty. The problem is that  we create  time and again  new objects in the calls \pyv{F.rvs()} and \pyv{G.rvs()}  to generate the quasi-random inter-arrival and service times\footnote{You only know such things if you have some general knowledge of python. Hence, it pays to invest in knowledge of the computer language you use.}. Specifically,  code like this runs very slow:
+Before we build the class for the queues we observe that the implementation of the $G/G/c$ of Section~\ref{sec:ggc-continuous-time} suffers from a performance penalty. The problem is that  we create  time and again  new objects in the calls \pyv{F.rvs()} and \pyv{G.rvs()}  to generate the quasi-random inter-arrival and service times\footnote{You only know such things if you have some general knowledge of python or computer programming general. Hence, it pays to invest in knowledge of the computer language you use.}. Specifically,  code like this runs very slow:
 \begin{pyverbatim}
 def generate_jobs_bad_implementation(F, G, p_business, num_jobs):
     # the difference in performance is tremendous
@@ -2294,32 +2316,54 @@ You can find the code in \pyv{tutorial_5.py}. Read it carefully so that you unde
   Suppose there are no business customers, then all servers should be available for the economy class customers. With this idea you can implement the $M/M/c$ queue and check whether the simulator gives the same results as the theoretical values. 
 \end{exercise}
 
-\subsection{Cases}
+\subsection{Case analysis and summary}
 \label{sec:cases}
 
-% Grappige observaties. 
-
-
-% In bovenstaand scenario zijn de business klanten slechter af. Kennelijk is die ene server te weinig. Ik kan nu twee business servers maken, of p\_business kleiner kiezen.
+Recall, we build this simulator to see whether we want to share the servers or not.
+To obtain insight into the performance of each situation (shared, or unshared), we need to analyze a few characteristic situations.
+The result of this might be that in certain settings, sharing is best (relatively many business customer?), and in others, we don't want to share. 
 
 \begin{exercise}
-  What remains to be able to apply our simulator to a real check-in process?
-  \begin{solution}
-    \begin{enumerate}
-    \item First we need to check whether the our simulator is indeed correct. Is there a specific queue for business class customers? If so, do the business server(s), when idle, indeed take economy class customers in service? 
-    \item We need real data to see whether our simple arrival process and service distributions are realistic. 
-    \item Perhaps the servers the dynamic, 3 during the first hour, 6 in the second. 
-    \end{enumerate}
+  Assume we have $n=300$ customers, the desks open 2 hours before departure and close 1 hour before departure, and service distribution is $U[1,2]$ (minutes) for  all customers. The fracton of business customers is $p=0.1$. There are $c=6$ servers for the economy class customers, and 1 for the business customers. Finally, assume that during the opening slot of the desks, the arrival process is Poisson with constant rate. 
 
-However, by and large, we have all tools available to analyze a real business case.
+Make a `test-bed' that allows you to compare, side-by-side, the shared versus the unshared situation. Then, do the simulation and interpret the results.
+\end{exercise}
+
+\begin{exercise}
+  Now start varying on the base case, for instance, longer opening hours, more/less customers, higher/lower fraction of business customers, longer/shorter service times, more/less variability in the service times.  (In other words, just play with your simulator, and try to relate the outcomes to what you experienced/observed from your last flight.) Compare the results.
+\end{exercise}
+
+\begin{exercise}
+  \begin{solution}
+    First obtain realistic data.
+
   \end{solution}
 \end{exercise}
 
-extensions.
-\begin{enumerate}
-\item Service distribution of the business and economy jobs are different.
-\end{enumerate}
 
+\begin{exercise}
+  What remains to be done so that you can  apply our simulator to a real check-in process? In other words,  what do you  have to do to use this tool in a real consultancy job?
+
+  \begin{solution}
+    \begin{enumerate}
+    \item First, check whether the our simulator is indeed correct.
+      Is there a specific queue for business class customers?
+      If so, do the business server(s), when idle, indeed take economy class customers in service?
+    \item You'll need real data to see whether our simple arrival process and service distributions are realistic.     I suppose most of this is already known. For instance, the number of customers on the plain is known, as is the number of business customers. Service times can obtained from the desks, either by measuring, or by using the times the boarding passes are printed.
+    \item Once you have good data, vary one parameter at a time, and report the results \emph{graphically}.
+      People typically want to see trends; graphs are indispensable for this.
+    \end{enumerate}
+
+    Finally, you often need to compare a host of different policies:
+    \begin{itemize}
+    \item Perhaps it is better to have  dynamic service capacity, 3 during the first hour, 6 in the second. 
+    \item Perhaps the service distributions of the business customers can be made shorter, or more regular. What would be impact of this? 
+    \item Since there is small number of business customers, why not open the business check-in desk later than the other desks?
+      Or, share the desks during the first opening hour of the desks, and `unshare' during the second?
+    \end{itemize}
+
+  \end{solution}
+\end{exercise}
 
 
 
