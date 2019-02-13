@@ -19,8 +19,6 @@ def sort_ages():
         age, name = heappop(stack)
         print(name, age)
 
-    quit()
-
 
 # sort_ages()
 
@@ -37,7 +35,6 @@ def sort_ages_with_more_info():
         age, name, phone = heappop(stack)
         print(age, name, phone)
 
-    quit()
 
 
 # sort_ages_with_more_info()
@@ -87,7 +84,6 @@ def experiment_1():
         time, job, typ = heappop(stack)
         print(job)
 
-    quit()
 
 
 # experiment_1()
@@ -152,7 +148,6 @@ def experiment_2():
     av_queue_length = tot_queue / len(served_jobs)
     print("Theoretical avg. queue length: ", rho * rho / (1 - rho))
     print("Simulated avg. queue length:", av_queue_length)
-    quit()
 
 
 #experiment_2()
@@ -184,8 +179,6 @@ def experiment_3():
     for j in served_jobs:
         print(j)
 
-    quit()
-
 
 #experiment_3()
 
@@ -197,8 +190,6 @@ def pollakzek_khintchine(labda, G):
     ce2 = G.var() / ES / ES
     EW = (1.0 + ce2) / 2 * rho / (1 - rho) * ES
     return EW
-
-
 
 
 

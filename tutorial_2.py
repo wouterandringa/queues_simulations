@@ -6,8 +6,6 @@ import scipy
 from scipy.stats import poisson
 import matplotlib.pyplot as plt
 
-from tutorial_1 import cdf
-
 scipy.random.seed(3)
 
 
@@ -27,7 +25,6 @@ def experiment_1():
     a = poisson(labda).rvs(N)
     s = poisson(mu).rvs(N)
     print(a.mean(), a.std())
-    quit()
 
 
 # experiment_1()
@@ -42,11 +39,16 @@ def experiment_2():
     plt.plot(Q)
     plt.show()
     print(d.mean())
-    quit()
 
 
 # experiment_2()
 
+
+def cdf_better(a):
+    y = range(1, len(a) + 1)
+    y = [yy / len(a) for yy in y]  # normalize
+    x = sorted(a)
+    return x, y
 
 def experiment_3():
     labda, mu, q0, N = 5, 6, 0, 100
@@ -57,7 +59,6 @@ def experiment_3():
     x, F = cdf(Q)
     plt.plot(x, F)
     plt.show()
-    quit()
 
 
 # experiment_3()
@@ -71,7 +72,6 @@ def experiment_4():
     Q, d = compute_Q_d(a, s, q0)
     plt.plot(Q)
     plt.show()
-    quit()
 
 
 # experiment_4()
@@ -90,7 +90,6 @@ def experiment_5():
 
     plt.plot(Q)
     plt.show()
-    quit()
 
 
 # experiment_5()
@@ -107,7 +106,6 @@ def experiment_6():
 
     Q, d = compute_Q_d(a, s, q0)
     print(Q.mean(), Q.std())
-    quit()
 
 
 # experiment_6()
@@ -124,7 +122,6 @@ def experiment_6a():
 
     Q, d = compute_Q_d(a, s, q0)
     print(Q.mean(), Q.std())
-    quit()
 
 
 # experiment_6a()
@@ -141,7 +138,6 @@ def experiment_6b():
 
     Q, d = compute_Q_d(a, s, q0)
     print(Q.mean(), Q.std())
-    quit()
 
 
 # experiment_6b()
@@ -179,7 +175,6 @@ def experiment_7():
     x, F = cdf(Q)
     plt.plot(x, F)
     plt.show()
-    quit()
 
 
 # experiment_7()
@@ -212,7 +207,6 @@ def experiment_7a():
     x, F = cdf(Q)
     plt.plot(x, F)
     plt.show()
-    quit()
 
 
 # experiment_7a()
@@ -263,7 +257,6 @@ def experiment_8():
     a = poisson(labda).rvs(num_jobs)
     av = compute_cost(a, mu, q0, threshold, h, p, S)
     print(av)
-    quit()
 
 
 # experiment_8()

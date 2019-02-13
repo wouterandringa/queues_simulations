@@ -196,7 +196,7 @@ def DD1_test_1():
     ggc = GGc_with_business(c, jobs)
     ggc.run()
     ggc.print_served_job()
-    quit()
+    
 
 #DD1_test_1()
 
@@ -211,7 +211,7 @@ def DD1_test_2():
     ggc = GGc_with_business(c, jobs)
     ggc.run()
     ggc.print_served_job()
-    quit()
+    
 
 #DD1_test_2()
 
@@ -226,7 +226,7 @@ def DD1_test_3():
     ggc = GGc_with_business(c, jobs)
     ggc.run()
     ggc.print_served_job()
-    quit()
+    
 
 #DD1_test_3()
 
@@ -242,7 +242,7 @@ def DD2_test_1():
     ggc = GGc_with_business(c, jobs)
     ggc.run()
     ggc.print_served_job()
-    quit()
+    
 
 #DD2_test_1()
 
@@ -260,7 +260,7 @@ def mm1_test_1():
     ggc = GGc_with_business(c, jobs)
     ggc.run()
     ggc.print_served_job()
-    quit()
+    
 
 #mm1_test_1()
 
@@ -281,7 +281,7 @@ def mm1_test_2():
     ggc.run()
 
     print("mean waiting: ", ggc.mean_waiting_time())
-     quit()
+     
 
 #mm1_test_2()
 
@@ -302,7 +302,7 @@ def mm1_test_3():
     ggc.run()
 
     print("mean waiting: ", ggc.mean_waiting_time())
-    quit()
+    
 
 #mm1_test_3()
 
@@ -325,7 +325,7 @@ def mm2_test_1():
 
     # mind that Sakasegawa's result is an approximation for the M/M/c with c>1
     print("mean waiting: ", ggc.mean_waiting_time())
-    quit()
+    
 
 #mm2_test_1()
 
@@ -347,7 +347,7 @@ def mm2_test_2():
     ggc.run()
 
     print("mean waiting: ", ggc.mean_waiting_time())
-    quit()
+    
 
 #mm2_test_2()
 
@@ -397,7 +397,7 @@ def case1():
     c = 6
     jobs = generate_jobs(F, G, p_business, num_jobs)
     case_analysis(jobs, c)
-    quit()
+    
 
 #case1()
 
@@ -410,6 +410,6 @@ def case2():
     c = 5
     jobs = generate_jobs(F, G, p_business, num_jobs)
     case_analysis(jobs, c)
-    quit()
+    
 
 #case2()

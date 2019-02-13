@@ -60,7 +60,6 @@ def test1():
     s = sorted(a)
     plt.plot(I, s)
     plt.show()
-    quit()
 
 
 """
@@ -116,7 +115,6 @@ def make_nice_plots_1():
 
     plt.plot(x, y, drawstyle="steps-post")
     plt.show()
-    quit()
 
 
 # make_nice_plots_1()
@@ -132,7 +130,6 @@ def make_nice_plots_2():
 
     plt.hlines(y, left, right)
     plt.show()
-    quit()
 
 
 # make_nice_plots_2()
@@ -143,7 +140,6 @@ def simulation_1():
     G = uniform(loc=4, scale=2)  # G is called a frozen distribution.
     a = G.rvs(L)
     print(a)
-    quit()
 
 
 # simulation_1
@@ -163,7 +159,6 @@ def simulation_2():
     plt.plot(x, y, label="d")
     plt.legend()
     plt.show()
-    quit()
 
 
 # simulation_2
@@ -186,7 +181,6 @@ def simulation_3():
     a = G.rvs(L)
 
     print(KS(a, G))
-    quit()
 
 
 # simulation_3
@@ -214,7 +208,6 @@ def simulation_4():
     dist_name = "U[4,6]"
 
     plot_distributions(x, y, N, L, E, dist_name)
-    quit()
 
 
 # simulation_4
@@ -238,7 +231,6 @@ def shop_1():
 
     times = [0] + sorted(A[1:] + B[1:])
     print(times)
-    quit()
 
 
 # shop_1
@@ -257,7 +249,6 @@ def shop_2():
         shop.append(t - s)
 
     print(shop)
-    quit()
 
 
 # shop_2
@@ -283,7 +274,6 @@ def shop_3():
     plot_distributions(x, y, N, L, E, dist_name)
 
     print(KS(a, E))  # Compute KS statistic using the function defined earlier
-    quit()
 
 
 # shop_3
@@ -303,7 +293,6 @@ def shop_4():
     plot_distributions(x, y, N, L, E, dist_name)
 
     print(KS(a, E))
-    quit()
 
 
 # shop_4
@@ -322,7 +311,6 @@ def shop_5():
     plot_distributions(x, y, N, L, E, dist_name)
 
     print(KS(a, E))
-    quit()
 
 
 # shop_5

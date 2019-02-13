@@ -114,7 +114,6 @@ def mm1_test(labda=0.8, mu=1, num_jobs=100):
     print("M/M/1 TEST")
     print("Theo avg. waiting time in queue:", sakasegawa(F, G, c))
     print("Simu avg. waiting time in queue:", avg_wait_in_q)
-    quit()
 
 
 # mm1_test(num_jobs=100)
@@ -134,7 +133,6 @@ def md1_test(labda=0.9, mu=1, num_jobs=100):
     print("M/D/1 TEST")
     print("Theo avg. waiting time in queue:", sakasegawa(F, G, c))
     print("Simu avg. waiting time in queue:", avg_wait_in_q)
-    quit()
 
 
 # md1_test(num_jobs=100)
@@ -154,7 +152,6 @@ def md2_test(labda=1.8, mu=1, num_jobs=100):
     print("M/D/2 TEST")
     print("Theo avg. waiting time in queue:", sakasegawa(F, G, c))
     print("Simu avg. waiting time in queue:", avg_wait_in_q)
-    quit()
 
 
 # md2_test(num_jobs=100)
@@ -182,7 +179,6 @@ def intake_test_1():
         max_waiting_time, longer_ten = intake_process(F, G, c, num)
         print(c, max_waiting_time, longer_ten)
 
-    quit()
 
 
 # intake_test_1()
@@ -199,7 +195,6 @@ def intake_test_2():
         max_waiting_time, longer_ten = intake_process(F, G, c, num)
         print(c, max_waiting_time, longer_ten)
 
-    quit()
 
 
-intake_test_2()
+#intake_test_2()
