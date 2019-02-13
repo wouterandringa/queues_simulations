@@ -876,16 +876,16 @@ If  $\mu=\sigma=5$ then the analysis should break down. What happens if you set 
 \section{Tutorial 2: Simulation of the $G/G/1$ queue in discrete time}
 \label{sec:single-server-queue}
 
-In this tutorial we simulate the queueing behavior of a supermarket or hospital, in fact, for a general service system. We first make a simple model of a queueing system, and then extend this to cover more and more difficult queueing situations. With these models we can provide insight into how to design or improve real-world queueing systems.  You will see, hopefully, how astonishingly easy it is with simulation to evaluate many types of decisions and design problems.  
+In this tutorial we simulate the queueing behavior of a supermarket or hospital, in fact, for a general service system. We first make a simple model of a queueing system, and then extend this to cover more and more difficult queueing situations. With these models we can provide insight into how to design or improve real-world queueing systems.  You will see, hopefully, how astonishingly easy it is to evaluate many types of decisions and design problems with simulation.  
 
-For ease we  consider a queueing system in discrete time, and don't make a distinction between the number of jobs in the system and the number of jobs in queue. Thus, queue length corresponds here to all jobs in the system, c.f. Section 1.4 of the queueing book. 
+For ease we  consider a queueing system in discrete time, and don't make a distinction between the number of jobs in the system and the number of jobs in queue. Thus, queue length corresponds here to all jobs in the system, cf. Section 1.4 of the queueing book. 
 
 \subsection{Set up}
 \label{sec:set-up}
 
 
 \begin{exercise}
-Write down the recursions to compute the queue length at the end of a period based on the number of arrivals $a_i$ during  period $i$, the queue length $Q_i$ at the start, and the number of services $s_i$. Assume that service is provided at the start of the period.   Then sketch an  algorithm (in pseudo code) to carry out the computations (use a for loop). Then check this exercise's solution for the python code.
+Write down the recursions to compute the queue length at the end of a period based on the number of arrivals $a_i$ during  period $i$, the queue length $Q_0$ at the start, and the number of services $s_i$. Assume that service is provided at the start of the period.   Then sketch an  algorithm (in pseudo code) to carry out the computations (use a for loop). Then check this exercise's solution for the python code.
 
   \begin{solution}
     We need a few imports.
@@ -910,7 +910,7 @@ def compute_Q_d(a, s, q0=0):
   
 \end{pyverbatim}
 
-    One of the nicest things of python is that  the real code and pseudo code resemble each other so much.
+    One of the nicest things about python is that  the real code and pseudo code resemble each other so much.
   \end{solution}
   
 \end{exercise}
@@ -978,7 +978,7 @@ plt.show()
 
 
 \begin{exercise}
-  Getting statistics is now really easy. For example,  try to plot the empirical distribution function of the queue length process.
+  Getting statistics is really easy now. For example,  try to plot the empirical distribution function of the queue length process.
   \begin{hint}
 For  the empirical distribution function  you can use the code of Exercise~\ref{ex:1}. Before looking it up, try to recall how the cdf is computed.
   \end{hint}
@@ -1035,7 +1035,7 @@ Explain what you see. What is the drain rate of $Q$?
 \end{exercise}
 
 \begin{exercise}
-What do you expect to see when $\lambda=6$ and $\mu=5$? Once you formulated your hypothesis, check it.
+What do you expect to see when $\lambda=6$ and $\mu=5$? Once you have formulated your hypothesis, check it.
 
 \begin{pyverbatim}
 N = 10000
@@ -1054,22 +1054,22 @@ plt.show()
 Explain again what you see.
 \end{exercise}
 
-\subsection{What if analysis}
+\subsection{What-if analysis}
 \label{sec:what-if-analysis}
 
 With simulation we can do all kinds of experiments to see whether the performance of a queueing system improves in the way we want. Here is a simple example of the type of experiments we can run now. 
 
-For instance,  the mean and the sigma of the queue length  might be too large, that is, customers complain about long waiting times.  Suppose we are able, with significant technological investment, to make the service times more predictable. Then we would like to know  the influence of this change on the queue length.
+For instance,  the mean and the sigma of the queue length  might be too large, that is, customers complain about long waiting times.  Suppose we are able, with significant technological investments, to make the service times more predictable. Then we would like to know  the influence of this change on the queue length.
 
-To quantify the effect of regularity of service times we first assume that the service times are exponentially distributed, then we change it to deterministic times.
+To quantify the effect of regularity of service times we first assume that the service times are exponentially distributed; then we change it to deterministic times.
 As deterministic service times are the best we can achieve,  we cannot do any better than this by just making the service times more regular. If we are unhappy about its effect, we have to make service times shorter on average, or add extra servers, or block demand so that the inflow reduces. 
 
 \begin{exercise}
 Let's test the influence of service time variability. First run this:
 \begin{pyverbatim}
 N = 10000
-labda = 6
-mu = 5
+labda = 5
+mu = 6
 q0 = 0
 
 a = poisson(labda).rvs(N)
@@ -1091,7 +1091,7 @@ Then run the same code but with the line with \pyv{# marked} replaced by with \p
   \begin{pyverbatim}
 s = poisson(1.1*mu).rvs(N)    
   \end{pyverbatim}
-i.e., we increases the service rate with $10\%$. 
+i.e., we increase the service rate with $10\%$. 
 
 Do the computations and compare the results to those of the previous exercise. What change in average service time do we need to get about the same average queue length as the one for the queueing system with deterministic service times? Is an $10\%$ increase enough, or should it be $20\%$, or $30\%$? Just test a few numbers and see what you get. 
   \begin{solution}
@@ -1099,12 +1099,12 @@ For our experiments it is about 20\% extra.
   \end{solution}
 \end{exercise}
 
-You should make the crucial observation now that we can experiment with all kinds of changes (system improvements) and compare their effects. In more general terms: simulation allows us to do `what-if' analysis. 
+You should make the crucial observation now that we can experiment with all kinds of changes (system improvements) and compare their effects. In more general terms: simulation allows us to do `what-if' analyses. 
 
 \subsection{Control }
 \label{sec:control-}
 
-In the previous section we analyzed the effect of the design of the system, such as changing the average service times. These changes are independent of the queue length. In many systems, however, the service rate depends on the dynamics of the queue process. When the queue is large, service rates increase, while when the queue is small, service rates decrease.  You see this type of policy often in supermarkets: extra cashiers will open when the queue length increases.
+In the previous section we analyzed the effect of the design of the system, such as changing the average service times. These changes are independent of the queue length. In many systems, however, the service rate depends on the dynamics of the queue process. When the queue is large, service rates increase; when the queue is small, service rates decrease. This type of policy can often be seen in supermarkets: extra cashiers will open when the queue length increases.
 
  Suppose that normally we have 6 servers, each working at rate $1$ per period. When the queue becomes longer than 20 we hire two extra servers, and when the queue is empty again, we send the extra two servers home, until the queue hits 20 again, and so on.
 \begin{exercise}
@@ -1135,7 +1135,7 @@ def compute_Q_d(a, q0=0, mu=6, threshold=20, extra=2):
     
     \end{pyverbatim}
 
-    Note that this code runs significantly  slower than the other code. This is because  we now  have to call \pyv{poisson(mu).rvs()} in every step of the for-loop. We could make the program run faster by using the \pyv{scipy} library to generate $N$ random numbers in one step outside of the for loop and then extract numbers from there when needed. However, for clarity we chose not to do so.
+    Note that this code runs significantly more slowly than the other code. This is because  we now  have to call \pyv{poisson(mu).rvs()} in every step of the for loop. We could make the program run faster by using the \pyv{scipy} library to generate $N$ random numbers in one step outside of the for loop and then extract numbers from there when needed. However, for the sake of clarity we chose not to do so.
   \end{solution}
   
 \end{exercise}
@@ -1180,7 +1180,7 @@ plt.show()
   \end{solution}
 \end{exercise}
 
-As a final case consider a single server queue that can be switched on and off. There is a cost $h$ associated with keeping a job waiting for one period, there is a cost $p$ to hire the server for one period, and it costs $s$ to switch on the server. Given the parameter values of the next exercise,  would what be a good threshold $N$ such that when the queue hits or exceeds $N$, the server is switched on? We assume (and it is easy to prove) that it is optimal to switch off the server when the queue is empty. 
+As a final case consider a single server queue that can be switched on and off. There is a cost $h$ associated with keeping a job waiting for one period, there is a cost $p$ to hire the server for one period, and it costs $s$ to switch on the server. Given the parameter values of the next exercise, what would be a good threshold $N$ such that the server is switched on when the queue hits or exceeds $N$? We assume (and it is easy to prove) that it is optimal to switch off the server when the queue is empty. 
 
 \begin{exercise}
   Jobs arrive at rate $\lambda=0.3$ per period; if the server is present the service rate is $\mu=1$ per period. The number of arrivals and service are Poisson distributed with the given rates. Then, $h=1$ (without loss of generality), $p=5$ and $S=500$. Write a simulator to compute the average cost for setting $N=100$. Then, change $N$ to find a better value.
@@ -1247,8 +1247,8 @@ After a bit of experimentation, we see that $N=15$ is quite a bit better than $N
   \begin{solution}
     Some important points are the following.
     \begin{enumerate}
-    \item  Making a  simulation requires some ingenuity, but is often not difficult
-    \item With simulation it becomes possible to analyze many difficult queueing situations. The mathematical analysis of often much harder, if possible at all.
+    \item  Making a  simulation requires some ingenuity, but is often not difficult.
+    \item With simulation it becomes possible to analyze many difficult queueing situations. The mathematical analysis is often much harder, if possible at all.
     \item We studied the behavior of queues under certain control policies, typically policies that change the service rate as a function of the queue length. Such policies are used in practice, such as in supermarkets, hospitals, the customs services at airports, and so on. Hence, you now have some tools to design and analyze such systems. 
     \end{enumerate}
 
