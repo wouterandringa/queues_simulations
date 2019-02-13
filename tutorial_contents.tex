@@ -1534,7 +1534,11 @@ As a general observation, testing code is very important. For this reason, befor
 You might want to check Exercise~\ref{ex:3} to see how to generate the jobs.
     \end{hint}
   \begin{solution}
-Now we see that we needed to store the jobs in \pyv{served_jobs}. Set \pyv{num_jobs=100} in the code of Exercise~\ref{ex:3}. Put the following code at the end of the simulator to compute the statistics. 
+    Now we see that we needed to store the jobs in \pyv{served_jobs}. Set
+    \begin{pyverbatim}
+    num_jobs=100      
+    \end{pyverbatim}
+in the code of Exercise~\ref{ex:3}. Put the following code at the end of the simulator to compute the statistics. 
     \begin{pyverbatim}
 
 tot_queue = sum(j.queue_length_at_arrival for j in served_jobs)
@@ -1565,7 +1569,7 @@ G = uniform(2, 0.00001)
 
 Then use this in our simulation. What happens? What happens if you reverse the 2 and the 3 in $F$ and $G$?
 \begin{solution}
-  With \pyv{F=uniform(3, 0.00001)} job inter-arrival times are nearly 3.
+  With \pyv{F=uniform(3, 0.00001)} the job inter-arrival times are nearly 3.
   Likewise, the service times are nearly 2.
   Hence, arriving customers will always see an empty queue, implying that the average queue length upon arrival equals zero.
   When you reverse the 2 and 3 a queue should build up.
@@ -1590,7 +1594,11 @@ We assume that demand arrives as a Poisson process with rate $\lambda=1/3$ per m
 
   
   \begin{hint}
-Build a function with arguments $\lambda$ and $G$. From from \pyv{scipy.stats} import \pyv{uniform}. (Read the docs to see how to build the uniform distribution in \pyv{scipy.stats}.) Then use \pyv{G.var()} and \pyv{G.mean()} to compute $c_e^2$.  Then use Little's law to convert the expected waiting time to the expected queue length. 
+    Build a function with arguments $\lambda$ and $G$. Use
+    \begin{pyverbatim}
+from scipy.stats import uniform
+    \end{pyverbatim}
+to simulate the uniform distribution. (Read the docs to see how to build the uniform distribution in \pyv{scipy.stats}.) Then use \pyv{G.var()} and \pyv{G.mean()} to compute $c_e^2$.  Then use Little's law to convert the expected waiting time to the expected queue length. 
   \end{hint}
   \begin{solution}
 
@@ -1750,7 +1758,18 @@ and \pyv{queue.pop(0)} by \pyv{heappop(queue)}.
 
 When you do large scale simulations, involving many hours of simulation time, all inefficiencies build up and can make the running time orders of magnitude longer. A famous example is the sorting of numbers. A simple, but stupid, sorting algorithm is $O(n^2)$ while a good algorithm is $O(n \log n)$. The sorting time of $10^6$ numbers is dramatically different. 
 
-    For our code, add the line \pyv{from collections import deque} and replace \pyv{queue = []} by \pyv{queue = deque()}, and \pyv{queue.pop(0)}  by \pyv{queue.popleft()}.
+For our code, add the line
+\begin{pyverbatim}
+from collections import deque
+\end{pyverbatim}
+and replace \pyv{queue = []} by
+\begin{pyverbatim}
+queue = deque()
+\end{pyverbatim}
+and \pyv{queue.pop(0)}  by
+\begin{pyverbatim}
+queue.popleft()
+\end{pyverbatim}
   \end{solution}
 \end{exercise}
 
@@ -2185,7 +2204,9 @@ And, indeed, along the way we caught numerous mistakes, from missing \pyv{if} st
   
 
   \begin{solution}
-Here are two tests. The tests will not yet work since we have not yet made the \pyv{GGc_with_business} class. 
+    Here are two tests.
+    The tests will not yet work since we have not yet made the class to simulate the queueing system.
+    In other words, we know that our first test should fail initially.
 
     \begin{pyverbatim}
 def DD1_test_1():
@@ -2330,7 +2351,7 @@ Make a `test-bed' that allows you to compare, side-by-side, the shared versus th
 \end{exercise}
 
 \begin{exercise}
-  Now start varying on the base case, for instance, longer opening hours, more/less customers, higher/lower fraction of business customers, longer/shorter service times, more/less variability in the service times.  (In other words, just play with your simulator, and try to relate the outcomes to what you experienced/observed from your last flight.) Compare the results.
+  Now start varying on the base case, for instance, longer opening hours, more (less) customers, higher (lower) fraction of business customers, longer (shorter) service times, more (less) variability in the service times.  (In other words, just play with your simulator, and try to relate the outcomes to what you experienced/observed from your last flight.) Compare the results.
 \end{exercise}
 
 \begin{exercise}
@@ -2357,7 +2378,7 @@ Make a `test-bed' that allows you to compare, side-by-side, the shared versus th
     Finally, you often need to compare a host of different policies:
     \begin{itemize}
     \item Perhaps it is better to have  dynamic service capacity, 3 during the first hour, 6 in the second. 
-    \item Perhaps the service distributions of the business customers can be made shorter, or more regular. What would be impact of this? 
+    \item Perhaps the service distributions of the business customers can be made a bit shorter, or more regular. What would be impact of this? 
     \item Since there is small number of business customers, why not open the business check-in desk later than the other desks?
       Or, share the desks during the first opening hour of the desks, and `unshare' during the second?
     \end{itemize}
