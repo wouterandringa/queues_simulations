@@ -183,7 +183,7 @@ def simulation_3():
     print(KS(a, G))
 
 
-# simulation_3
+# simulation_3()
 
 
 def plot_distributions(x, y, N, L, dist, dist_name):
