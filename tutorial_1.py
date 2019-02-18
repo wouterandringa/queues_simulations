@@ -251,7 +251,7 @@ def shop_2():
     print(shop)
 
 
-# shop_2
+# shop_2()
 
 
 def superposition(a):
