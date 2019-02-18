@@ -233,7 +233,7 @@ def shop_1():
     print(times)
 
 
-# shop_1
+# shop_1()
 
 
 def shop_2():
