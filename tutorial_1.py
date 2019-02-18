@@ -161,7 +161,7 @@ def simulation_2():
     plt.show()
 
 
-# simulation_2
+# simulation_2()
 
 
 def KS(X, F):
