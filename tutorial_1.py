@@ -295,7 +295,7 @@ def shop_4():
     print(KS(a, E))
 
 
-# shop_4
+# shop_4()
 
 
 def shop_5():
