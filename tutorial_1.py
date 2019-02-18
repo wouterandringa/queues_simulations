@@ -210,7 +210,7 @@ def simulation_4():
     plot_distributions(x, y, N, L, E, dist_name)
 
 
-# simulation_4
+# simulation_4()
 
 
 def compute_arrivaltimes(a):
