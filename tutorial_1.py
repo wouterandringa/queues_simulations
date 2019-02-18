@@ -276,7 +276,7 @@ def shop_3():
     print(KS(a, E))  # Compute KS statistic using the function defined earlier
 
 
-# shop_3
+# shop_3()
 
 
 def shop_4():
