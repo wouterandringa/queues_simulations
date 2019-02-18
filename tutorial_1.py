@@ -142,7 +142,7 @@ def simulation_1():
     print(a)
 
 
-# simulation_1
+# simulation_1()
 
 
 def simulation_2():
