@@ -973,7 +973,11 @@ Q, d = compute_Q_d(a, s, q0)
 
 plt.plot(Q)
 plt.show()
-  \end{pyverbatim}
+\end{pyverbatim}
+
+\begin{solution}
+  You should see that the queue starts at 100 and drains roughly at rate $\lambda-\mu$. If you make $Q_0$ very large ($10 000$ or so), you should see that the queue length process behaves nearly like a line until it hits 0.
+\end{solution}
 \end{exercise}
 
 
@@ -1036,22 +1040,9 @@ Explain what you see. What is the drain rate of $Q$?
 
 \begin{exercise}
 What do you expect to see when $\lambda=6$ and $\mu=5$? Once you have formulated your hypothesis, check it.
-
-\begin{pyverbatim}
-N = 10000
-labda = 6
-mu = 5
-q0 = 0
-
-a = poisson(labda).rvs(N)
-s = poisson(mu).rvs(N)
-
-Q, d = compute_Q_d(a, s, q0)
-
-plt.plot(Q)
-plt.show()
-  \end{pyverbatim}
-Explain again what you see.
+\begin{solution}
+  The queue should increase with rate $\lambda - \mu$. Of course the queue length process will fluctuate a bit around the line with slope $\lambda-\mu$, but the line shows the trend. 
+\end{solution}
 \end{exercise}
 
 \subsection{What-if analysis}
