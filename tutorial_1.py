@@ -142,7 +142,7 @@ def simulation_1():
     print(a)
 
 
-# simulation_1
+# simulation_1()
 
 
 def simulation_2():
@@ -161,7 +161,7 @@ def simulation_2():
     plt.show()
 
 
-# simulation_2
+# simulation_2()
 
 
 def KS(X, F):
@@ -183,7 +183,7 @@ def simulation_3():
     print(KS(a, G))
 
 
-# simulation_3
+# simulation_3()
 
 
 def plot_distributions(x, y, N, L, dist, dist_name):
@@ -210,7 +210,7 @@ def simulation_4():
     plot_distributions(x, y, N, L, E, dist_name)
 
 
-# simulation_4
+# simulation_4()
 
 
 def compute_arrivaltimes(a):
@@ -233,7 +233,7 @@ def shop_1():
     print(times)
 
 
-# shop_1
+# shop_1()
 
 
 def shop_2():
@@ -251,7 +251,7 @@ def shop_2():
     print(shop)
 
 
-# shop_2
+# shop_2()
 
 
 def superposition(a):
@@ -276,7 +276,7 @@ def shop_3():
     print(KS(a, E))  # Compute KS statistic using the function defined earlier
 
 
-# shop_3
+# shop_3()
 
 
 def shop_4():
@@ -295,7 +295,7 @@ def shop_4():
     print(KS(a, E))
 
 
-# shop_4
+# shop_4()
 
 
 def shop_5():
@@ -313,4 +313,4 @@ def shop_5():
     print(KS(a, E))
 
 
-# shop_5
+# shop_5()

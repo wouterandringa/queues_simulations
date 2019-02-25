@@ -370,8 +370,8 @@ But now we still have vertical lines. To remove those, we can use \pyv{hlines}.
 y = range(0, len(a)+1)
 y = [yy/len(a) for yy in y] # normalize
 s = sorted(a)
-left = [min(a)-1] + a
-right = a + [max(a)+1]
+left = [min(s)-1] + s
+right = s + [max(s)+1]
 
 plt.hlines(y, left, right)
 plt.show()
