@@ -56,7 +56,7 @@ def experiment_3():
     s = poisson(mu).rvs(N)
     Q, d = compute_Q_d(a, s, q0)
 
-    x, F = cdf(Q)
+    x, F = cdf_better(Q)
     plt.plot(x, F)
     plt.show()
 
