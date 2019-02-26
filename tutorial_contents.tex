@@ -1537,7 +1537,8 @@ print("Simulated avg. queue length:", av_queue_length)
       
 tot_sojourn = sum(j.sojourn_time() for j in served_jobs)
 av_sojourn_time = tot_sojourn/len(served_jobs)
-print("Avg. sojourn time:", av_sojourn_time)
+print("Theoretical avg. sojourn time:", (1./labda)*rho/(1-rho))
+print("Simulated avg. sojourn time:", av_sojourn_time)
 \end{pyverbatim}
 
 Now run the simulator.
