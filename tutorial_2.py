@@ -204,7 +204,7 @@ def experiment_7a():
     Q, d = compute_Q_d_blocking(a, s, q0, b=15)
     print(Q.mean(), Q.std())
 
-    x, F = cdf(Q)
+    x, F = cdf_better(Q)
     plt.plot(x, F)
     plt.show()
 
