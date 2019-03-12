@@ -172,7 +172,7 @@ def experiment_7():
     Q, d = compute_Q_d_with_extra_servers(a, q0, mu=6, threshold=20, extra=2)
     print(Q.mean(), Q.std())
 
-    x, F = cdf(Q)
+    x, F = cdf_better(Q)
     plt.plot(x, F)
     plt.show()
 
@@ -204,7 +204,7 @@ def experiment_7a():
     Q, d = compute_Q_d_blocking(a, s, q0, b=15)
     print(Q.mean(), Q.std())
 
-    x, F = cdf(Q)
+    x, F = cdf_better(Q)
     plt.plot(x, F)
     plt.show()
 
