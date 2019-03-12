@@ -1,3 +1,6 @@
+\usepackage{classicthesis}
+\usepackage{a4wide}
+
 \usepackage[solutionfiles]{optional}
 
 % Als je daarentegen de antwoorden onder de opdracht wil hebben, quote
@@ -7,43 +10,8 @@
 \opt{nosolutionfiles}{\usepackage[nosolutionfiles]{answers}}
 \opt{solutionfiles}{\usepackage{answers}}
 
-\usepackage[english]{babel}
+\usepackage{../queueing_book/preamble}
 
-\usepackage{mathtools,amsthm,amssymb}
-\usepackage{verbatim}
-\usepackage[colorlinks=true]{hyperref}
-
-\usepackage[T1]{fontenc}
-\usepackage{fouriernc}
-\usepackage{fontawesome} % for the linux hint symbol
-\newcommand{\hintsymbol}{\marginpar{\center{\faLinux}}}
-
-
-% I don't know why, pythontext should appear somewhere above some
-% other packages. I don't know which ones, but at this spot it works.
-\usepackage{pythontex}
-
-\usepackage{fancyhdr}
-\pagestyle{fancy}
-\fancyhead{} % clear all header fields
-\fancyhead[LO, LE]{\rightmark}
-\fancyfoot{} % clear all footer fields
-\fancyfoot[C]{\thepage}
-\setlength{\headheight}{14pt} 
-
-\Newassociation{solution}{Solution}{ans}
-%\Newassociation{sol}{Solution}{ans}
-\Newassociation{hint}{Hint}{hint}
-\renewcommand{\Hintlabel}[1]{\textbf{h.#1}}
-\renewcommand{\Solutionlabel}[1]{\textbf{s.#1}}
-
-\theoremstyle{definition} % font type for theorems and related environments
-\newtheorem{exercise}{Exercise}[section]
-
-\usepackage{etoolbox}% necessary for the command below
-\AtBeginEnvironment{hint}{\hintsymbol} 
-
-\newcommand{\E}[1]{\,\mathsf{E}\left[#1\right]}
 
 \title{Tutorials for queueing simulations}
 \author{N.D. Van Foreest and E.R. Van Beesten}
@@ -51,7 +19,6 @@
 \begin{document}
 \maketitle
 
-\setcounter{tocdepth}{1}
 \tableofcontents
 
 \clearpage
@@ -176,21 +143,17 @@ but nothing happens. This issue can be solved by the following steps
 
 The aim of this tutorial is to show, empirically, a fascinating fact: even for very small populations in which individuals decide independently to visit a server (a shop, a hospital, etc), the exponential distribution is a good model for the inter-arrival times as seen by the server.
 We will develop a simulation to motivate this `fact of nature'.
-In particular, our aim is to build analogues to Figure 1.1, 1.2., and 1.3 of the queueing book\footnote{You can find this here: \url{https://github.com/ndvanforeest/queueing_book}}, but in terms of cdfs instead of pdfs.
-(Read the description that underlies these figures.)
+In particular, our aim is to build the analogues of Figures~\ref{fig:uniformfew}, \ref{fig:uniformmany} and \ref{fig:normal}  in terms of cdfs instead of pdfs.
 
-\subsection{to be merged}
-\label{sec:tutor-1:-expon}
+\subsection{Background}
 
 
-Let us now show with simulation how the exponential distribution
-originates. Consider $N$ people that regularly visit a shop. We assume
-that we can characterize the inter-arrival times
-$\{X_k^i, k=1,2, \ldots\}$ of customer $i$ by some distribution
-function, for instance the uniform distribution. Then, with
-$A_{0}^i=0$ for all~$i$, define 
+We first discuss how the exponential distribution originates.
+Consider $N$ people that regularly visit a shop.
+We assume that we can characterize the inter-arrival times $\{X_k^i, k=1,2, \ldots\}$ of customer $i$ by some distribution function, for instance the uniform distribution.
+Then, with $A_{0}^i=0$ for all~$i$, define
 \begin{equation}\label{eq:A_kk}
-A_k^i = A_{k-1}^i + X_k^i = \sum_{j=1}^k X_j^i,
+A_k^i = A_{k-1}^i + X_k^i = \sum_{j=1}^k X_j^i
 \end{equation}
 as the arrival moment of the $k$th visit of customer $i$.  Now the
 shop owner `sees' the superposition of the arrivals of all
@@ -198,33 +161,28 @@ customers. One way to compute the arrival moments of all customers
 together is to put all the arrival times
 $\{A_k^i, k=1,\ldots,n, i=1,\ldots,N\}$ into one set, and sort these
 numbers in increasing order. This results in the (sorted) set of
-arrival times $\{A_k, k=1,2,\ldots\}$ at the shop of all customers together. Taking $A_0=0$,  then
+arrival times $\{A_k, k=1,2,\ldots\}$ at the shop of all customers together. Taking $A_0=0$,  it follows hat
 \begin{equation}\label{eq:X_kk}
 X_k = A_k - A_{k-1},
 \end{equation}
-must be the inter-arrival time between the $k-1$th and
-$k$th customer at the shop.  Thus, with this procedure, starting from inter-arrival times of
-individual customers, we can construct inter-arrival times as seen by
-the shop.
+is the inter-arrival time between the $k-1$th and $k$th customer at the shop.
+Thus, with this procedure, starting from inter-arrival times of individual customers, we can construct inter-arrival times as seen by the shop.
 
 
-Suppose that we  generate, by means of simulation, many inter-arrival times for a set of individual customers, compute the arrival times by~(\ref{eq:A_kk}), sort these, and compute with~(\ref{eq:X_kk}) the inter-arrival times $\{X_k\}$ of customers as seen by the shop.  To plot the \recall{empirical distribution function}, or the \emph{histogram}, of $\{X_k\}$, we just  count the
-number of inter-arrival times smaller than time $t$ for any $t$.  Then the empirical distribution of $\{X_k\}$ is defined as
+Suppose that we generate, by means of simulation, many inter-arrival times for a set of individual customers.
+Then we compute the arrival times by~(\ref{eq:A_kk}), sort these, and compute with~(\ref{eq:X_kk}) the inter-arrival times $\{X_k\}$ of customers as seen by the shop.
+To plot the empirical distribution function, of $\{X_k\}$, we just count the number of inter-arrival times smaller than time $t$ for any $t$.
+Then the empirical distribution of $\{X_k\}$ is defined as
 \begin{equation*}
   \P{X \leq t}_{n} = \frac1{n}\sum_{k=1}^{n} \1{X_k\leq t},
 \end{equation*}
 where the \emph{indicator function} is $\1{X_k\leq t}=1$ if $X_k\leq t$ and $\1{X_k\leq t}=0$
 if $X_k> t$.  
 
-Let us now compare the probability density as
-obtained for several simulation scenarios to the density of the
-exponential distribution, i.e., to $\lambda e^{-\lambda t}$.  As a
-first example, take $N=1$ customer and let the computer generate
-$n=100$ uniformly distributed numbers on the set $[4, 6]$.  Thus, the
-time between two visits of this customer is somewhere between $4$ and
-$6$ hours, and the average inter-arrival times $\E X = 5$. In a second
-simulation we take $N=3$ customers, and in the third, $N=10$
-customers. 
+Let us now compare the probability density as obtained for several simulation scenarios to the density of the exponential distribution, i.e., to $\lambda e^{-\lambda t}$.
+As a first example, take $N=1$ customer and let the computer generate $n=100$ uniformly distributed numbers on the set $[4, 6]$.
+Thus, the time between two visits of this customer is somewhere between $4$ and $6$ hours, and the average inter-arrival times $\E X = 5$.
+In a second simulation we take $N=3$ customers, and in the third, $N=10$ customers.
 
 Approximations of the probability density functions, based on the empirical distributions, are shown, from left to right,
 in the three panels in Figure~\ref{fig:uniformfew}. The continuous
@@ -238,7 +196,7 @@ hours,  the arrival rate is $1/5$. Hence, when $N$ customers visit the shop, eac
   \centering
   \begin{tabular}[h]{c}
 % see progs/convergence_to_exp.py
- \input{progs/uniform_to_exponential_few.tex}\\
+ \input{../queueing_book/progs/uniform_to_exponential_few.tex}\\
   \end{tabular}
   \caption{The inter-arrival process as seen by the shop owner. Observe
     that the density $\lambda e^{-\lambda x}$ intersects the $y$-axis
@@ -259,7 +217,7 @@ $\sigma=1$, see Figure~\ref{fig:normal}.
   \centering
   \begin{tabular}[h]{c}
 % see progs/convergence_to_exp.py
- \input{progs/uniform_to_exponential_many.tex}\\
+ \input{../queueing_book/progs/uniform_to_exponential_many.tex}\\
   \end{tabular}
   \caption{Each of the $N$ customers visits the shop at uniformly 
     distributed inter-arrival times, but now the number of visits is
@@ -271,7 +229,7 @@ $\sigma=1$, see Figure~\ref{fig:normal}.
   \centering
   \begin{tabular}[h]{c}
 % see progs/convergence_to_exp.py
- \input{progs/normal_to_exponential.tex}
+ \input{../queueing_book/progs/normal_to_exponential.tex}
   \end{tabular}
   \caption{Each of the $N$ customers visits the shop with normally
     distributed inter-arrival times with $\mu=5$ and
@@ -287,9 +245,7 @@ exponential distribution to model inter-arrival times of customers for systems (
 customers each of which  deciding independently to visit the system.
 
 
-\subsection{Continuation with old tutorial}
-
-
+\subsection{Simulations}
 
 \begin{exercise}
   Make a plan of the steps you have to carry out to make an analogue of Figure 1.1 of the queueing book in terms of a cdf.
