@@ -179,6 +179,117 @@ We will develop a simulation to motivate this `fact of nature'.
 In particular, our aim is to build analogues to Figure 1.1, 1.2., and 1.3 of the queueing book\footnote{You can find this here: \url{https://github.com/ndvanforeest/queueing_book}}, but in terms of cdfs instead of pdfs.
 (Read the description that underlies these figures.)
 
+\subsection{to be merged}
+\label{sec:tutor-1:-expon}
+
+
+Let us now show with simulation how the exponential distribution
+originates. Consider $N$ people that regularly visit a shop. We assume
+that we can characterize the inter-arrival times
+$\{X_k^i, k=1,2, \ldots\}$ of customer $i$ by some distribution
+function, for instance the uniform distribution. Then, with
+$A_{0}^i=0$ for all~$i$, define 
+\begin{equation}\label{eq:A_kk}
+A_k^i = A_{k-1}^i + X_k^i = \sum_{j=1}^k X_j^i,
+\end{equation}
+as the arrival moment of the $k$th visit of customer $i$.  Now the
+shop owner `sees' the superposition of the arrivals of all
+customers. One way to compute the arrival moments of all customers
+together is to put all the arrival times
+$\{A_k^i, k=1,\ldots,n, i=1,\ldots,N\}$ into one set, and sort these
+numbers in increasing order. This results in the (sorted) set of
+arrival times $\{A_k, k=1,2,\ldots\}$ at the shop of all customers together. Taking $A_0=0$,  then
+\begin{equation}\label{eq:X_kk}
+X_k = A_k - A_{k-1},
+\end{equation}
+must be the inter-arrival time between the $k-1$th and
+$k$th customer at the shop.  Thus, with this procedure, starting from inter-arrival times of
+individual customers, we can construct inter-arrival times as seen by
+the shop.
+
+
+Suppose that we  generate, by means of simulation, many inter-arrival times for a set of individual customers, compute the arrival times by~(\ref{eq:A_kk}), sort these, and compute with~(\ref{eq:X_kk}) the inter-arrival times $\{X_k\}$ of customers as seen by the shop.  To plot the \recall{empirical distribution function}, or the \emph{histogram}, of $\{X_k\}$, we just  count the
+number of inter-arrival times smaller than time $t$ for any $t$.  Then the empirical distribution of $\{X_k\}$ is defined as
+\begin{equation*}
+  \P{X \leq t}_{n} = \frac1{n}\sum_{k=1}^{n} \1{X_k\leq t},
+\end{equation*}
+where the \emph{indicator function} is $\1{X_k\leq t}=1$ if $X_k\leq t$ and $\1{X_k\leq t}=0$
+if $X_k> t$.  
+
+Let us now compare the probability density as
+obtained for several simulation scenarios to the density of the
+exponential distribution, i.e., to $\lambda e^{-\lambda t}$.  As a
+first example, take $N=1$ customer and let the computer generate
+$n=100$ uniformly distributed numbers on the set $[4, 6]$.  Thus, the
+time between two visits of this customer is somewhere between $4$ and
+$6$ hours, and the average inter-arrival times $\E X = 5$. In a second
+simulation we take $N=3$ customers, and in the third, $N=10$
+customers. 
+
+Approximations of the probability density functions, based on the empirical distributions, are shown, from left to right,
+in the three panels in Figure~\ref{fig:uniformfew}. The continuous
+curve is the graph of $\lambda e^{-\lambda x}$ where
+$\lambda = N/\E X = N/5$. (Recall from Exercise~(\ref{exer:lambda}) that when one
+person visits the shop  with an average inter-arrival time of $5$
+hours,  the arrival rate is $1/5$. Hence, when $N$ customers visit the shop, each with an average inter-arrival time of 5 hours, the total arrival rate as seen by the shop must be $N/5$.)
+
+
+\begin{figure}[ht]
+  \centering
+  \begin{tabular}[h]{c}
+% see progs/convergence_to_exp.py
+ \input{progs/uniform_to_exponential_few.tex}\\
+  \end{tabular}
+  \caption{The inter-arrival process as seen by the shop owner. Observe
+    that the density $\lambda e^{-\lambda x}$ intersects the $y$-axis
+    at level $N/5$, which is equal to the arrival rate when $N$
+    persons visit the shop. The parameter $n=100$ is the simulation
+    length, i.e., the number of visits per customer, and $b=10$ is the
+    number of bins to collect the data. The height of a point corresponds to a density, but its computation is a bit subtle. Let $a=(X_1, \ldots, X_n)$ denote the simulated inter-arrival times. Define the width of a bin as $\delta = (\max\{a\} - \min\{a\})/b$. Then the height of the $i$th bin is computed as $h_i = n_i/(n \delta)$. With this: $\sum_{i=1}^b h_i \delta = 1$.}
+  \label{fig:uniformfew}
+\end{figure}
+
+As a second
+example, we extend the simulation to $n=1000$ visits to the shop, see
+Figure~\ref{fig:uniformmany}. In the third example we take the
+inter-arrival times to be normally distributed times with mean $5$ and
+$\sigma=1$, see Figure~\ref{fig:normal}.
+
+\begin{figure}[ht]
+  \centering
+  \begin{tabular}[h]{c}
+% see progs/convergence_to_exp.py
+ \input{progs/uniform_to_exponential_many.tex}\\
+  \end{tabular}
+  \caption{Each of the $N$ customers visits the shop at uniformly 
+    distributed inter-arrival times, but now the number of visits is
+    $n=1000$.}  
+  \label{fig:uniformmany}
+\end{figure}
+
+\begin{figure}[ht]
+  \centering
+  \begin{tabular}[h]{c}
+% see progs/convergence_to_exp.py
+ \input{progs/normal_to_exponential.tex}
+  \end{tabular}
+  \caption{Each of the $N$ customers visits the shop with normally
+    distributed inter-arrival times with $\mu=5$ and
+    $\sigma=1$.}  \label{fig:normal}
+\end{figure}
+
+As the graphs show, even when the customer population consists of 10
+members, each visiting the shop with an inter-arrival time that is
+quite `far' from exponential, the distribution of the inter-arrival
+times as observed by the shop is very well approximated by an
+exponential distribution. Thus, it appears reasonable to use the
+exponential distribution to model inter-arrival times of customers for systems (such as a shop, or a hospital or a call center) that handle many (thousands of)
+customers each of which  deciding independently to visit the system.
+
+
+\subsection{Continuation with old tutorial}
+
+
 
 \begin{exercise}
   Make a plan of the steps you have to carry out to make an analogue of Figure 1.1 of the queueing book in terms of a cdf.
@@ -1256,6 +1367,151 @@ An interesting extension is to incorporate time-varying demand. In many systems,
 
   \end{solution}
 \end{exercise}
+
+
+\subsection{To be merged}
+\label{sec:be-merged}
+
+I copied this part from the book. To be merged. For students: you can skip this part. 
+
+\begin{exercise}
+  Implement Eqs.~\eqref{eq:31} in Python and simulate a
+  simple single-server queueing system. Assume that the $a_k \sim P(20)$, i.e., Poisson distributed with $\lambda=20$, and $c_k =\mu=21$. Make a plot of the queue length process $Q$, and compute the mean and standard variance of $Q$. Compute the fraction of periods in which the queue length exceeds some threshold, 20, say. 
+  \begin{solution}
+    Below I fix the seed of the random number generator to ensure that
+    I always get the same results from the simulator.  The arrival
+    process is Poisson, and the number of services is fixed to 21 per
+    period. I use \pyv{Q = np.zeros_like(a)} to make an array of the
+    same size as the number of arrival $a$ initially set to zeros. The
+    rest of the code is nearly identical to the formulas in the text.
+
+\begin{pyconsole}
+import numpy as np
+
+np.random.seed(3) # fix the seed
+
+labda = 20
+mu = 21
+\end{pyconsole}
+
+These are the number of arrivals in each period.
+
+\begin{pyconsole}
+a = np.random.poisson(labda, 10)
+a
+\end{pyconsole}
+
+The number of potential services
+\begin{pyconsole}
+c = mu * np.ones_like(a)
+c
+\end{pyconsole}
+
+Now for the queueing recursions:
+
+\begin{pyconsole}
+Q = np.zeros_like(a)
+d = np.zeros_like(a)
+Q[0] = 10  # initial queue length
+
+for k in range(1, len(a)):
+    d[k] = min(Q[k - 1], c[k])
+    Q[k] = Q[k - 1] - d[k] + a[k]
+
+\end{pyconsole}
+
+Here are the departures and queue lengths for each period:
+\begin{pyconsole}
+d
+Q
+\end{pyconsole}
+
+
+Suppose we define loss as the number of periods in which the queue length exceeds 20.
+Of course, any other threshold can be taken.
+Counting the number of such periods is very easy in Python: \pyv{(Q>20)} gives all entries of $Q$ such $Q>20$, the function \pyv{sum()} just adds them.
+
+\begin{pyconsole}
+loss = (Q > 20)
+loss
+loss.sum()
+\end{pyconsole}
+
+Now all statistics:
+
+\begin{pyconsole}
+d.mean()
+Q.mean()
+Q.std()
+(Q > 20).sum()
+\end{pyconsole}
+  
+
+Since this is a small example, the mean number of departures, i.e., \pyv{d.mean()}, is not equal to the arrival rate $\lambda$.
+Likewise for the computation of the mean, variance, and other statistical functions.
+
+Now I am going to run the same code, but for a larger instance. 
+
+\begin{pyconsole}
+num = 1000
+a = np.random.poisson(labda, num)
+c = mu * np.ones_like(a)
+Q = np.zeros_like(a)
+d = np.zeros_like(a)
+Q[0] = 10  # initial queue length
+
+for k in range(1, len(a)):
+    d[k] = min(Q[k - 1], c[k])
+    Q[k] = Q[k - 1] - d[k] + a[k]
+
+d.mean()
+Q.mean()
+Q.std()
+(Q > 30).sum()/num * 100
+\end{pyconsole}
+
+
+I multiply with 100 to get a percentage.
+Clearly, many jobs see a long queue, the mean is already some 28 jobs.
+For this arrival rate a service capacity of $\mu=21$ is certainly too small.
+
+
+Hopefully you understand from this discussion that once you have the recursions to construct/simulate the queueing process, you are `in business'.
+The rest is easy: make plots, do some counting, i.e., assemble statistics, vary parameters for sensitivity analysis, and so on.
+
+
+\end{solution}
+\end{exercise}
+
+
+\begin{exercise}
+  Change the service process of the previous exercise from $c_k =\mu=21$ to $c_k\sim P(\mu)$ with $\mu=21$. What is the influence of the higher variability of the service process on the queue length? 
+  \begin{solution}
+In this  example the number of jobs served per day is $\sim P(21)$, so the service rate is
+still $21$, but the period capacity $c$ is a Poisson random variable. 
+
+\begin{pyconsole}
+c = np.random.poisson(mu, num)
+Q = np.zeros_like(a)
+d = np.zeros_like(a)
+Q[0] = 10  # initial queue length
+
+for k in range(1, len(a)):
+    d[k] = min(Q[k - 1], c[k])
+    Q[k] = Q[k - 1] - d[k] + a[k]
+
+d.mean()
+Q.mean()
+Q.std()
+(Q > 30).sum()/num * 100
+\end{pyconsole}
+
+Comparing this to the result of the previous exercise in which the service capacity in each period was constant $c=21$, we see that the average waiting time increases, just as the number of periods in which the queue length exceeds 30.
+Clearly, variability in service capacity does not improve the performance of the queueing system, quite on the contrary, it increases.
+In later sections we will see why this is so.
+  \end{solution}
+\end{exercise}
+
 
 \clearpage
 
