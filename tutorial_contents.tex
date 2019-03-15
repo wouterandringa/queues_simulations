@@ -147,30 +147,28 @@ In particular, our aim is to build the analogues of Figures~\ref{fig:uniformfew}
 
 \subsection{Background}
 
-
-We first discuss how the exponential distribution originates.
-Consider $N$ people that regularly visit a shop.
-We assume that we can characterize the inter-arrival times $\{X_k^i, k=1,2, \ldots\}$ of customer $i$ by some distribution function, for instance the uniform distribution.
+We discuss an example to intuitively see how the exponential distribution originates.
+Consider a group of $N$ patients that have to visit a hospital somewhere between $4$ and $6$ weeks, say, for a check-up.
+We assume that we can characterize the inter-arrival times $\{X_k^i, k=1,2, \ldots\}$ of patient $i$ by the uniform distribution $U[4, 6]$ weeks.
 Then, with $A_{0}^i=0$ for all~$i$, define
 \begin{equation}\label{eq:A_kk}
 A_k^i = A_{k-1}^i + X_k^i = \sum_{j=1}^k X_j^i
 \end{equation}
-as the arrival moment of the $k$th visit of customer $i$.  Now the
-shop owner `sees' the superposition of the arrivals of all
-customers. One way to compute the arrival moments of all customers
-together is to put all the arrival times
-$\{A_k^i, k=1,\ldots,n, i=1,\ldots,N\}$ into one set, and sort these
-numbers in increasing order. This results in the (sorted) set of
-arrival times $\{A_k, k=1,2,\ldots\}$ at the shop of all customers together. Taking $A_0=0$,  it follows hat
+as the arrival moment of the $k$th visit of patient $i$.
+
+Now the hospital doctor `sees' the superposition of the arrivals of all patients.
+One way to compute the arrival moments of all patients together is to put all the arrival times $\{A_k^i, k=1,\ldots,n, i=1,\ldots,N\}$ into one set, and sort these numbers in increasing order.
+This results in the (sorted) set of arrival times $\{A_k, k=1,2,\ldots\}$ at the doctor of all patients together.
+Taking $A_0=0$, it follows hat
 \begin{equation}\label{eq:X_kk}
 X_k = A_k - A_{k-1},
 \end{equation}
-is the inter-arrival time between the $k-1$th and $k$th customer at the shop.
-Thus, with this procedure, starting from inter-arrival times of individual customers, we can construct inter-arrival times as seen by the shop.
+is the inter-arrival time between the $k-1$th and $k$th patient at the doctor.
+Thus, with this procedure, starting from inter-arrival times of individual patients, we can construct inter-arrival times as seen by the doctor.
 
 
-Suppose that we generate, by means of simulation, many inter-arrival times for a set of individual customers.
-Then we compute the arrival times by~(\ref{eq:A_kk}), sort these, and compute with~(\ref{eq:X_kk}) the inter-arrival times $\{X_k\}$ of customers as seen by the shop.
+Suppose that we generate, by means of simulation, many inter-arrival times for a set of individual patients.
+Then we compute the arrival times by~(\ref{eq:A_kk}), sort these, and compute with~(\ref{eq:X_kk}) the inter-arrival times $\{X_k\}$ of patients as seen by the doctor.
 To plot the empirical distribution function, of $\{X_k\}$, we just count the number of inter-arrival times smaller than time $t$ for any $t$.
 Then the empirical distribution of $\{X_k\}$ is defined as
 \begin{equation*}
@@ -180,16 +178,16 @@ where the \emph{indicator function} is $\1{X_k\leq t}=1$ if $X_k\leq t$ and $\1{
 if $X_k> t$.  
 
 Let us now compare the probability density as obtained for several simulation scenarios to the density of the exponential distribution, i.e., to $\lambda e^{-\lambda t}$.
-As a first example, take $N=1$ customer and let the computer generate $n=100$ uniformly distributed numbers on the set $[4, 6]$.
-Thus, the time between two visits of this customer is somewhere between $4$ and $6$ hours, and the average inter-arrival times $\E X = 5$.
-In a second simulation we take $N=3$ customers, and in the third, $N=10$ customers.
+As a first example, take $N=1$ patient and let the computer generate $n=100$ uniformly distributed numbers on the set $[4, 6]$.
+Thus, the time between two visits of this patient is somewhere between $4$ and $6$ hours, and the average inter-arrival times $\E X = 5$.
+In a second simulation we take $N=3$ patients, and in the third, $N=10$ patients.
 
 Approximations of the probability density functions, based on the empirical distributions, are shown, from left to right,
 in the three panels in Figure~\ref{fig:uniformfew}. The continuous
 curve is the graph of $\lambda e^{-\lambda x}$ where
 $\lambda = N/\E X = N/5$. (Recall from Exercise~(\ref{exer:lambda}) that when one
-person visits the shop  with an average inter-arrival time of $5$
-hours,  the arrival rate is $1/5$. Hence, when $N$ customers visit the shop, each with an average inter-arrival time of 5 hours, the total arrival rate as seen by the shop must be $N/5$.)
+person visits the doctor  with an average inter-arrival time of $5$
+hours,  the arrival rate is $1/5$. Hence, when $N$ patients visit the doctor, each with an average inter-arrival time of 5 hours, the total arrival rate as seen by the doctor must be $N/5$.)
 
 
 \begin{figure}[ht]
@@ -198,17 +196,17 @@ hours,  the arrival rate is $1/5$. Hence, when $N$ customers visit the shop, eac
 % see progs/convergence_to_exp.py
  \input{../queueing_book/progs/uniform_to_exponential_few.tex}\\
   \end{tabular}
-  \caption{The inter-arrival process as seen by the shop owner. Observe
+  \caption{The inter-arrival process as seen by the doctor owner. Observe
     that the density $\lambda e^{-\lambda x}$ intersects the $y$-axis
     at level $N/5$, which is equal to the arrival rate when $N$
-    persons visit the shop. The parameter $n=100$ is the simulation
-    length, i.e., the number of visits per customer, and $b=10$ is the
+    persons visit the doctor. The parameter $n=100$ is the simulation
+    length, i.e., the number of visits per patient, and $b=10$ is the
     number of bins to collect the data. The height of a point corresponds to a density, but its computation is a bit subtle. Let $a=(X_1, \ldots, X_n)$ denote the simulated inter-arrival times. Define the width of a bin as $\delta = (\max\{a\} - \min\{a\})/b$. Then the height of the $i$th bin is computed as $h_i = n_i/(n \delta)$. With this: $\sum_{i=1}^b h_i \delta = 1$.}
   \label{fig:uniformfew}
 \end{figure}
 
 As a second
-example, we extend the simulation to $n=1000$ visits to the shop, see
+example, we extend the simulation to $n=1000$ visits to the doctor, see
 Figure~\ref{fig:uniformmany}. In the third example we take the
 inter-arrival times to be normally distributed times with mean $5$ and
 $\sigma=1$, see Figure~\ref{fig:normal}.
@@ -219,7 +217,7 @@ $\sigma=1$, see Figure~\ref{fig:normal}.
 % see progs/convergence_to_exp.py
  \input{../queueing_book/progs/uniform_to_exponential_many.tex}\\
   \end{tabular}
-  \caption{Each of the $N$ customers visits the shop at uniformly 
+  \caption{Each of the $N$ patients visits the doctor at uniformly 
     distributed inter-arrival times, but now the number of visits is
     $n=1000$.}  
   \label{fig:uniformmany}
@@ -231,18 +229,13 @@ $\sigma=1$, see Figure~\ref{fig:normal}.
 % see progs/convergence_to_exp.py
  \input{../queueing_book/progs/normal_to_exponential.tex}
   \end{tabular}
-  \caption{Each of the $N$ customers visits the shop with normally
+  \caption{Each of the $N$ patients visits the doctor with normally
     distributed inter-arrival times with $\mu=5$ and
     $\sigma=1$.}  \label{fig:normal}
 \end{figure}
 
-As the graphs show, even when the customer population consists of 10
-members, each visiting the shop with an inter-arrival time that is
-quite `far' from exponential, the distribution of the inter-arrival
-times as observed by the shop is very well approximated by an
-exponential distribution. Thus, it appears reasonable to use the
-exponential distribution to model inter-arrival times of customers for systems (such as a shop, or a hospital or a call center) that handle many (thousands of)
-customers each of which  deciding independently to visit the system.
+As the graphs show, even when the patient population consists of 10 members, each visiting the doctor with an inter-arrival time that is quite `far' from exponential, the distribution of the inter-arrival times as observed by the doctor is very well approximated by an exponential distribution.
+Thus, it appears reasonable to use the exponential distribution to model inter-arrival times of patients for systems (such as a doctor, or a hospital or a call center) that handle many (thousands of) patients each of which deciding independently to visit the system.
 
 
 \subsection{Simulations}
@@ -259,14 +252,14 @@ customers each of which  deciding independently to visit the system.
 
   \begin{solution}
     \begin{enumerate}
-    \item Generate realizations of a uniformly distributed random variable representing the inter-arrival times of one customer.
+    \item Generate realizations of a uniformly distributed random variable representing the inter-arrival times of one patient.
     \item Plot the inter-arrival times.
     \item Compute the (empirical) distribution function of the simulated inter-arrival times.
     \item Plot the (empirical) distribution function.
-    \item Generate realizations of uniformly distributed random variables representing the inter-arrival times of multiple customers, e.g., 3. 
-    \item Compute the arrival times for each customer.
-    \item Merge  the arrival times for all customers. This is the arrival process as seen by the shop.
-    \item Compute the inter-arrival times as seen by the shop.
+    \item Generate realizations of uniformly distributed random variables representing the inter-arrival times of multiple patients, e.g., 3. 
+    \item Compute the arrival times for each patient.
+    \item Merge  the arrival times for all patients. This is the arrival process as seen by the doctor.
+    \item Compute the inter-arrival times as seen by the doctor.
     \item Plot these inter-arrival times.
     \item Compare to the exponential distribution function with a suitable arrival rate $\lambda$. 
     \end{enumerate}
@@ -486,10 +479,10 @@ cdf(a, True)
 \end{solution}
 \end{exercise}
 
-\subsection{Simulating the arrival process of a single customer}
+\subsection{Simulating the arrival process of a single patient}
 \label{sec:simulations}
 
-The next step is to simulate inter-arrival times of a single customer and  make an empirical cdf of these times.  Then we graphically compare this cdf to the exponential distribution. A more formal method to compare cdfs is by means of the Kolmogorov-Smirnov statistic (see Wikipedia) which we develop in passing.
+The next step is to simulate inter-arrival times of a single patient and  make an empirical cdf of these times.  Then we graphically compare this cdf to the exponential distribution. A more formal method to compare cdfs is by means of the Kolmogorov-Smirnov statistic (see Wikipedia) which we develop in passing.
 
 \begin{exercise}
   Generate 3 random numbers uniformly distributed on $[4,6]$.  Print these numbers to see if you get something decent. Read the documentation of
@@ -517,11 +510,11 @@ print(a)
 
 
 \begin{exercise}
-Generate $L=300$ random numbers $\sim U[4,6]$ and make a histogram of these numbers. You should interpret these random numbers as inter-arrival times of one customer at a shop (in hours say.)
+Generate $L=300$ random numbers $\sim U[4,6]$ and make a histogram of these numbers. You should interpret these random numbers as inter-arrival times of one patient at a doctor (in hours say.)
 \begin{solution}
 Add this code to the other code and run it.
 \begin{pyverbatim}
-N = 1 # number of customers
+N = 1 # number of patients
 L = 300 # number of interarrival times
 a = G.rvs(L)
 
@@ -619,18 +612,18 @@ It is pretty obvious why these graphs must be different: we compare a uniform an
 \end{exercise}
 
 
-\subsection{Simulating many customers}
+\subsection{Simulating many patients}
 \label{sec:simul-many-cust}
 
-We would now like to simulate the inter-arrival process as seen by a shop that serves many customers. For ease, we call this the merged, or superposed, inter-arrival process. Again, this requires quite a bit of thought. Thus, we start with a numerical example with two customers, and organize all steps we make to compute the empirical distribution of the merged inter-arrival process. Then we make an algorithm, and scale up to many numbers. 
+We would now like to simulate the inter-arrival process as seen by a doctor that serves many patients. For ease, we call this the merged, or superposed, inter-arrival process. Again, this requires quite a bit of thought. Thus, we start with a numerical example with two patients, and organize all steps we make to compute the empirical distribution of the merged inter-arrival process. Then we make an algorithm, and scale up to many numbers. 
 
 \begin{exercise}
 
 
-  Suppose we have two customers with inter-arrival times $a=[4, 3, 1.2, 5]$ and $b=[2, 0.5, 9]$. Make, by hand, the empirical cdf of the merged process.
+  Suppose we have two patients with inter-arrival times $a=[4, 3, 1.2, 5]$ and $b=[2, 0.5, 9]$. Make, by hand, the empirical cdf of the merged process.
 
   \begin{hint}
-Note that the shop sees the combined arrival process, so first find a way to merge the arrival times of the customers into one arrival process as observed by the shop. Then convert this into inter-rival times at the shop.
+Note that the doctor sees the combined arrival process, so first find a way to merge the arrival times of the patients into one arrival process as observed by the doctor. Then convert this into inter-rival times at the doctor.
   \end{hint}
   \begin{solution}
     The following steps in code explain the logic.
@@ -654,11 +647,11 @@ B = compute_arrivaltimes(b)
 times = [0] + sorted(A[1:] + B[1:]) 
 print(times)
 
-shop = []
+doctor = []
 for s, t in zip(times[:-1], times[1:]):
-    shop.append(t - s)
+    doctor.append(t - s)
 
-print(shop)
+print(doctor)
     \end{pyverbatim}
   \end{solution}
 \end{exercise}
@@ -674,7 +667,7 @@ def superposition(a):
     A = list(sorted(chain.from_iterable(A)))
     return np.diff(A)
 \end{pyverbatim}  
-Note that the input \pyv{a} in the function \pyv{superposition} is a matrix of inter-arrival times of several customers.
+Note that the input \pyv{a} in the function \pyv{superposition} is a matrix of inter-arrival times of several patients.
 
 Try to understand this code by reading the documentation (on the web) of the following functions.
 \begin{enumerate}
@@ -686,7 +679,7 @@ Try to understand this code by reading the documentation (on the web) of the fol
 
 
 \begin{exercise}
-  Generate 100 random inter-arrival times for 3 customers, plot the cdf of the merged process, and compare to the exponential distribution with the correct mean. Also compute the Kolmogorov-Smirnov statistic for this case. What is the effect of increasing the number of customers from $N=1$ to $N=3$?
+  Generate 100 random inter-arrival times for 3 patients, plot the cdf of the merged process, and compare to the exponential distribution with the correct mean. Also compute the Kolmogorov-Smirnov statistic for this case. What is the effect of increasing the number of patients from $N=1$ to $N=3$?
 \begin{solution}
 Add this to the other code and run it. 
 \begin{pyverbatim}
@@ -708,7 +701,7 @@ print(KS(a, E)) # Compute KS statistic using the function defined earlier
 
 
 \begin{exercise}
-  Compare  the empirical distribution of the inter-arrival times generated by  $N=10$ customers to the exponential distribution (compute the appropriate arrival rate). Make a plot, and explain what you see.
+  Compare  the empirical distribution of the inter-arrival times generated by  $N=10$ patients to the exponential distribution (compute the appropriate arrival rate). Make a plot, and explain what you see.
 \begin{solution}
 Add this to the other code and run it. 
 \begin{pyverbatim}
@@ -731,8 +724,8 @@ This is great. For just $N=10$ we see that the exponential distribution is a rea
 
 
 \begin{exercise}
-Do the same for $N=10$ customers with normally distributed inter-arrival times with $\mu=5$, and $\sigma =1$.
-For this use \pyv{scipy.stats.norm}. What do you see? What is the influence of the distribution of inter-arrival times of an individual customer? 
+Do the same for $N=10$ patients with normally distributed inter-arrival times with $\mu=5$, and $\sigma =1$.
+For this use \pyv{scipy.stats.norm}. What do you see? What is the influence of the distribution of inter-arrival times of an individual patient? 
 \begin{solution}
 Add this to the other code and run it. 
 \begin{pyverbatim}
@@ -749,7 +742,7 @@ plot_distributions(x, y, N, L, dist_name)
 print(KS(a, E))
 \end{pyverbatim}
 
-Clearly, whether the distribution of inter-arrival times of an individual customer are uniform, or normal, doesn't really matter. In both cases the exponential distribution is a good model for what the shop sees. We did not analyze what happens if we would merge customers with normal distribution and uniform distribution, but we can suspect that in all these cases the merged process converges to a set of i.i.d. exponentially distributed random variables.
+Clearly, whether the distribution of inter-arrival times of an individual patient are uniform, or normal, doesn't really matter. In both cases the exponential distribution is a good model for what the doctor sees. We did not analyze what happens if we would merge patients with normal distribution and uniform distribution, but we can suspect that in all these cases the merged process converges to a set of i.i.d. exponentially distributed random variables.
 
 \end{solution}
 \end{exercise}
@@ -774,8 +767,8 @@ If  $\mu=\sigma=5$ then the analysis should break down. What happens if you set 
     \item Algorithmic thinking, i.e., how to chop up a computational challenge into small steps.
     \item How to efficiently compute the empirical distribution function
     \item The Kolmogorov-Smirnov statistic
-    \item The empirical distribution of a  merged inter-arrival arrival process converges, typically, super rapidly to an exponential distribution. Thus,  inter-arrival times at shops, hospitals and so on, are often very well described by an exponential distribution with suitable mean. 
-    \item This convergence is not so sensitive to the distribution of the inter-arrival times of a single customers. For the shop, only the population matters. 
+    \item The empirical distribution of a  merged inter-arrival arrival process converges, typically, super rapidly to an exponential distribution. Thus,  inter-arrival times at doctors, hospitals and so on, are often very well described by an exponential distribution with suitable mean. 
+    \item This convergence is not so sensitive to the distribution of the inter-arrival times of a single patients. For the doctor, only the population matters. 
     \item Using functions (e.g., \pyv{def compute(a)})  to document code  (by the function name), hide complexity, and reuse code so that it can be applied multiple times. Moreover, defining functions is in line with the extremely important Don't-Repeat-Yourself (DRY) principle. 
     \item Coding skills: python, \pyv{numpy} and \pyv{scipy}.
     \end{enumerate}
