@@ -1,5 +1,4 @@
 \usepackage{classicthesis}
-\usepackage{a4wide}
 
 \usepackage[solutionfiles]{optional}
 
@@ -2461,8 +2460,8 @@ def generate_jobs_bad_implementation(F, G, p_business, num_jobs):
 \end{pyverbatim}
 Note that we generate \pyv{num_jobs} jobs. Then, with probability $p$ (\pyv{p_business} in our code) the job is a business customer. 
 
-To repair this problem it is better let \pyv{scipy} call a random number generator in C++ just once and generate all random numbers in one pass.
-Here is one way to obtain a factor of 100 or so speed up.
+To repair this problem it is better to let \pyv{scipy} call a random number generator in C++ just once and generate all random numbers in one pass.
+Here is one way to obtain a speed up of about a factor 100.
 \begin{pyverbatim}
 def generate_jobs(F, G, p_business, num_jobs):
     jobs = set()
@@ -2549,12 +2548,6 @@ Make a `test-bed' that allows you to compare, side-by-side, the shared versus th
   Now start varying on the base case, for instance, longer opening hours, more (less) customers, higher (lower) fraction of business customers, longer (shorter) service times, more (less) variability in the service times.  (In other words, just play with your simulator, and try to relate the outcomes to what you experienced/observed from your last flight.) Compare the results.
 \end{exercise}
 
-\begin{exercise}
-  \begin{solution}
-    First obtain realistic data.
-
-  \end{solution}
-\end{exercise}
 
 
 \begin{exercise}
