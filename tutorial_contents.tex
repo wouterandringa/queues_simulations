@@ -1,4 +1,5 @@
 \usepackage{classicthesis}
+\usepackage{a4wide}
 
 \usepackage[solutionfiles]{optional}
 
@@ -2370,6 +2371,26 @@ Some  interesting extensions.
 
 \section{Tutorial 5: Airport Check-in process}
 \label{sec:simul-check-proc}
+
+In this final tutorial we consider the case in which business and economy class customers have their own server(s).
+In fact, we are going to use simulation to compare different ways to organize the queueing system.
+One way is like this: there is one server strictly allocated to business class customers, and there are $c$, say, servers strictly used by the economy class customers.
+Another way is like this.
+There are still one business server and $c$ economy servers.
+When the business server is free, this server takes just one economy customer in service.
+When, after this service, there is still no business customer, the business server serves a second economy customer.
+Once a business customer arrives, the business server finished the economy customer (if there is any), and then servers the business customer.
+We use a similar policy for serving business customers by free economy class server.
+The problem is of course to figure out which of these policies is best.
+
+
+\begin{exercise}
+  What KPI's would you use to compare the two policies?
+  \begin{solution}
+    Average waiting time of each job class, and maximal waiting time of each class.
+    We might also be interested in the fraction of jobs spending less than 10 minutes in the system.
+  \end{solution}
+\end{exercise}
 
 As the simulation of this case is somewhat more difficult than the $G/G/c$ queue, testing is also more important.
 For this reason we will follow a \emph{test-driven} procedure, which works like this.
