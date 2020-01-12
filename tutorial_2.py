@@ -15,13 +15,15 @@ import scipy
 from scipy.stats import poisson
 import matplotlib.pyplot as plt
 
-plt.ion()
+plt.ion() # to skip making the graphs, I only use it for testing purposes.
 
 scipy.random.seed(3)
 
 def compute_Q_d(a, s, q0=0):
-    d = np.zeros_like(a)
-    Q = np.zeros_like(a)
+    # a: no of arrivals in a period
+    # s: no of services at start of a period
+    d = np.zeros_like(a) # departures
+    Q = np.zeros_like(a) # queue lengths
     Q[0] = q0 # starting level of the queue
     for i in range(1, len(a)):
         d[i] = min(Q[i-1], s[i])
@@ -89,10 +91,10 @@ experiment_4()
 
 # %%
 def experiment_5():
-    N = 10000
+    N = 10  # set this to the correct value.
     labda = 6
     mu = 5
-    q0 = 0
+    q0 = 30
 
     a = poisson(labda).rvs(N)
     s = poisson(mu).rvs(N)
@@ -107,10 +109,10 @@ experiment_5()
 
 # %%
 def experiment_6():
-    N = 10000
+    N = 100 #  Again, replace the numbers
     labda = 5
     mu = 6
-    q0 = 0
+    q0 = 10
 
     a = poisson(labda).rvs(N)
     s = poisson(mu).rvs(N)
@@ -122,7 +124,7 @@ experiment_6()
 
 # %%
 def experiment_6a():
-    N = 10000
+    N = 10 # Use a larger value here
     labda = 5
     mu = 6
     q0 = 0
@@ -137,7 +139,7 @@ experiment_6a()
 
 # %%
 def experiment_6b():
-    N = 10000
+    N = 10 # Change to a larger value.
     labda = 5
     mu = 6
     q0 = 0
@@ -170,7 +172,7 @@ def compute_Q_d_with_extra_servers(a, q0=0, mu=6, threshold=np.inf, extra=0):
 
 
 def experiment_7():
-    N = 10000
+    N = 100 # take a big number here.
     labda = 5
     mu = 6
     q0 = 0
@@ -201,7 +203,7 @@ def compute_Q_d_blocking(a, s, q0=0, b=np.inf):
 
 
 def experiment_7a():
-    N = 10000
+    N = 100 # take a larger value
     labda = 5
     mu = 6
     q0 = 0
@@ -252,19 +254,37 @@ def compute_cost(a, mu, q0=0, threshold=np.inf, h=0, p=0, S=0):
 
 
 def experiment_8():
-    num_jobs = 10000
+    N = 100
     labda = 0.3
     mu = 1
     q0 = 0
-    threshold = 100  # threshold
+    theta = 100  # threshold
 
     h = 1
     p = 5
     S = 500
 
-    a = poisson(labda).rvs(num_jobs)
-    av = compute_cost(a, mu, q0, threshold, h, p, S)
+    a = poisson(labda).rvs(N)
+    av = compute_cost(a, mu, q0, theta, h, p, S)
     print(av)
 
-
 experiment_8()
+
+# %%
+def experiment_9():
+    N = 10 # Change to a larger value.
+    labda = 5
+    mu = 6
+    q0 = 0
+
+    a = poisson(labda).rvs(N)
+    s = poisson(mu).rvs(N)
+
+    Q, d = compute_Q_d(a, s, q0)
+    loss = (Q > 20)
+    print(loss.sum())
+    total_demand = a.sum() 
+    print(100*(Q > 0).sum()/total_demand)
+
+
+experiment_9()
