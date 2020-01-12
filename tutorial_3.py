@@ -279,7 +279,7 @@ def check_ins():
     job = Job()
     labda = 1.0 / 3
     F = expon(scale=1.0 / labda)  # interarrival time distributon
-    G = uniform(1, 3)
+    G = uniform(1, 2)
     print("ES: ", G.mean(), "rho: ", labda * G.mean())
 
     num_jobs = 1000
