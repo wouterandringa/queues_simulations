@@ -1,35 +1,45 @@
-""" Code for tutorial 2 """
+# %%
+'''
+# Tutorial 2, solutions
 
 
+This solution is a jupyter notebook which allows you to directly interact with the code so that
+you can see the effect of any changes you may like to make.
+
+Author: Nicky van Foreest
+'''
+
+# %%
 import numpy as np
 import scipy
 from scipy.stats import poisson
 import matplotlib.pyplot as plt
 
-scipy.random.seed(3)
+plt.ion()
 
+scipy.random.seed(3)
 
 def compute_Q_d(a, s, q0=0):
     d = np.zeros_like(a)
     Q = np.zeros_like(a)
-    Q[0] = q0  # starting level of the queue
+    Q[0] = q0 # starting level of the queue
     for i in range(1, len(a)):
-        d[i] = min(Q[i - 1], s[i])
-        Q[i] = Q[i - 1] + a[i] - d[i]
+        d[i] = min(Q[i-1], s[i])
+        Q[i] = Q[i-1] + a[i] - d[i]
 
     return Q, d
 
 
+# %%
 def experiment_1():
     labda, mu, q0, N = 5, 6, 0, 100
     a = poisson(labda).rvs(N)
     s = poisson(mu).rvs(N)
     print(a.mean(), a.std())
 
+experiment_1()
 
-# experiment_1()
-
-
+# %%
 def experiment_2():
     labda, mu, q0, N = 5, 6, 0, 100
     a = poisson(labda).rvs(N)
@@ -41,10 +51,10 @@ def experiment_2():
     print(d.mean())
 
 
-# experiment_2()
+experiment_2()
 
-
-def cdf_better(a):
+# %%
+def cdf(a):
     y = range(1, len(a) + 1)
     y = [yy / len(a) for yy in y]  # normalize
     x = sorted(a)
@@ -56,14 +66,15 @@ def experiment_3():
     s = poisson(mu).rvs(N)
     Q, d = compute_Q_d(a, s, q0)
 
-    x, F = cdf_better(Q)
+    print(d.mean())
+
+    x, F = cdf(Q)
     plt.plot(x, F)
     plt.show()
 
+experiment_3()
 
-# experiment_3()
-
-
+# %%
 def experiment_4():
     labda, mu = 5, 6
     q0, N = 1000, 100
@@ -74,9 +85,9 @@ def experiment_4():
     plt.show()
 
 
-# experiment_4()
+experiment_4()
 
-
+# %%
 def experiment_5():
     N = 10000
     labda = 6
@@ -92,9 +103,9 @@ def experiment_5():
     plt.show()
 
 
-# experiment_5()
+experiment_5()
 
-
+# %%
 def experiment_6():
     N = 10000
     labda = 5
@@ -102,15 +113,14 @@ def experiment_6():
     q0 = 0
 
     a = poisson(labda).rvs(N)
-    s = poisson(mu).rvs(N)  # marked
+    s = poisson(mu).rvs(N)
 
     Q, d = compute_Q_d(a, s, q0)
     print(Q.mean(), Q.std())
 
+experiment_6()
 
-# experiment_6()
-
-
+# %%
 def experiment_6a():
     N = 10000
     labda = 5
@@ -123,10 +133,9 @@ def experiment_6a():
     Q, d = compute_Q_d(a, s, q0)
     print(Q.mean(), Q.std())
 
+experiment_6a()
 
-# experiment_6a()
-
-
+# %%
 def experiment_6b():
     N = 10000
     labda = 5
@@ -139,10 +148,9 @@ def experiment_6b():
     Q, d = compute_Q_d(a, s, q0)
     print(Q.mean(), Q.std())
 
+experiment_6b()
 
-# experiment_6b()
-
-
+# %%
 def compute_Q_d_with_extra_servers(a, q0=0, mu=6, threshold=np.inf, extra=0):
     d = np.zeros_like(a)
     Q = np.zeros_like(a)
@@ -172,14 +180,13 @@ def experiment_7():
     Q, d = compute_Q_d_with_extra_servers(a, q0, mu=6, threshold=20, extra=2)
     print(Q.mean(), Q.std())
 
-    x, F = cdf_better(Q)
+    x, F = cdf(Q)
     plt.plot(x, F)
     plt.show()
 
+experiment_7()
 
-# experiment_7()
-
-
+# %%
 def compute_Q_d_blocking(a, s, q0=0, b=np.inf):
     # b is the blocking level.
     d = np.zeros_like(a)
@@ -190,6 +197,7 @@ def compute_Q_d_blocking(a, s, q0=0, b=np.inf):
         Q[i] = min(b, Q[i - 1] + a[i] - d[i])
 
     return Q, d
+
 
 
 def experiment_7a():
@@ -204,14 +212,14 @@ def experiment_7a():
     Q, d = compute_Q_d_blocking(a, s, q0, b=15)
     print(Q.mean(), Q.std())
 
-    x, F = cdf_better(Q)
+    x, F = cdf(Q)
     plt.plot(x, F)
     plt.show()
 
 
-# experiment_7a()
+experiment_7a()
 
-
+# %%
 def compute_cost(a, mu, q0=0, threshold=np.inf, h=0, p=0, S=0):
     d = np.zeros_like(a)
     Q = np.zeros_like(a)
@@ -259,4 +267,4 @@ def experiment_8():
     print(av)
 
 
-# experiment_8()
+experiment_8()

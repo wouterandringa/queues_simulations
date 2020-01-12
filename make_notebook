@@ -1,0 +1,15 @@
+python tangle.py
+
+ipynb-py-convert tutorial_1.py tutorial_1.ipynb
+jupyter nbconvert --to latex --execute tutorial_1.ipynb
+pdflatex tutorial_1.tex
+latexmk -c tutorial_1
+rm tutorial_1.tex
+
+#ipynb-py-convert tutorial_2.py tutorial_2.ipynb
+#jupyter nbconvert --to latex --execute tutorial_2.ipynb
+#pdflatex tutorial_2.tex
+
+#ipynb-py-convert tutorial_3.py tutorial_3.ipynb
+#jupyter nbconvert --to latex --execute tutorial_3.ipynb
+#pdflatex tutorial_3.tex
