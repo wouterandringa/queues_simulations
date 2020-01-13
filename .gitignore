@@ -13,3 +13,6 @@ chunks/*
 *.pytxcode
 pythontex-files*
 tutorial*files/
+
+# Jetbrains IDEs
+.idea/
