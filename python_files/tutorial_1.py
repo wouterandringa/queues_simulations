@@ -14,7 +14,8 @@ import numpy as np
 import scipy
 import matplotlib.pyplot as plt
 
-plt.ion()  # you can skip this, I only use it for testing purposes so that the computer skips making the graphs.
+plt.ion()  # you can skip this, I only use it for testing
+           # purposes so that the computer skips making the graphs.
 
 # this is to print not too many digits to the screen
 np.set_printoptions(precision=3)
@@ -71,7 +72,8 @@ run the program, comment it again, etc.
 test1()
 
 # %%
-    # Include this void code to keep the numbering the same between the tutorial text and the jupyter notebook.
+    # Include this void code to keep the numbering the same between
+    # the tutorial text and the jupyter notebook.
 
 # %%
 def test1a():
@@ -103,7 +105,8 @@ def test2():
 test2()
 
 # %%
-    # Include this void code to keep the numbering the same between the tutorial text and the jupyter notebook.
+    # Include this void code to keep the numbering the same between the tutorial
+    # text and the jupyter notebook.
 
 # %%
 def cdf(a):  # the implementation we will use mostly. It is simple and fast.

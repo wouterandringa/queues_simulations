@@ -8,4 +8,9 @@ pdflatex tutorial_mobile
 pythontex tutorial_mobile
 pdflatex tutorial_mobile
 
-rm hint.tex ans.tex x.log
+rm hint.tex ans.tex
+rm x.log
+
+mv tutorial_a4.pdf ..
+mv tutorial_mobile.pdf ..
+

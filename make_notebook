@@ -2,16 +2,8 @@ python tangle.py
 
 file=tutorial_3
 
-ipynb-py-convert $file.py $file.ipynb
-jupyter nbconvert --to latex --execute $file.ipynb
-pdflatex $file.tex
-latexmk -c $file
-rm $file.tex
+ipynb-py-convert python_files/$file.py notebooks/$file.ipynb
+jupyter nbconvert --to latex --execute notebooks/$file.ipynb
+pdflatex notebooks/$file.tex
+rm $file.out $file.log $file.aux notebooks/$file.tex
 
-#ipynb-py-convert tutorial_2.py tutorial_2.ipynb
-#jupyter nbconvert --to latex --execute tutorial_2.ipynb
-#pdflatex tutorial_2.tex
-
-#ipynb-py-convert tutorial_3.py tutorial_3.ipynb
-#jupyter nbconvert --to latex --execute tutorial_3.ipynb
-#pdflatex tutorial_3.tex

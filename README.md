@@ -6,5 +6,6 @@ in available in the form of python programs, with extension `.py`,
 and, for the first three tutorials as Jupyter notebooks, with
 extension `.ipynb`.
 
-I wrote all python in the `tex` files. To extract the python code I
-use `tangle.py`. Then I convert the python program into notebooks with `ipynb-py-convert`.
+The tex files in `tex_files` contain all python source code.
+To extract the python code I use `tangle.py`.
+Then I convert the python program into notebooks with `ipynb-py-convert`.
