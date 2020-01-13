@@ -57,7 +57,9 @@ Author: Nicky van Foreest
 
 
 for i, fname in enumerate(files):
-    source = tangle(fname)
+    source = tangle("tex_files/" + fname)
+    if source == "":
+        continue
     f_to = f"tutorial_{i+1}.py"
     source.insert(0, title.format(i + 1))
     with open(f_to, "w") as fp:

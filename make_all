@@ -4,7 +4,8 @@ pdflatex tutorial_a4
 pythontex tutorial_a4
 pdflatex tutorial_a4
 
+pdflatex tutorial_mobile
+pythontex tutorial_mobile
+pdflatex tutorial_mobile
 
-#pdflatex tutorial_mobile
-#pythontex tutorial_mobile
-#pdflatex tutorial_mobile
+rm hint.tex ans.tex x.log
