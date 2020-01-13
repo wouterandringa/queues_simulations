@@ -1,9 +1,9 @@
 python tangle.py
 
-file=tutorial_3
+file=tutorial_4
 
 ipynb-py-convert python_files/$file.py notebooks/$file.ipynb
-jupyter nbconvert --to latex --execute notebooks/$file.ipynb
+jupyter nbconvert --execute notebooks/$file.ipynb --inplace
+jupyter nbconvert --to latex notebooks/$file.ipynb
 pdflatex notebooks/$file.tex
 rm $file.out $file.log $file.aux notebooks/$file.tex
-

@@ -48,33 +48,136 @@ Likewise,   generalize  the \pyv{handle_departure} function of the $G/G/1$ queue
 It is not  problem when you spend considerable time on this exercise. Most of the following exercises are simple numerical experiments, which should take little time. So, just try and see how far you get. All code is in the solution.
 
 \begin{solution}
-See \pyv{tutorial_4.py}. Study it in detail so that you really understand how it works.
-\end{solution}
+  Study this code it in detail so that you really understand how it works.
 
-\end{exercise}
-
-
-\begin{exercise}
-
-How can we instantiate the \pyv{GGc} simulator, i.e., make an object of a class? How can we run a simulation with exponential inter-arrival times with $\lambda=2$, exponential service times with $\mu=1$, $c=3$, and $10$ jobs?
-\begin{solution}
-First we instantiate, then we run and print.
 \begin{pyverbatim}
-labda = 2
-mu = 1
-ggc = GGc(expon(scale=1./labda), expon(scale=1./mu), 3, 10)
-ggc.run()
+from collections import deque
+from heapq import heappop, heappush
+import numpy as np
+from scipy.stats import expon, uniform
 
-print(ggc.served_jobs)
+np.random.seed(8)
+
+ARRIVAL = 0
+DEPARTURE = 1
+
+
+class Job:
+    def __init__(self):
+        self.arrival_time = 0
+        self.service_time = 0
+        self.departure_time = 0
+        self.queue_length_at_arrival = 0
+
+    def sojourn_time(self):
+        return self.departure_time - self.arrival_time
+
+    def waiting_time(self):
+        return self.sojourn_time() - self.service_time
+
+    def __repr__(self):
+        return f"{self.arrival_time}, {self.service_time}, {self.departure_time}\n"
+
+    def __lt__(self, other):
+        # this is necessary to sort jobs when they have the same arrival times.
+        return self.queue_length_at_arrival < other.queue_length_at_arrival
+
+
+class GGc:
+    def __init__(self, jobs, c):
+        self.jobs = jobs
+        self.c = c
+        self.num_busy = 0  # number of busy servers
+        self.stack = []  # event stack
+        self.queue = deque()
+        self.served_jobs = []
+
+    def handle_arrival(self, time, job):
+        job.queue_length_at_arrival = len(self.queue)
+        if self.num_busy < self.c:
+            self.start_service(time, job)
+        else:
+            self.queue.append(job)
+
+    def put_new_arrivals_on_stack(self):
+        while self.jobs:
+            job = self.jobs.popleft()
+            heappush(self.stack, (job.arrival_time, job, ARRIVAL))
+
+    def start_service(self, time, job):
+        self.num_busy += 1  # server becomes busy.
+        job.departure_time = time + job.service_time
+        heappush(self.stack, (job.departure_time, job, DEPARTURE))
+
+    def handle_departure(self, time, job):
+        self.num_busy -= 1
+        self.served_jobs.append(job)
+        if self.queue:  # not empty
+            next_job = self.queue.popleft()
+            self.start_service(time, next_job)
+
+    def consistency_check(self):
+        if (
+            self.num_busy < 0
+            or self.num_busy > self.c
+            or len(self.queue) < 0
+            or (len(self.queue) > 0 and self.num_busy < self.c)
+        ):
+            print("there is something wrong")
+            quit()
+
+    def run(self):
+        time = 0
+        self.put_new_arrivals_on_stack()
+
+        while self.stack:  # not empty
+            time, job, typ = heappop(self.stack)
+            # self.consistency_check() # use only when testing.
+            if typ == ARRIVAL:
+                self.handle_arrival(time, job)
+            else:
+                self.handle_departure(time, job)
+
+def make_jobs(arrival_times, service_times_jobs):
+    jobs = deque()
+    for a, s in zip(arrival_times, service_times_jobs):
+        job = Job()
+        job.arrival_time = a
+        job.service_time = s
+        jobs.append(job)
+
+    return jobs
+    
 \end{pyverbatim}
 \end{solution}
 \end{exercise}
+
 
 \subsection{Testing}
 \label{sec:testing-1}
 
 \begin{exercise}
-Test the simulator with deterministic inter-arrival times, for instance a job that arrives every 10 minutes, and each job takes 1 hour of service. Check the departure process for $c=1$, $c=2$, $c=5$, $c=6$, and $c=7$.
+Test the simulator with deterministic inter-arrival times, for instance a job that arrives every 10 minutes, and each job takes 25 minues of service. Check the departure process for $c=1$, $c=2$, and $c=3$. 
+\begin{solution}
+\begin{pyverbatim}
+def ddc_test():
+    num_jobs = 10
+    a = [10] * num_jobs
+    A = np.cumsum(a)
+    S = [25.0] * num_jobs
+
+    jobs = make_jobs(A, S)
+    c = 1
+
+    ggc = GGc(jobs, c)
+    ggc.run()
+    print(ggc.served_jobs)
+
+
+ddc_test()
+\end{pyverbatim}
+\end{solution}
+
 \end{exercise}
 
 \begin{exercise}
@@ -89,49 +192,53 @@ Follow the implementation of Exercise~\ref{ex:5}.
 Recall that Sakasegawa's formula is exact for the $M/G/1$ queue, hence also for the $M/M/1$ queue.
 
 \begin{pyverbatim}
-
 def sakasegawa(F, G, c):
-    labda = 1./F.mean()
+    labda = 1.0 / F.mean()
     ES = G.mean()
-    rho = labda*ES/c
-    EWQ_1 = rho**(np.sqrt(2*(c+1)) - 1)/(c*(1-rho))*ES
-    ca2 = F.var()*labda*labda
-    ce2 = G.var()/ES/ES
-    return (ca2+ce2)/2 * EWQ_1
+    rho = labda * ES / c
+    EWQ_1 = rho ** (np.sqrt(2 * (c + 1)) - 1) / (c * (1 - rho)) * ES
+    ca2 = F.var() * labda * labda
+    ce2 = G.var() / ES / ES
+    return (ca2 + ce2) / 2 * EWQ_1
 
-  \end{pyverbatim}
-
-
-  \end{solution}
+\end{pyverbatim}
+\end{solution}
 \end{exercise}
 
 
 \begin{exercise}
-  Test the code for the $M/M/1$ queue with $\lambda=0.8$ and $\mu=1$. Compute the mean waiting time in queue and compare this to the theoretical value. Test it first for run length $N=100$, then for $N=10000$. Think about how to organize your tests.
+  Test the code for the $M/M/1$ queue with $\lambda=0.8$ and $\mu=1$.
+  Compute the mean waiting time in queue and compare this to the theoretical value.
+  Test it first for a run length of $N=100$, then for $N=10000$.
+  Think about how to organize your tests.
 \begin{hint}
   Implement the test in a function so that you can organize all your setting in one clean environment. We can use this below for more general cases.
 \end{hint}
 \begin{solution}
-
 In the next function we perform the test. We give this function standard  arguments so that we can  run the function as a standalone test. As such we want to to  contain all parameter values.
 
 \begin{pyverbatim}
 def mm1_test(labda=0.8, mu=1, num_jobs=100):
     c = 1
-    F = expon(scale=1./labda)
-    G = expon(scale=1./mu)
+    F = expon(scale=1.0 / labda)
+    G = expon(scale=1.0 / mu)
+    a = F.rvs(num_jobs)
+    A = np.cumsum(a)
+    S = G.rvs(num_jobs)
+    jobs = make_jobs(A, S)
 
-    ggc = GGc(F, G, c, num_jobs)
+    ggc = GGc(jobs, c)
     ggc.run()
     tot_wait_in_q = sum(j.waiting_time() for j in ggc.served_jobs)
-    avg_wait_in_q = tot_wait_in_q/len(ggc.served_jobs)
+    avg_wait_in_q = tot_wait_in_q / len(ggc.served_jobs)
+    # print(sorted(ggc.served_jobs, key=lambda job: job.arrival_time))
 
     print("M/M/1 TEST")
     print("Theo avg. waiting time in queue:", sakasegawa(F, G, c))
     print("Simu avg. waiting time in queue:", avg_wait_in_q)
 
 mm1_test(num_jobs=100)
-mm1_test(num_jobs=10000)
+mm1_test(num_jobs=100_000)
 \end{pyverbatim}
 
   \end{solution}
@@ -139,62 +246,66 @@ mm1_test(num_jobs=10000)
 
 \begin{exercise}
   Now test it for the $M/D/1$ queue with $\lambda=0.9$ and $S\equiv 1$.
-
 \begin{hint}
     Implement the deterministic distribution as \pyv{uniform(1, 0.00001)}.
 \end{hint}
-
 \begin{solution}
 Here is a function to keep things organized.
   \begin{pyverbatim}
 def md1_test(labda=0.9, mu=1, num_jobs=100):
     c = 1
-    F = expon(scale=1./labda)
+    F = expon(scale=1.0 / labda)
     G = uniform(mu, 0.0001)
+    a = F.rvs(num_jobs)
+    A = np.cumsum(a)
+    S = G.rvs(num_jobs)
+    jobs = make_jobs(A, S)
 
-    ggc = GGc(F, G, c, num_jobs)
+    ggc = GGc(jobs, c)
     ggc.run()
     tot_wait_in_q = sum(j.waiting_time() for j in ggc.served_jobs)
-    avg_wait_in_q = tot_wait_in_q/len(ggc.served_jobs)
+    avg_wait_in_q = tot_wait_in_q / len(ggc.served_jobs)
 
     print("M/D/1 TEST")
     print("Theo avg. waiting time in queue:", sakasegawa(F, G, c))
     print("Simu avg. waiting time in queue:", avg_wait_in_q)
 
-md1_test(num_jobs=100)
-md1_test(num_jobs=10000)
 
-  \end{pyverbatim}
-  \end{solution}
+md1_test(num_jobs=100)
+md1_test(num_jobs=100_000)
+\end{pyverbatim}
+\end{solution}
 
 \end{exercise}
 
 \begin{exercise}
-With our simulation we can also check the quality of Sakasegawa's approximation. Try this for the $M/D/2$ queue $\lambda=1.8$ and $S\equiv 1$.
-
+With our simulation we can also check the quality of Sakasegawa's approximation. Try this for the $M/D/2$ queue with $\lambda=1.8$ and $S\equiv 1$.
 \begin{solution}
 The code.
 
-  \begin{pyverbatim}
-
+\begin{pyverbatim}
 def md2_test(labda=1.8, mu=1, num_jobs=100):
     c = 2
-    F = expon(scale=1./labda)
+    F = expon(scale=1.0 / labda)
     G = uniform(mu, 0.0001)
+    a = F.rvs(num_jobs)
+    A = np.cumsum(a)
+    S = G.rvs(num_jobs)
+    jobs = make_jobs(A, S)
 
-    ggc = GGc(F, G, c, num_jobs)
+    ggc = GGc(jobs, c)
     ggc.run()
     tot_wait_in_q = sum(j.waiting_time() for j in ggc.served_jobs)
-    avg_wait_in_q = tot_wait_in_q/len(ggc.served_jobs)
+    avg_wait_in_q = tot_wait_in_q / len(ggc.served_jobs)
 
     print("M/D/2 TEST")
     print("Theo avg. waiting time in queue:", sakasegawa(F, G, c))
     print("Simu avg. waiting time in queue:", avg_wait_in_q)
 
-md2_test(num_jobs=100)
-md2_test(num_jobs=10000)
 
-  \end{pyverbatim}
+md2_test(num_jobs=100)
+md2_test(num_jobs=100_000)
+\end{pyverbatim}
 
 \end{solution}
 
@@ -205,22 +316,17 @@ md2_test(num_jobs=10000)
 
 We again analyze the check-in process at an airport, but we make it more realistic than the analysis of Section~\ref{sec:check-in-process-at} in that we now allow for multiple check-in desks.
 
-Assume that a flight departing at 11 am  consists of $N=300$ people.  For ease, assume that all $N$ customers arrive between 9 and 10. Suppose that the check-in of a job is $U[1, 3]$ distributed.
+Assume that a flight departing at 11 am  consists of $N=300$ people.  For ease, assume that all $N$ customers arrive between 8 and 10. Suppose that the check-in of a job is $U[1, 3]$ distributed. 
 
 
 \begin{exercise}
   Model the arrival process.
-
-
-\begin{hint}
-    Most people arrive independently. What is the arrival rate?
-\end{hint}
 \begin{solution}
-Since most people arrive independent of each other, it is reasonable that the arrival process in this period of duration $T$ is Poisson with rate $\lambda = N/T$.
+We assume that the 300 customers arrive uniformly over 120 minutes. 
   \end{solution}
 \end{exercise}
 
-The queueing problem  is evidently to determine the required number of servers $c$ such that the performance is acceptable.
+It is evident that we need to determine the required number of servers $c$ such that the performance of service system is acceptable.
 
 \begin{exercise}
   What performance measures are relevant here?
@@ -237,7 +343,9 @@ The queueing problem  is evidently to determine the required number of servers $
     Think hard about the context. Is this queueing process stationary? Is the arrival process stationary?
 \end{hint}
 \begin{solution}
-    There are, by assumption, only arrivals between 9 and 10, hence the arrival process is not stationary, hence the queueing process is not stationary.  It is also not a problem if the system is temporarily in overload. In fact, as long as $c$ is such that the performance measures (maximum delay and fraction of people waiting longer than some threshold) are within reasonable bounds, the system works as it should.
+  There are, by assumption, only arrivals between 8 and 10, hence the arrival process is not stationary, hence the queueing process is not stationary.
+  It is also not a problem if the system is temporarily in overload.
+  In fact, as long as $c$ is such that the performance measures (maximum delay and fraction of people waiting longer than some threshold) are within reasonable bounds, the system works as it should.
   \end{solution}
 \end{exercise}
 
@@ -251,8 +359,6 @@ The queueing problem  is evidently to determine the required number of servers $
 
 \begin{exercise}
   Search for a good $c$.
-
-
 \begin{hint}
   For this it is best to write two functions. The first function simulates a scenario for a fixed set of parameters and computes the performance measures. The second  function calls the simulator over a suitable range for $c$ and prints the KPIs. Like this, we use  the second function to fix all parameters so that we always can retrieve the exact scenarios we analyzed.
 \end{hint}
@@ -260,81 +366,44 @@ The queueing problem  is evidently to determine the required number of servers $
 \begin{solution}
 The first function computes the KPIs, the second runs multiple scenarios.
 
-    \begin{pyverbatim}
-def intake_process(F, G, c, num):
+\begin{pyverbatim}
+def intake_process():
+    num_jobs = 300
+    A = np.sort(uniform(0, 120).rvs(num_jobs))
+    S = uniform(1, 3).rvs(num_jobs)
+    jobs = make_jobs(A, S)
 
-    ggc = GGc(F, G, c, num)
+    ggc = GGc(jobs, c=5)
     ggc.run()
 
     max_waiting_time = max(j.waiting_time() for j in ggc.served_jobs)
-    longer_ten = sum((j.waiting_time()>=10)for j in ggc.served_jobs)
-    return max_waiting_time, longer_ten
+    longer_ten = sum((j.waiting_time() >= 10) for j in ggc.served_jobs)
+    print(max_waiting_time, longer_ten)
 
+
+intake_process()
 
 def intake_test_1():
-    labda = 300/60
-    F = expon(scale=1.0 / labda)
-    G = uniform(1, 2)
-    num = 300
+    num_jobs = 300
+    A = np.sort(uniform(0, 120).rvs(num_jobs))
+    S = uniform(1, 3).rvs(num_jobs)
 
     print("Num servers, max waiting time, num longer than 10")
     for c in range(3, 10):
-        max_waiting_time, longer_ten = intake_process(F, G, c, num)
+        jobs = make_jobs(A, S)
+        ggc = GGc(jobs, c)
+        ggc.run()
+
+        max_waiting_time = max(j.waiting_time() for j in ggc.served_jobs)
+        longer_ten = sum((j.waiting_time() >= 10) for j in ggc.served_jobs)
         print(c, max_waiting_time, longer_ten)
 
 
 intake_test_1()
-
-    \end{pyverbatim}
-  \end{solution}
-
-\end{exercise}
-
-\begin{exercise}
-  What do you think of the results? If you are not satisfied, propose and analyze an improvement.
-
-\begin{solution}
-    I get these numbers
-
-\begin{verbatim}
-Num servers, max waiting time, num longer than 10
-3 138.1697966325396 280
-4 82.7792212258584 266
-5 54.741743193174834 227
-6 39.35432320034931 220
-7 22.868514027211248 167
-8 15.77953068102207 102
-9 12.118348481100451 50
-\end{verbatim}
-
-    Even for 9 servers, 50 people wait longer than 10 minutes. Interestingly, with 9 servers the maximum waiting time is just 12 minutes, so we can at least keep this within bounds.
-
-We could also make a plot of the job waiting time as a function of time, but we skip it here.
-
-
-Perhaps we should open the check-in desks for a longer time and advise people to come earlier. Let's try 90 minutes instead.
-
-\begin{pyverbatim}
-
-def intake_test_2():
-    labda = 300/90
-    F = expon(scale=1.0 / labda)
-    G = uniform(1, 2)
-    num = 300
-
-    print("Num servers, max waiting time, num longer than 10")
-    for c in range(3, 10):
-        max_waiting_time, longer_ten = intake_process(F, G, c, num)
-        print(c, max_waiting_time, longer_ten)
-
-
 \end{pyverbatim}
-
-If you do the experiment, you'll see that this works much better. It is now also very simple to set up a third experiment in which the desks are open during two hours. Then you'll see that 4 servers  suffice.
-
-  \end{solution}
-
+\end{solution}
 \end{exercise}
+
 
 \begin{exercise}
   Relate the results of these simulations to your traveling experiences.
