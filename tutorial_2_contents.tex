@@ -135,6 +135,10 @@ experiment_3()
 \begin{solution}
   The mean number of departures must be (about) equal to the mean number arrivals per period.
   Jobs cannot enter from `nowhere'.
+
+  \begin{pyverbatim}
+# A void cell for the numbering    
+  \end{pyverbatim}
   \end{solution}
 \end{exercise}
 
@@ -159,6 +163,7 @@ Explain what you see.
 \begin{solution}
   The queue length drains at rate $\mu-\lambda$ when $q_0$ is really large.
   Thus, for such settings, you might just as well approximate the queue length behavior as $q(t) = q_0 - (\mu-\lambda)t$, i.e., as a deterministic system.
+
 \end{solution}
 \end{exercise}
 
@@ -412,7 +417,6 @@ experiment_7a()
 \label{sec:cost-computations}
 
 
-
 Let us next consider a single server queue that can be switched on and off.
 There is a cost $h$ associated with keeping a job waiting for one period, there is a cost $p$ to hire the server for one period, and it costs $s$ to switch on the server.
 Given the parameter values of the next exercise, what would be a good threshold $\theta$ such that the server is switched on when the queue hits or exceeds $\theta$?
@@ -485,6 +489,7 @@ After a bit of experimentation, we see that $\theta=15$ is quite a bit better th
 
 As a final example, suppose we have to pay a penalty for any customer that sees a queue larger than 20. How to estimate the effect of these costs? 
 
+
 \begin{exercise}
   Suppose that the number of jobs arriving in a period is Poisson distributed with $\lambda=5$, and the number of potential services is $\mu=6$ per period.
   Use the programs we developed earlier to compute the queue lengths, and use the code \pyv{(Q>20)} to count all periods in in which $Q>20$.
@@ -515,11 +520,6 @@ I multiply with 100 to get a percentage.
 
 \end{exercise}
 
-
-\end{solution}
-\end{exercise}
-
-
 \subsection{Summary}
 \label{sec:summary}
 
@@ -539,3 +539,5 @@ An interesting extension is to incorporate time-varying demand. In many systems,
   \end{solution}
 \end{exercise}
 
+  
+\end{comment}

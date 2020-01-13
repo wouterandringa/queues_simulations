@@ -1,6 +1,6 @@
 python tangle.py
 
-file=tutorial_2
+file=tutorial_3
 
 ipynb-py-convert $file.py $file.ipynb
 jupyter nbconvert --to latex --execute $file.ipynb

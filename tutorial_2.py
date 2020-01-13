@@ -77,6 +77,9 @@ def experiment_3():
 experiment_3()
 
 # %%
+# A void cell for the numbering    
+
+# %%
 def experiment_4():
     labda, mu = 5, 6
     q0, N = 1000, 100

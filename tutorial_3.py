@@ -10,12 +10,11 @@ Author: Nicky van Foreest
 '''
 
 # %%
-from collections import Counter
 from heapq import heappop, heappush
-import numpy as np
+import scipy
 from scipy.stats import uniform, expon
 
-np.random.seed(3)
+scipy.random.seed(3)
 
 def sort_ages():
     stack = []
@@ -47,6 +46,9 @@ def sort_ages_with_more_info():
 sort_ages_with_more_info()
 
 # %%
+# void  code for numbering
+
+# %%
 ARRIVAL = 0
 DEPARTURE = 1
 
@@ -75,11 +77,6 @@ class Job:
 
 
 # %%
-job = Job()
-job.arrival_time = 3
-job.service_time = 2
-
-# %%
 def experiment_1():
     labda = 2.0
     mu = 3.0
@@ -104,15 +101,6 @@ def experiment_1():
 
 
 experiment_1()
-
-# %%
-while stack:
-    time, job, typ = heappop(stack)
-    if typ == ARRIVAL:
-        handle_arrival(time, job)
-    else:
-        handle_departure(time, job)
-
 
 # %%
 class Server:
@@ -140,7 +128,6 @@ def handle_departure(time, job):
     if queue: # queue is not empty
         next_job = queue.pop(0) # pop oldest job in queue
         start_service(time, next_job)
-
 
 # %%
 def experiment_2():
@@ -220,6 +207,10 @@ experiment_2a()
 # %%
 from scipy.stats import uniform
 
+stack = [] # this is the event stack
+queue = []
+served_jobs = [] # used for statistics
+
 def experiment_3():
     labda = 2.0
     mu = 3.0
@@ -251,9 +242,6 @@ def experiment_3():
 experiment_3()
 
 # %%
-from scipy.stats import uniform
-
-# %%
 
 def pollaczek_khinchine(labda, G):
     ES = G.mean()
@@ -269,13 +257,12 @@ G = uniform(1, 2)
 
 print("PK: ", labda*pollaczek_khinchine(labda,G))
 
-
 # %%
 stack = [] # this is the event stack
 queue = []
 served_jobs = [] # used for statistics
 
-def check_ins():
+def test_mg1():
     job = Job()
     labda = 1.0 / 3
     F = expon(scale=1.0 / labda)  # interarrival time distributon
@@ -310,18 +297,98 @@ def check_ins():
     print("Theoretical avg. sojourn time: ", pollaczek_khinchine(labda, G) + G.mean())
     print("Avg. sojourn time:", av_sojourn_time)
 
+test_mg1()
+
+# %%
+import numpy as np
+
+F = np.sort(uniform(0, 120).rvs(60))
+
+# %%
+from collections import Counter
+
+stack = [] # this is the event stack
+queue = []
+served_jobs = [] # used for statistics
+
+def check_in():
+    num_jobs = 60
+    F = np.sort(uniform(0, 120).rvs(num_jobs))
+    G = uniform(1, 3)
+
+    for i in range(num_jobs):
+        job = Job()
+        job.arrival_time = F[i]
+        job.service_time = G.rvs()
+        heappush(stack, (job.arrival_time, job, ARRIVAL))
+
+    while stack:
+        time, job, typ = heappop(stack)
+        if typ == ARRIVAL:
+            handle_arrival(time, job)
+        else:
+            handle_departure(time, job)
+            served_jobs.append(job)
+
+    tot_queue = sum(j.queue_length_at_arrival for j in served_jobs)
+    av_queue_length = tot_queue / len(served_jobs)
+    print("Simulated avg. queue length:", av_queue_length)
+
+    tot_sojourn = sum(j.sojourn_time() for j in served_jobs)
+    av_sojourn_time = tot_sojourn / len(served_jobs)
+    print("Avg. sojourn time:", av_sojourn_time)
 
     c = Counter([j.queue_length_at_arrival for j in served_jobs])
     print("Queue length distributon, sloppy output")
-    print(c)
+    print(sorted(c.items()))
 
-check_ins()
 
+check_in()
 
 # %%
-Counter({0: 37134, 1: 16558, 2: 12517, 3: 9070, 4: 6725, 5: 4785, 6: 3515, 7: 2631,
+import matplotlib.pyplot as plt
 
-   8: 2047, 9: 1433, 10: 1095,  11: 818, 12: 545, 13: 401, 14: 260,
+x = [job.arrival_time for job in served_jobs]
+y = [job.queue_length_at_arrival for job in served_jobs]
 
-   15: 178, 16: 116, 17: 72, 18: 49, 19: 27, 20: 13, 21: 6, 22: 5})
+plt.plot(x, y, "o")
+plt.show()
 
+# %%
+stack = [] # this is the event stack
+queue = []
+served_jobs = [] # used for statistics
+
+def check_in_2():
+    num_jobs = 60
+    F = np.sort(uniform(0, 150).rvs(num_jobs))
+    G = uniform(1, 2)
+
+    for i in range(num_jobs):
+        job = Job()
+        job.arrival_time = F[i]
+        job.service_time = G.rvs()
+        heappush(stack, (job.arrival_time, job, ARRIVAL))
+
+    while stack:
+        time, job, typ = heappop(stack)
+        if typ == ARRIVAL:
+            handle_arrival(time, job)
+        else:
+            handle_departure(time, job)
+            served_jobs.append(job)
+
+    tot_queue = sum(j.queue_length_at_arrival for j in served_jobs)
+    av_queue_length = tot_queue / len(served_jobs)
+    print("Simulated avg. queue length:", av_queue_length)
+
+    tot_sojourn = sum(j.sojourn_time() for j in served_jobs)
+    av_sojourn_time = tot_sojourn / len(served_jobs)
+    print("Avg. sojourn time:", av_sojourn_time)
+
+    x = [job.arrival_time for job in served_jobs]
+    y = [job.queue_length_at_arrival for job in served_jobs]
+    
+    plt.plot(x, y, "o")
+    plt.show()
+check_in_2()
