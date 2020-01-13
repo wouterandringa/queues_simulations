@@ -1,0 +1,369 @@
+\section{Tutorial 4: $G/G/c$ queue in continuous time}
+\label{sec:ggc-continuous-time}
+
+The goal of this tutorial is to  generalize the simulator for the $G/G/1$ to a $G/G/c$ queue. You will see that this is rather easy, once you have the right idea. We will organize the entire simulator into a single class so that our code is organized and we will develop a method to set up structured  tests\footnote{Structured testing is enormously important when you use code for real applications. (I suppose you prefer all code used in self-driving cars to be tested.)  If you are interested, check the web on  \pyv{python unittest} and `test-driven coding'. With test-driven coding you first write down a hierarchy of  many simple tests that your program is supposed to pass.  Then you build your program until the first test pass. Then you implement the next step until the second test pass too, and so on.} Once we have a working simulator we apply it to the check-in process of the airport.
+
+
+
+\subsection{The simulator}
+\label{sec:simulator}
+
+\begin{exercise}
+In the $G/G/1$ we have just one server which is busy or not.
+  Generalize  the \pyv{handle_arrival} function of the $G/G/1$ queue such that it can cope with multiple servers.
+
+\begin{hint}
+  Introduce a \pyv{num_busy} variable that keeps track of the number of busy servers. What happens if a job arrives and this number is less than $c$; what if this number is equal to $c$?
+\end{hint}
+\begin{solution}
+    If the number of busy servers is less than $c$, a service can start. Otherwise a job has to queue. If a service starts, increase \pyv{num_busy} by one.
+  \end{solution}
+\end{exercise}
+
+
+\begin{exercise}
+Likewise,   generalize  the \pyv{handle_departure} function of the $G/G/1$ queue such that it can cope with multiple servers.
+\begin{hint}
+  Again, use the \pyv{num_busy} variable.
+\end{hint}
+
+\begin{solution}
+  At a departure, a server becomes free, hence decrease \pyv{num_busy} by one. If there are jobs in queue, start a new service.
+\end{solution}
+\end{exercise}
+
+\begin{exercise}
+  Can you think of some sort of property of the $G/G/c$ queue that must be true at all times? It is important to use such properties  as tests while developing.
+\begin{hint}
+    There must be a relation between the queue length and the number of busy servers.
+\end{hint}
+\begin{solution}
+    Of course, the number of busy servers cannot be negative or larger than $c$. The queue length cannot be negative. Finally, it cannot be that  the queue length is positive and the number of busy servers is less than $c$.
+  \end{solution}
+\end{exercise}
+
+\begin{exercise}
+  The design of the simulation of $G/G/1$ queue is not entirely satisfactory. For instance, if we want to run different experiments, we have to clean up old experiments before we can start new ones. The current design is not very practical for this. It is better to encapsulate the state and its behavior (i.e., functions) of the simulator into one class. Build a class that simulates the $G/G/c$ queue; use the ideas of the $G/G/1$ simulator.
+
+It is not  problem when you spend considerable time on this exercise. Most of the following exercises are simple numerical experiments, which should take little time. So, just try and see how far you get. All code is in the solution.
+
+\begin{solution}
+See \pyv{tutorial_4.py}. Study it in detail so that you really understand how it works.
+\end{solution}
+
+\end{exercise}
+
+
+\begin{exercise}
+
+How can we instantiate the \pyv{GGc} simulator, i.e., make an object of a class? How can we run a simulation with exponential inter-arrival times with $\lambda=2$, exponential service times with $\mu=1$, $c=3$, and $10$ jobs?
+\begin{solution}
+First we instantiate, then we run and print.
+\begin{pyverbatim}
+labda = 2
+mu = 1
+ggc = GGc(expon(scale=1./labda), expon(scale=1./mu), 3, 10)
+ggc.run()
+
+print(ggc.served_jobs)
+\end{pyverbatim}
+\end{solution}
+\end{exercise}
+
+\subsection{Testing}
+\label{sec:testing-1}
+
+\begin{exercise}
+Test the simulator with deterministic inter-arrival times, for instance a job that arrives every 10 minutes, and each job takes 1 hour of service. Check the departure process for $c=1$, $c=2$, $c=5$, $c=6$, and $c=7$.
+\end{exercise}
+
+\begin{exercise}
+  For testing purposes, implement Sakasegawa's formula.  BTW, why should you use Sakasegawa's formula?
+
+\begin{hint}
+Follow the implementation of Exercise~\ref{ex:5}.
+
+\end{hint}
+
+\begin{solution}
+Recall that Sakasegawa's formula is exact for the $M/G/1$ queue, hence also for the $M/M/1$ queue.
+
+\begin{pyverbatim}
+
+def sakasegawa(F, G, c):
+    labda = 1./F.mean()
+    ES = G.mean()
+    rho = labda*ES/c
+    EWQ_1 = rho**(np.sqrt(2*(c+1)) - 1)/(c*(1-rho))*ES
+    ca2 = F.var()*labda*labda
+    ce2 = G.var()/ES/ES
+    return (ca2+ce2)/2 * EWQ_1
+
+  \end{pyverbatim}
+
+
+  \end{solution}
+\end{exercise}
+
+
+\begin{exercise}
+  Test the code for the $M/M/1$ queue with $\lambda=0.8$ and $\mu=1$. Compute the mean waiting time in queue and compare this to the theoretical value. Test it first for run length $N=100$, then for $N=10000$. Think about how to organize your tests.
+\begin{hint}
+  Implement the test in a function so that you can organize all your setting in one clean environment. We can use this below for more general cases.
+\end{hint}
+\begin{solution}
+
+In the next function we perform the test. We give this function standard  arguments so that we can  run the function as a standalone test. As such we want to to  contain all parameter values.
+
+\begin{pyverbatim}
+def mm1_test(labda=0.8, mu=1, num_jobs=100):
+    c = 1
+    F = expon(scale=1./labda)
+    G = expon(scale=1./mu)
+
+    ggc = GGc(F, G, c, num_jobs)
+    ggc.run()
+    tot_wait_in_q = sum(j.waiting_time() for j in ggc.served_jobs)
+    avg_wait_in_q = tot_wait_in_q/len(ggc.served_jobs)
+
+    print("M/M/1 TEST")
+    print("Theo avg. waiting time in queue:", sakasegawa(F, G, c))
+    print("Simu avg. waiting time in queue:", avg_wait_in_q)
+
+mm1_test(num_jobs=100)
+mm1_test(num_jobs=10000)
+\end{pyverbatim}
+
+  \end{solution}
+\end{exercise}
+
+\begin{exercise}
+  Now test it for the $M/D/1$ queue with $\lambda=0.9$ and $S\equiv 1$.
+
+\begin{hint}
+    Implement the deterministic distribution as \pyv{uniform(1, 0.00001)}.
+\end{hint}
+
+\begin{solution}
+Here is a function to keep things organized.
+  \begin{pyverbatim}
+def md1_test(labda=0.9, mu=1, num_jobs=100):
+    c = 1
+    F = expon(scale=1./labda)
+    G = uniform(mu, 0.0001)
+
+    ggc = GGc(F, G, c, num_jobs)
+    ggc.run()
+    tot_wait_in_q = sum(j.waiting_time() for j in ggc.served_jobs)
+    avg_wait_in_q = tot_wait_in_q/len(ggc.served_jobs)
+
+    print("M/D/1 TEST")
+    print("Theo avg. waiting time in queue:", sakasegawa(F, G, c))
+    print("Simu avg. waiting time in queue:", avg_wait_in_q)
+
+md1_test(num_jobs=100)
+md1_test(num_jobs=10000)
+
+  \end{pyverbatim}
+  \end{solution}
+
+\end{exercise}
+
+\begin{exercise}
+With our simulation we can also check the quality of Sakasegawa's approximation. Try this for the $M/D/2$ queue $\lambda=1.8$ and $S\equiv 1$.
+
+\begin{solution}
+The code.
+
+  \begin{pyverbatim}
+
+def md2_test(labda=1.8, mu=1, num_jobs=100):
+    c = 2
+    F = expon(scale=1./labda)
+    G = uniform(mu, 0.0001)
+
+    ggc = GGc(F, G, c, num_jobs)
+    ggc.run()
+    tot_wait_in_q = sum(j.waiting_time() for j in ggc.served_jobs)
+    avg_wait_in_q = tot_wait_in_q/len(ggc.served_jobs)
+
+    print("M/D/2 TEST")
+    print("Theo avg. waiting time in queue:", sakasegawa(F, G, c))
+    print("Simu avg. waiting time in queue:", avg_wait_in_q)
+
+md2_test(num_jobs=100)
+md2_test(num_jobs=10000)
+
+  \end{pyverbatim}
+
+\end{solution}
+
+\end{exercise}
+
+\subsection{The check-in process at an airport}
+\label{sec:check-in-process}
+
+We again analyze the check-in process at an airport, but we make it more realistic than the analysis of Section~\ref{sec:check-in-process-at} in that we now allow for multiple check-in desks.
+
+Assume that a flight departing at 11 am  consists of $N=300$ people.  For ease, assume that all $N$ customers arrive between 9 and 10. Suppose that the check-in of a job is $U[1, 3]$ distributed.
+
+
+\begin{exercise}
+  Model the arrival process.
+
+
+\begin{hint}
+    Most people arrive independently. What is the arrival rate?
+\end{hint}
+\begin{solution}
+Since most people arrive independent of each other, it is reasonable that the arrival process in this period of duration $T$ is Poisson with rate $\lambda = N/T$.
+  \end{solution}
+\end{exercise}
+
+The queueing problem  is evidently to determine the required number of servers $c$ such that the performance is acceptable.
+
+\begin{exercise}
+  What performance measures are relevant here?
+\begin{solution}
+    It is reasonable \emph{within the context} that the mean waiting time is less important than the largest waiting time and the fraction of people that wait longer than 10 minutes, say.
+    Note here, \emph{context is crucial} when making models.
+  \end{solution}
+\end{exercise}
+
+\begin{exercise}
+  Define the offered load as $\lambda \E S$ and the load as $\rho = \lambda \E S/ c$. Is it important for the check-in desk that $\rho<1$?
+
+\begin{hint}
+    Think hard about the context. Is this queueing process stationary? Is the arrival process stationary?
+\end{hint}
+\begin{solution}
+    There are, by assumption, only arrivals between 9 and 10, hence the arrival process is not stationary, hence the queueing process is not stationary.  It is also not a problem if the system is temporarily in overload. In fact, as long as $c$ is such that the performance measures (maximum delay and fraction of people waiting longer than some threshold) are within reasonable bounds, the system works as it should.
+  \end{solution}
+\end{exercise}
+
+\begin{exercise}
+  Why do we need simulation to analyze this case?
+\begin{solution}
+    We study the dynamics of a queueing process in which the demand grows and than peters out. Such queueing situations are, typically, mathematically intractable. In fact, we finally have come to a point in which we really need simulation.
+  \end{solution}
+\end{exercise}
+
+
+\begin{exercise}
+  Search for a good $c$.
+
+
+\begin{hint}
+  For this it is best to write two functions. The first function simulates a scenario for a fixed set of parameters and computes the performance measures. The second  function calls the simulator over a suitable range for $c$ and prints the KPIs. Like this, we use  the second function to fix all parameters so that we always can retrieve the exact scenarios we analyzed.
+\end{hint}
+
+\begin{solution}
+The first function computes the KPIs, the second runs multiple scenarios.
+
+    \begin{pyverbatim}
+def intake_process(F, G, c, num):
+
+    ggc = GGc(F, G, c, num)
+    ggc.run()
+
+    max_waiting_time = max(j.waiting_time() for j in ggc.served_jobs)
+    longer_ten = sum((j.waiting_time()>=10)for j in ggc.served_jobs)
+    return max_waiting_time, longer_ten
+
+
+def intake_test_1():
+    labda = 300/60
+    F = expon(scale=1.0 / labda)
+    G = uniform(1, 2)
+    num = 300
+
+    print("Num servers, max waiting time, num longer than 10")
+    for c in range(3, 10):
+        max_waiting_time, longer_ten = intake_process(F, G, c, num)
+        print(c, max_waiting_time, longer_ten)
+
+
+intake_test_1()
+
+    \end{pyverbatim}
+  \end{solution}
+
+\end{exercise}
+
+\begin{exercise}
+  What do you think of the results? If you are not satisfied, propose and analyze an improvement.
+
+\begin{solution}
+    I get these numbers
+
+\begin{verbatim}
+Num servers, max waiting time, num longer than 10
+3 138.1697966325396 280
+4 82.7792212258584 266
+5 54.741743193174834 227
+6 39.35432320034931 220
+7 22.868514027211248 167
+8 15.77953068102207 102
+9 12.118348481100451 50
+\end{verbatim}
+
+    Even for 9 servers, 50 people wait longer than 10 minutes. Interestingly, with 9 servers the maximum waiting time is just 12 minutes, so we can at least keep this within bounds.
+
+We could also make a plot of the job waiting time as a function of time, but we skip it here.
+
+
+Perhaps we should open the check-in desks for a longer time and advise people to come earlier. Let's try 90 minutes instead.
+
+\begin{pyverbatim}
+
+def intake_test_2():
+    labda = 300/90
+    F = expon(scale=1.0 / labda)
+    G = uniform(1, 2)
+    num = 300
+
+    print("Num servers, max waiting time, num longer than 10")
+    for c in range(3, 10):
+        max_waiting_time, longer_ten = intake_process(F, G, c, num)
+        print(c, max_waiting_time, longer_ten)
+
+
+\end{pyverbatim}
+
+If you do the experiment, you'll see that this works much better. It is now also very simple to set up a third experiment in which the desks are open during two hours. Then you'll see that 4 servers  suffice.
+
+  \end{solution}
+
+\end{exercise}
+
+\begin{exercise}
+  Relate the results of these simulations to your traveling experiences.
+\end{exercise}
+
+
+\subsection{Summary}
+\label{sec:summary}
+
+
+\begin{exercise}
+  What have you learned in this tutorial?
+ Can you extend this work to more general cases?
+\begin{solution}
+    Topics learned.
+    \begin{enumerate}
+    \item The simulation of the $G/G/c$ queue
+    \item Python classes and, a bit more generally, object oriented programming.
+    \item Organizing cases and experiments by means of  functions. With these functions we can keep a log of what we precisely tested, what parameter values we used and which code we ran. These tests are also useful to show how to actually use/run the code.
+    \end{enumerate}
+
+Some  interesting extensions.
+    \begin{enumerate}
+    \item   Scale up to networks of $G/G/c$ queues.
+    \item In the $G/G/c$ queue the assumption is that all servers have the same service rate.
+      In production settings this is typically not the case.
+      There is a queue of jobs, and these jobs are served by machines with different speeds.
+      For instance, old machines may work at a slower rate than new machines.
+    % \item Above we also mentioned how to deal with priorities. Once we included priorities we can simulate the queueing behavior at the check-in desks at airports with business and economy class customers.
+    \end{enumerate}
+  \end{solution}
+\end{exercise}

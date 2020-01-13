@@ -1,0 +1,227 @@
+\section{Tutorial 5: Airport Check-in process}
+\label{sec:simul-check-proc}
+
+In this final tutorial we consider the case in which business and economy class customers have their own server(s).
+In fact, we are going to use simulation to compare different ways to organize the queueing system.
+One way is like this: there is one server strictly allocated to business class customers, and there are $c$, say, servers strictly used by the economy class customers.
+Another way is like this.
+There are still one business server and $c$ economy servers.
+When the business server is free, this server takes just one economy customer in service.
+When, after this service, there is still no business customer, the business server serves a second economy customer.
+Once a business customer arrives, the business server finished the economy customer (if there is any), and then servers the business customer.
+We use a similar policy for serving business customers by free economy class server.
+The problem is of course to figure out which of these policies is best.
+
+
+\begin{exercise}
+  What KPI's would you use to compare the two policies?
+\begin{solution}
+    Average waiting time of each job class, and maximal waiting time of each class.
+    We might also be interested in the fraction of jobs spending less than 10 minutes in the system.
+  \end{solution}
+\end{exercise}
+
+As the simulation of this case is somewhat more difficult than the $G/G/c$ queue, testing is also more important.
+For this reason we will follow a \emph{test-driven} procedure, which works like this.
+First we design a number of test cases, from very simple to a bit less simple.
+Then we  build and test until the first test case passes.
+Then we build and test until also the second case passes, and so on, until all the tests pass.
+And, indeed, along the way we caught numerous mistakes, from missing \pyv{if} statements (a very big bug) to simple typos.
+
+\subsection{The simulator}
+\label{sec:simulator-1}
+
+\begin{exercise}
+  Make a list of  simple cases whose outcome you can check by hand, to cases that are a bit harder but for which  you can use theoretical tools to validate the outcome.
+\begin{hint}
+    Suppose there is only a server for business customers and also only business customers?
+    What should happen?
+    Suppose further that the inter-arrival times are constant and 1 minutes and service times constant and equal to 0.5 minute?
+    What if the service times are 2 minutes and 10 business customers arrive?
+    What if all 10 customers arrive at time 0; when should the last leave?
+    What if we only have economy customers but only the business server?
+    And so on.
+    Ensure you design cases you can check by hand.
+    These simple tests will catch many, many errors.
+    As a general rule, invest in such tests.
+\end{hint}
+
+
+\begin{solution}
+    Here are two tests.
+    The tests will not yet work since we have not yet made the class to simulate the queueing system.
+    In other words, we know that our first test should fail initially.
+
+    \begin{pyverbatim}
+def DD1_test_1():
+    # test with only business customers
+    c = 0
+    F = uniform(1, 0.0001)
+    G = expon(0.5, 0.0001)
+    p_business = 1
+    num_jobs = 5
+    jobs = generate_jobs(F, G, p_business, num_jobs)
+    ggc = GGc_with_business(c, jobs)
+    ggc.run()
+    ggc.print_served_job()
+
+
+def DD1_test_2():
+    # test with only economy customers
+    c = 1
+    F = uniform(1, 0.0001)
+    G = expon(0.5, 0.0001)
+    p_business = 0
+    num_jobs = 5
+    jobs = generate_jobs(F, G, p_business, num_jobs)
+    ggc = GGc_with_business(c, jobs)
+    ggc.run()
+    ggc.print_served_job()
+
+def do_tests():
+    DD1_test_1()
+    #DD1_test_2()
+
+do_tests()
+    \end{pyverbatim}
+
+  \end{solution}
+
+\end{exercise}
+
+
+Before we build the class for the queues we observe that the implementation of the $G/G/c$ of Section~\ref{sec:ggc-continuous-time} suffers from a performance penalty. The problem is that  we create  time and again  new objects in the calls \pyv{F.rvs()} and \pyv{G.rvs()}  to generate the quasi-random inter-arrival and service times\footnote{You only know such things if you have some general knowledge of python or computer programming general. Hence, it pays to invest in knowledge of the computer language you use.}. Specifically,  code like this runs very slow:
+
+
+\begin{pyverbatim}
+def generate_jobs_bad_implementation(F, G, p_business, num_jobs):
+    # the difference in performance is tremendous
+    for n in range(num_jobs):
+        job = Job()
+        job.arrival_time = time + F.rvs()
+        job.service_time = G.rvs()
+        if uniform(0,1).rvs() < p_business:
+            job.customer_type = BUSINESS
+        else:
+            job.customer_type = ECONOMY
+
+        jobs.add(job)
+        time = job.arrival_time
+
+    return jobs
+\end{pyverbatim}
+Note that we generate \pyv{num_jobs} jobs. Then, with probability $p$ (\pyv{p_business} in our code) the job is a business customer.
+
+To repair this problem it is better to let \pyv{scipy} call a random number generator in C++ just once and generate all random numbers in one pass.
+Here is one way to obtain a speed up of about a factor 100.
+\begin{pyverbatim}
+def generate_jobs(F, G, p_business, num_jobs):
+    jobs = set()
+    time = 0
+    a = F.rvs(num_jobs)
+    b = G.rvs(num_jobs)
+    p = uniform(0, 1).rvs(num_jobs)
+
+    for n in range(num_jobs):
+        job = Job()
+        job.arrival_time = time + a[n]
+        job.service_time = b[n]
+        if p[n] <  p_business:
+            job.customer_type = BUSINESS
+        else:
+            job.customer_type = ECONOMY
+
+        jobs.add(job)
+        time = job.arrival_time
+
+    return jobs
+\end{pyverbatim}
+
+We assume that the service distribution is the same for all job classes. If we do not want this, we can make the service time dependent on the job type.
+
+\begin{exercise}
+  How to implement the dependence of job service time on job type?
+
+\begin{solution}
+The code explains all. Note, we will not use it in our simulation.
+
+
+\begin{pyverbatim}
+def generate_jobs_bad_implementation(F, Ge, Gb, p_business, num_jobs):
+    # the difference in performance is tremendous
+    for n in range(num_jobs):
+        job = Job()
+        job.arrival_time = time + F.rvs()
+        if uniform(0,1).rvs() < p_business:
+            job.customer_type = BUSINESS
+            job.service_time = Gb.rvs()
+        else:
+            job.customer_type = ECONOMY
+            job.service_time = Ge.rvs()
+
+        jobs.add(job)
+        time = job.arrival_time
+
+    return jobs
+
+\end{pyverbatim}
+  \end{solution}
+\end{exercise}
+
+\begin{exercise}
+  Try to implement (or design) the $G/G/c$ queue with business customers. The rules must be like this. Business and economy class customers have separate queues and separate, dedicated servers. There is one business server and there are $c$ economy class servers. If the business (economy) server becomes  idle and there is an economy (business) class customer in queue, the business (economy) server takes an economy (business) customer into service.
+
+You can find the code in \pyv{tutorial_5.py}. Read it carefully so that you understand all details.
+\end{exercise}
+
+
+\begin{exercise}
+  To design some further test cases: think about what happens if two customer classes are completely separated:  business customers have one dedicated server and the economy customers have $c$ dedicated servers.  How would you implement this in the code?
+\end{exercise}
+
+\begin{exercise}
+  Suppose there are no business customers, then all servers should be available for the economy class customers. With this idea you can implement the $M/M/c$ queue and check whether the simulator gives the same results as the theoretical values.
+\end{exercise}
+
+\subsection{Case analysis and summary}
+\label{sec:cases}
+
+Recall, we build this simulator to see whether we want to share the servers or not.
+To obtain insight into the performance of each situation (shared, or unshared), we need to analyze a few characteristic situations.
+The result of this might be that in certain settings, sharing is best (relatively many business customer?), and in others, we don't want to share.
+
+\begin{exercise}
+  Assume we have $n=300$ customers, the desks open 2 hours before departure and close 1 hour before departure, and service distribution is $U[1,2]$ (minutes) for  all customers. The fracton of business customers is $p=0.1$. There are $c=6$ servers for the economy class customers, and 1 for the business customers. Finally, assume that during the opening slot of the desks, the arrival process is Poisson with constant rate.
+
+Make a `test-bed' that allows you to compare, side-by-side, the shared versus the unshared situation. Then, do the simulation and interpret the results.
+\end{exercise}
+
+\begin{exercise}
+  Now start varying on the base case, for instance, longer opening hours, more (less) customers, higher (lower) fraction of business customers, longer (shorter) service times, more (less) variability in the service times.  (In other words, just play with your simulator, and try to relate the outcomes to what you experienced/observed from your last flight.) Compare the results.
+\end{exercise}
+
+
+
+\begin{exercise}
+  What remains to be done so that you can  apply our simulator to a real check-in process? In other words,  what do you  have to do to use this tool in a real consultancy job?
+
+\begin{solution}
+    \begin{enumerate}
+    \item First, check whether the our simulator is indeed correct.
+      Is there a specific queue for business class customers?
+      If so, do the business server(s), when idle, indeed take economy class customers in service?
+    \item You'll need real data to see whether our simple arrival process and service distributions are realistic.     I suppose most of this is already known. For instance, the number of customers on the plain is known, as is the number of business customers. Service times can obtained from the desks, either by measuring, or by using the times the boarding passes are printed.
+    \item Once you have good data, vary one parameter at a time, and report the results \emph{graphically}.
+      People typically want to see trends; graphs are indispensable for this.
+    \end{enumerate}
+
+    Finally, you often need to compare a host of different policies:
+    \begin{itemize}
+    \item Perhaps it is better to have  dynamic service capacity, 3 during the first hour, 6 in the second.
+    \item Perhaps the service distributions of the business customers can be made a bit shorter, or more regular. What would be impact of this?
+    \item Since there is small number of business customers, why not open the business check-in desk later than the other desks?
+      Or, share the desks during the first opening hour of the desks, and `unshare' during the second?
+    \end{itemize}
+
+  \end{solution}
+\end{exercise}

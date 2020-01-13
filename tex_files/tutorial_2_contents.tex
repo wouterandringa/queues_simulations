@@ -1,0 +1,542 @@
+\section{Tutorial 2: Simulation of the $G/G/1$ queue in discrete time}
+\label{sec:single-server-queue}
+
+In this tutorial we simulate the queueing behavior of a supermarket or hospital, but it is easy to extend the ideas to much more general queueing system.
+We first make a simple model of a queueing system, and then extend this to cover  more difficult queueing situations.
+With these models we can provide insight into how to design or improve real-world queueing systems.
+You will see, hopefully, how astonishingly easy it is to evaluate many types of decisions and design problems with simulation.
+
+For ease we  consider a queueing system in discrete time, and don't make a distinction between the number of jobs in the system and the number of jobs in queue. Thus, queue length corresponds here to all jobs in the system, cf. Section 1.4 of the queueing book.
+
+\subsection{Set up}
+\label{sec:set-up}
+
+
+\begin{exercise}
+  Write down the recursions to compute the queue length at the end of a period based on the number of arrivals $a_i$ during period $i$, the queue length $Q_0$ at the start, and the number of services $s_i$.
+  Assume that service is provided at the start of the period.
+  Then sketch an algorithm (in pseudo code) to carry out the computations (use a for loop).
+  Then check this exercise's solution for the python code.
+
+\begin{solution}
+    We need a few imports.
+\begin{pyverbatim}
+import numpy as np
+import scipy
+from scipy.stats import poisson
+import matplotlib.pyplot as plt
+
+plt.ion() # to skip making the graphs, I only use it for testing purposes.
+
+scipy.random.seed(3)
+
+def compute_Q_d(a, s, q0=0):
+    # a: no of arrivals in a period
+    # s: no of services at start of a period
+    d = np.zeros_like(a) # departures
+    Q = np.zeros_like(a) # queue lengths
+    Q[0] = q0 # starting level of the queue
+    for i in range(1, len(a)):
+        d[i] = min(Q[i-1], s[i])
+        Q[i] = Q[i-1] + a[i] - d[i]
+
+    return Q, d
+
+\end{pyverbatim}
+Hopefully you notice how close the python code resembles the maths.
+  \end{solution}
+
+\end{exercise}
+
+
+With the code of the above exercises we can start our experiments.
+
+\begin{exercise}\label{ex:4}
+  Copy the code of the previous exercise to a new file in Anaconda.
+  Then add the code below and run it. (Or use the jupyter notebook.)
+
+  Here $\lambda$ is the arrival rate, $\mu$ the service rate, $N$ the number of periods, and $q_0$ the starting level of the queue.
+  Explain what the code does.
+  Can you also explain the value of the mean and the standard deviation?
+
+\begin{pyverbatim}
+def experiment_1():
+    labda, mu, q0, N = 5, 6, 0, 100
+    a = poisson(labda).rvs(N)
+    s = poisson(mu).rvs(N)
+    print(a.mean(), a.std())
+
+experiment_1()
+\end{pyverbatim}
+
+\end{exercise}
+
+\begin{exercise}
+  Modify  the appropriate parts of  code of the previous exercise to the below,  and run it. Explain what you see.
+
+\begin{pyverbatim}
+def experiment_2():
+    labda, mu, q0, N = 5, 6, 0, 100
+    a = poisson(labda).rvs(N)
+    s = poisson(mu).rvs(N)
+    Q, d = compute_Q_d(a, s, q0)
+
+    plt.plot(Q)
+    plt.show()
+    print(d.mean())
+
+
+experiment_2()
+\end{pyverbatim}
+
+\begin{solution}
+  You should see that the queue starts at 100 and drains roughly at rate $\lambda-\mu$.
+  If you make $Q_0$ very large ($10 000$ or so), you should see that the queue length process behaves nearly like a line until it hits 0.
+\end{solution}
+\end{exercise}
+
+
+\begin{exercise}
+  Getting statistics is really easy now.
+  For example, try to plot the empirical distribution function of the queue length process.
+\begin{hint}
+For  the empirical distribution function  you can use the code of Exercise~\ref{ex:1}. Before looking it up, try to recall how the cdf is computed.
+\end{hint}
+
+
+\begin{solution}
+This is the code.
+  \begin{pyverbatim}
+def cdf(a):
+    y = range(1, len(a) + 1)
+    y = [yy / len(a) for yy in y]  # normalize
+    x = sorted(a)
+    return x, y
+
+def experiment_3():
+    labda, mu, q0, N = 5, 6, 0, 100
+    a = poisson(labda).rvs(N)
+    s = poisson(mu).rvs(N)
+    Q, d = compute_Q_d(a, s, q0)
+
+    print(d.mean())
+
+    x, F = cdf(Q)
+    plt.plot(x, F)
+    plt.show()
+
+experiment_3()
+  \end{pyverbatim}
+  \end{solution}
+\end{exercise}
+
+\begin{exercise}
+  Can you explain the value of the mean number of departures?
+\begin{solution}
+  The mean number of departures must be (about) equal to the mean number arrivals per period.
+  Jobs cannot enter from `nowhere'.
+
+  \begin{pyverbatim}
+# A void cell for the numbering    
+  \end{pyverbatim}
+  \end{solution}
+\end{exercise}
+
+
+\begin{exercise}
+Plot the queue length process for a large initial queue, for instance, with
+
+\begin{pyverbatim}
+def experiment_4():
+    labda, mu = 5, 6
+    q0, N = 1000, 100
+    a = poisson(labda).rvs(N)
+    s = poisson(mu).rvs(N)
+    Q, d = compute_Q_d(a, s, q0)
+    plt.plot(Q)
+    plt.show()
+
+
+experiment_4()
+\end{pyverbatim}
+Explain what you see.
+\begin{solution}
+  The queue length drains at rate $\mu-\lambda$ when $q_0$ is really large.
+  Thus, for such settings, you might just as well approximate the queue length behavior as $q(t) = q_0 - (\mu-\lambda)t$, i.e., as a deterministic system.
+
+\end{solution}
+\end{exercise}
+
+
+\begin{exercise}
+Set $q_0=10000$ and $N=1000$.  (In Anaconda you can just change the numbers and run the code again, in other words, you don't have to copy all the code.) Finally,  make these values again 10 times larger.
+
+Explain what you see. What is the drain rate of $Q$?
+\begin{solution}
+  Copy this code and run it.
+  I don't use the values for $N$ and $Q0$ as specified in the exercise; running the code becomes somewhat slow, and this gets on my nerves while testing everything.
+  Hence, you should replace the numbers by the ones mentioned in the exercise.
+
+\begin{pyverbatim}
+def experiment_5():
+    N = 10  # set this to the correct value.
+    labda = 6
+    mu = 5
+    q0 = 30
+
+    a = poisson(labda).rvs(N)
+    s = poisson(mu).rvs(N)
+
+    Q, d = compute_Q_d(a, s, q0)
+
+    plt.plot(Q)
+    plt.show()
+
+
+experiment_5()
+\end{pyverbatim}
+
+You should see that the queue drains with relatively less variation. The `line' becomes `straighter'.
+\end{solution}
+\end{exercise}
+
+\begin{exercise}
+What do you expect to see when $\lambda=6$ and $\mu=5$? Once you have formulated your hypothesis, check it.
+\begin{solution}
+Copy this code and run it.
+\begin{pyverbatim}
+def experiment_6():
+    N = 100 #  Again, replace the numbers
+    labda = 5
+    mu = 6
+    q0 = 10
+
+    a = poisson(labda).rvs(N)
+    s = poisson(mu).rvs(N)
+
+    Q, d = compute_Q_d(a, s, q0)
+    print(Q.mean(), Q.std())
+
+experiment_6()
+\end{pyverbatim}
+  The queue should increase with rate $\lambda - \mu$. Of course the queue length process will fluctuate a bit around the line with slope $\lambda-\mu$, but the line shows the trend.
+\end{solution}
+\end{exercise}
+
+\subsection{What-if analysis}
+\label{sec:what-if-analysis}
+
+With simulation we can do all kinds of experiments to see whether the performance of a queueing system improves in the way we want.
+Here is a simple example of the type of experiments we can run now.
+
+For instance, the mean and the sigma of the queue length might be too large, that is, customers complain about long waiting times.
+Suppose we are able, with significant technological investments, to make the service times more predictable.
+Then we would like to know the influence of this change on the queue length.
+
+To quantify the effect of regularity of service times we first assume that the service times are exponentially distributed; then we change it to deterministic times.
+As deterministic service times are the best we can achieve, we cannot do any better than this by just making the service times more regular.
+If we are still unhappy about the effect of making service times much more regular, we have to make the average service times shorter, or add extra servers, or block demand so that the inflow reduces.
+
+\begin{exercise}
+  Let's test the influence of service time variability.
+  Replace the service times with the code \pyv{s = np.ones_like(a) * mu}.
+  Read the docs of \pyv{numpy} to see what \pyv{np.ones_like} does.
+  Explain the result.
+
+\begin{solution}
+Here is the code.
+\begin{pyverbatim}
+def experiment_6a():
+    N = 10 # Use a larger value here
+    labda = 5
+    mu = 6
+    q0 = 0
+
+    a = poisson(labda).rvs(N)
+    s = np.ones_like(a) * mu
+
+    Q, d = compute_Q_d(a, s, q0)
+    print(Q.mean(), Q.std())
+
+experiment_6a()
+\end{pyverbatim}
+
+You should observe that the mean and the variability of the queue length process decrease.
+\end{solution}
+\end{exercise}
+
+
+
+\begin{exercise}
+  Suppose that, instead of being able to reduce the variability of the service times, we are able to reduce the average service time by 10\%, say. 
+  To see the effect of this change, replace \pyv{s} by \pyv{s = poisson(1.1*mu).rvs(N)}, i.e., we increase the service rate with $10\%$.
+
+Do the computations and compare the results to those of the previous exercise. What change in average service time do we need to get about the same average queue length as the one for the queueing system with deterministic service times? Is an $10\%$ increase enough, or should it be $20\%$, or $30\%$? Just test a few numbers and see what you get.
+\begin{solution}
+Copy this code and run it.
+
+\begin{pyverbatim}
+def experiment_6b():
+    N = 10 # Change to a larger value.
+    labda = 5
+    mu = 6
+    q0 = 0
+
+    a = poisson(labda).rvs(N)
+    s = poisson(1.1 * mu).rvs(N)
+
+    Q, d = compute_Q_d(a, s, q0)
+    print(Q.mean(), Q.std())
+
+experiment_6b()
+\end{pyverbatim}
+For our experiments it is about 20\% extra.
+  \end{solution}
+\end{exercise}
+
+I hope you make the crucial observation from the above cases that we can experiment with all kinds of system changes and compare their effects on, for instance, waiting times.
+In fact, with simulation we can easily carry out `what-if' analysis.
+
+\subsection{Control}
+\label{sec:control-}
+
+In the previous section we analyzed the effect of the design of the system, such as changing the average service times.
+These changes are independent of the queue length.
+In many systems, however, the service rate depends on the dynamics of the queue process.
+When the queue is large, service rates increase; when the queue is small, service rates decrease.
+This type of policy can often be seen in supermarkets: extra cashiers will open when the queue length increases, and some of them close when all queues are empty.
+
+Suppose that normally we have 6 servers, each working at a rate of $1$ customer per period.
+When the queue becomes longer than 20 (this is about 3 customers per server in queue) we install two extra servers, and when the queue is empty again, we switch off the extra two servers, until the queue hits 20 again, and so on.
+\begin{exercise}
+  Try to write pseudo-code (or a  python program) to simulate the queue process. (This is pretty challenging; it's not a problem if you spend quite some time on this.)
+\begin{hint}
+  As a hint, you need a state variable to track whether the extra servers are present or not.
+  The solution shows the code.)
+  Analyze the effect of the threshold at 20; what happens if you set it to 18, say, or 30?
+  What is the effect of the number of extra servers; what happens if you would add 3 instead of 2?
+\end{hint}
+
+\begin{solution}
+Here is one implementation.
+\begin{pyverbatim}
+def compute_Q_d_with_extra_servers(a, q0=0, mu=6, threshold=np.inf, extra=0):
+    d = np.zeros_like(a)
+    Q = np.zeros_like(a)
+    Q[0] = q0
+    present = False  # extra employees are not in
+    for i in range(1, len(a)):
+        rate = mu + extra if present else mu  # service rate
+        s = poisson(rate).rvs()
+        d[i] = min(Q[i - 1], s)
+        Q[i] = Q[i - 1] + a[i] - d[i]
+        if Q[i] == 0:
+            present = False  # send employee home
+        elif Q[i] >= threshold:
+            present = True  # hire employee for next period
+
+    return Q, d
+
+
+def experiment_7():
+    N = 100 # take a big number here.
+    labda = 5
+    mu = 6
+    q0 = 0
+
+    a = poisson(labda).rvs(N)
+
+    Q, d = compute_Q_d_with_extra_servers(a, q0, mu=6, threshold=20, extra=2)
+    print(Q.mean(), Q.std())
+
+    x, F = cdf(Q)
+    plt.plot(x, F)
+    plt.show()
+
+experiment_7()
+\end{pyverbatim}
+
+Note that this code runs significantly slower than the other code.
+This is because we now have to call \pyv{poisson(mu).rvs()} in every step of the for loop.
+We could make the program run faster by using the \pyv{scipy} library to generate $N$ random numbers in one step outside of the for loop and then extract numbers from there when needed.
+However, for the sake of clarity we chose not to do so.
+\end{solution}
+
+\end{exercise}
+
+
+Another way to deal with large queues is to simply block customers if the queue is too long.
+What would happen if we would customers to enter the system when the queue is 15 or larger?
+How, for instance, would that affect the average queue and the distribution of the queue?
+\begin{exercise}
+  Modify the code to include blocking and do an experiment to see the effect on the queue length.
+
+\begin{solution}
+  Here is an example.
+  What is the meaning of \pyv{np.inf}?
+
+\begin{pyverbatim}
+def compute_Q_d_blocking(a, s, q0=0, b=np.inf):
+    # b is the blocking level.
+    d = np.zeros_like(a)
+    Q = np.zeros_like(a)
+    Q[0] = q0
+    for i in range(1, len(a)):
+        d[i] = min(Q[i - 1], s[i])
+        Q[i] = min(b, Q[i - 1] + a[i] - d[i])
+
+    return Q, d
+
+
+
+def experiment_7a():
+    N = 100 # take a larger value
+    labda = 5
+    mu = 6
+    q0 = 0
+
+    a = poisson(labda).rvs(N)
+    s = poisson(mu).rvs(N)
+
+    Q, d = compute_Q_d_blocking(a, s, q0, b=15)
+    print(Q.mean(), Q.std())
+
+    x, F = cdf(Q)
+    plt.plot(x, F)
+    plt.show()
+
+
+experiment_7a()
+\end{pyverbatim}
+
+  \end{solution}
+\end{exercise}
+
+
+\subsection{Cost computations}
+\label{sec:cost-computations}
+
+
+Let us next consider a single server queue that can be switched on and off.
+There is a cost $h$ associated with keeping a job waiting for one period, there is a cost $p$ to hire the server for one period, and it costs $s$ to switch on the server.
+Given the parameter values of the next exercise, what would be a good threshold $\theta$ such that the server is switched on when the queue hits or exceeds $\theta$?
+We assume (and it is easy to prove) that it is optimal to switch off the server when the queue is empty.
+
+\begin{exercise}
+  Jobs arrive at rate $\lambda=0.3$ per period.
+  If the server is present the service rate is $\mu=1$ per period; if the server is `on vacation', the service rate is 0.
+  The number of arrivals and services per period are Poisson distributed with the given rates.
+  Then, $h=1$ (without loss of generality), $p=5$ and $S=500$.
+  Write a simulator to compute the average cost for setting $\theta=100$.
+  Then, change $N$ to find a better value.
+
+\begin{solution}
+Here is all the code.
+\begin{pyverbatim}
+def compute_cost(a, mu, q0=0, threshold=np.inf, h=0, p=0, S=0):
+    d = np.zeros_like(a)
+    Q = np.zeros_like(a)
+    Q[0] = q0
+    present = False  # extra employee is not in.
+    queueing_cost = 0
+    server_cost = 0
+    setup_cost = 0
+    for i in range(1, len(a)):
+        if present:
+            server_cost += p
+            c = poisson(mu).rvs()
+        else:
+            c = 0  # server not present, hence no service
+        d[i] = min(Q[i - 1], c)
+        Q[i] = Q[i - 1] + a[i] - d[i]
+        if Q[i] == 0:
+            present = False  # send employee home
+        elif Q[i] >= threshold:
+            present = True  # switch on server
+            setup_cost += S
+        queueing_cost += h * Q[i]
+
+    print(queueing_cost, setup_cost, server_cost)
+
+    total_cost = queueing_cost + server_cost + setup_cost
+    num_periods = len(a) - 1
+    average_cost = total_cost / num_periods
+    return average_cost
+
+
+def experiment_8():
+    N = 100
+    labda = 0.3
+    mu = 1
+    q0 = 0
+    theta = 100  # threshold
+
+    h = 1
+    p = 5
+    S = 500
+
+    a = poisson(labda).rvs(N)
+    av = compute_cost(a, mu, q0, theta, h, p, S)
+    print(av)
+
+experiment_8()
+\end{pyverbatim}
+After a bit of experimentation, we see that $\theta=15$ is quite a bit better than $\theta=100$.
+
+\end{solution}
+\end{exercise}
+
+
+As a final example, suppose we have to pay a penalty for any customer that sees a queue larger than 20. How to estimate the effect of these costs? 
+
+
+\begin{exercise}
+  Suppose that the number of jobs arriving in a period is Poisson distributed with $\lambda=5$, and the number of potential services is $\mu=6$ per period.
+  Use the programs we developed earlier to compute the queue lengths, and use the code \pyv{(Q>20)} to count all periods in in which $Q>20$.
+
+  \begin{solution}
+\begin{pyverbatim}
+def experiment_9():
+    N = 10 # Change to a larger value.
+    labda = 5
+    mu = 6
+    q0 = 0
+
+    a = poisson(labda).rvs(N)
+    s = poisson(mu).rvs(N)
+
+    Q, d = compute_Q_d(a, s, q0)
+    loss = (Q > 20)
+    print(loss.sum())
+    total_demand = a.sum() 
+    print(100*(Q > 0).sum()/total_demand)
+
+
+experiment_9()
+\end{pyverbatim}
+I multiply with 100 to get a percentage.
+    
+  \end{solution}
+
+\end{exercise}
+
+\subsection{Summary}
+\label{sec:summary}
+
+\begin{exercise}
+  What have you learned from this tutorial? What interesting extensions can you think of, in particular, what is relevant for practice? 
+\begin{solution}
+    Some important points are the following.
+    \begin{enumerate}
+    \item Making a simulation requires some ingenuity, but is need not be difficult.
+    \item It is often much simpler to analyze difficult queueing situations with simulation than with mathematics.
+      In fact, most queueing systems cannot be analyzed with maths.
+    \item We studied the behavior of queues under certain control policies, typically policies that change the service rate as a function of the queue length. Such policies are used in practice, such as in supermarkets, hospitals, the customs services at airports, and so on. Hence, you now have some tools to design and analyze such systems.
+    \end{enumerate}
+
+An interesting extension is to incorporate time-varying demand. In many systems, such as supermarkets, the demand is not constant over the day. In such cases the planning of servers should take this into account.
+
+  \end{solution}
+\end{exercise}
+
+  
