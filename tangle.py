@@ -23,15 +23,19 @@ class PrintMachine(enum.Enum):
         Determines the next state based on the content of the passed-in line.
         Returns a tuple of (next state, current state).
         """
-        if self == self.PRINT and any(trigger in line
-                                      for trigger in self.dont_print_triggers):
+        if self == self.PRINT and self._should_go_to_dont_print(line):
             return self.DONT_PRINT, self.PRINT
 
-        if self == self.DONT_PRINT and any(trigger in line
-                                           for trigger in self.print_triggers):
+        if self == self.DONT_PRINT and self._should_go_to_print(line):
             return self.PRINT, self.DONT_PRINT
 
         return self, self.PRINT
+
+    def _should_go_to_dont_print(self, line):
+        return any(trigger in line for trigger in self.dont_print_triggers)
+
+    def _should_go_to_print(self, line):
+        return any(trigger in line for trigger in self.print_triggers)
 
 
 def tangle(fname):
