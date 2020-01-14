@@ -3,6 +3,7 @@ auto/
 *.out
 *.rel
 *.aux
+*.idx
 *.log
 *.gz
 *.toc
@@ -13,6 +14,5 @@ chunks/*
 *.pytxcode
 pythontex-files*
 tutorial*files/
-
-# Jetbrains IDEs
-.idea/
+.ipynb_checkpoints/
+__pycache__/

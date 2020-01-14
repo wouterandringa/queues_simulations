@@ -10,6 +10,15 @@ Author: Nicky van Foreest
 '''
 
 # %%
+# empty code for numbering
+
+# %%
+# empty code for numbering
+
+# %%
+# empty code for numbering
+
+# %%
 from collections import deque
 from heapq import heappop, heappush
 import numpy as np
@@ -204,6 +213,19 @@ def md2_test(labda=1.8, mu=1, num_jobs=100):
 
 md2_test(num_jobs=100)
 md2_test(num_jobs=100_000)
+
+# %%
+num_jobs = 300
+A = np.sort(uniform(0, 120).rvs(num_jobs))
+
+# %%
+# empty code for numbering
+
+# %%
+# empty code for numbering
+
+# %%
+# empty code for numbering
 
 # %%
 def intake_process():

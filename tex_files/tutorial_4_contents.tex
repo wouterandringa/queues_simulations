@@ -17,7 +17,11 @@ In the $G/G/1$ we have just one server which is busy or not.
 \end{hint}
 \begin{solution}
     If the number of busy servers is less than $c$, a service can start. Otherwise a job has to queue. If a service starts, increase \pyv{num_busy} by one.
-  \end{solution}
+
+\begin{pyverbatim}
+# empty code for numbering
+\end{pyverbatim}
+\end{solution}
 \end{exercise}
 
 
@@ -29,6 +33,9 @@ Likewise,   generalize  the \pyv{handle_departure} function of the $G/G/1$ queue
 
 \begin{solution}
   At a departure, a server becomes free, hence decrease \pyv{num_busy} by one. If there are jobs in queue, start a new service.
+\begin{pyverbatim}
+# empty code for numbering
+\end{pyverbatim}
 \end{solution}
 \end{exercise}
 
@@ -39,6 +46,9 @@ Likewise,   generalize  the \pyv{handle_departure} function of the $G/G/1$ queue
 \end{hint}
 \begin{solution}
     Of course, the number of busy servers cannot be negative or larger than $c$. The queue length cannot be negative. Finally, it cannot be that  the queue length is positive and the number of busy servers is less than $c$.
+\begin{pyverbatim}
+# empty code for numbering
+\end{pyverbatim}
   \end{solution}
 \end{exercise}
 
@@ -159,6 +169,7 @@ def make_jobs(arrival_times, service_times_jobs):
 \begin{exercise}
 Test the simulator with deterministic inter-arrival times, for instance a job that arrives every 10 minutes, and each job takes 25 minues of service. Check the departure process for $c=1$, $c=2$, and $c=3$. 
 \begin{solution}
+Like this you can build a $D/D/1$ queue.
 \begin{pyverbatim}
 def ddc_test():
     num_jobs = 10
@@ -323,6 +334,10 @@ Assume that a flight departing at 11 am  consists of $N=300$ people.  For ease, 
   Model the arrival process.
 \begin{solution}
 We assume that the 300 customers arrive uniformly over 120 minutes. 
+\begin{pyverbatim}
+num_jobs = 300
+A = np.sort(uniform(0, 120).rvs(num_jobs))
+\end{pyverbatim}
   \end{solution}
 \end{exercise}
 
@@ -333,6 +348,9 @@ It is evident that we need to determine the required number of servers $c$ such 
 \begin{solution}
     It is reasonable \emph{within the context} that the mean waiting time is less important than the largest waiting time and the fraction of people that wait longer than 10 minutes, say.
     Note here, \emph{context is crucial} when making models.
+\begin{pyverbatim}
+# empty code for numbering
+\end{pyverbatim}
   \end{solution}
 \end{exercise}
 
@@ -346,13 +364,19 @@ It is evident that we need to determine the required number of servers $c$ such 
   There are, by assumption, only arrivals between 8 and 10, hence the arrival process is not stationary, hence the queueing process is not stationary.
   It is also not a problem if the system is temporarily in overload.
   In fact, as long as $c$ is such that the performance measures (maximum delay and fraction of people waiting longer than some threshold) are within reasonable bounds, the system works as it should.
+\begin{pyverbatim}
+# empty code for numbering
+\end{pyverbatim}
   \end{solution}
 \end{exercise}
 
 \begin{exercise}
   Why do we need simulation to analyze this case?
 \begin{solution}
-    We study the dynamics of a queueing process in which the demand grows and than peters out. Such queueing situations are, typically, mathematically intractable. In fact, we finally have come to a point in which we really need simulation.
+    We study the dynamics of a queueing process in which the demand grows and than peters out. Such queueing situations are, typically, mathematically intractable. In fact, we finally have come to a point at which we really need simulation.
+\begin{pyverbatim}
+# empty code for numbering
+\end{pyverbatim}
   \end{solution}
 \end{exercise}
 

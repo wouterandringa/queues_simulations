@@ -3,12 +3,11 @@
 
 In this final tutorial we consider the case in which business and economy class customers have their own server(s).
 In fact, we are going to use simulation to compare different ways to organize the queueing system.
-One way is like this: there is one server strictly allocated to business class customers, and there are $c$, say, servers strictly used by the economy class customers.
+One way to organize the server allocation is like this: there is one server strictly allocated to business class customers, and there are $c$, say, servers strictly used by the economy class customers.
 Another way is like this.
-There are still one business server and $c$ economy servers.
-When the business server is free, this server takes just one economy customer in service.
-When, after this service, there is still no business customer, the business server serves a second economy customer.
-Once a business customer arrives, the business server finished the economy customer (if there is any), and then servers the business customer.
+There are still one business server and $c$ economy servers, but when the business server is free, this server takes just one economy customer in service (assuming there is such customer in queue).
+When, after this service, there is still no business customer in queue, the business server serves a second economy customer.
+Once a business customer arrives, the business server finishes the economy customer (if there is any in service), and then serves the business customer.
 We use a similar policy for serving business customers by free economy class server.
 The problem is of course to figure out which of these policies is best.
 
@@ -24,9 +23,8 @@ The problem is of course to figure out which of these policies is best.
 As the simulation of this case is somewhat more difficult than the $G/G/c$ queue, testing is also more important.
 For this reason we will follow a \emph{test-driven} procedure, which works like this.
 First we design a number of test cases, from very simple to a bit less simple.
-Then we  build and test until the first test case passes.
-Then we build and test until also the second case passes, and so on, until all the tests pass.
-And, indeed, along the way we caught numerous mistakes, from missing \pyv{if} statements (a very big bug) to simple typos.
+Then we build and test until the first test case passes.
+Then we build and test until also the second case passes, and so on, until all the tests pass \footnote{Indeed, when decision this tutorial, we caught numerous mistakes, from missing \pyv{if} statements (a very big bug) to simple typos.}.
 
 \subsection{The simulator}
 \label{sec:simulator-1}
@@ -52,7 +50,7 @@ And, indeed, along the way we caught numerous mistakes, from missing \pyv{if} st
     The tests will not yet work since we have not yet made the class to simulate the queueing system.
     In other words, we know that our first test should fail initially.
 
-    \begin{pyverbatim}
+    \begin{pynotangle}
 def DD1_test_1():
     # test with only business customers
     c = 0
@@ -83,17 +81,16 @@ def do_tests():
     #DD1_test_2()
 
 do_tests()
-    \end{pyverbatim}
+    \end{pynotangle}
 
   \end{solution}
 
 \end{exercise}
 
 
-Before we build the class for the queues we observe that the implementation of the $G/G/c$ of Section~\ref{sec:ggc-continuous-time} suffers from a performance penalty. The problem is that  we create  time and again  new objects in the calls \pyv{F.rvs()} and \pyv{G.rvs()}  to generate the quasi-random inter-arrival and service times\footnote{You only know such things if you have some general knowledge of python or computer programming general. Hence, it pays to invest in knowledge of the computer language you use.}. Specifically,  code like this runs very slow:
-
-
-\begin{pyverbatim}
+\begin{exercise}
+The code below can be used to generate a number of jobs. Why is the performance of this code pretty bad? 
+\begin{pynotangle}
 def generate_jobs_bad_implementation(F, G, p_business, num_jobs):
     # the difference in performance is tremendous
     for n in range(num_jobs):
@@ -109,12 +106,17 @@ def generate_jobs_bad_implementation(F, G, p_business, num_jobs):
         time = job.arrival_time
 
     return jobs
-\end{pyverbatim}
-Note that we generate \pyv{num_jobs} jobs. Then, with probability $p$ (\pyv{p_business} in our code) the job is a business customer.
+\end{pynotangle}
+We generate \pyv{num_jobs} jobs. Then, with probability $p$ (\pyv{p_business} in our code) the job is a business customer.
+\begin{solution}
+  The problem is that we create time and again new objects in the calls \pyv{F.rvs()} and \pyv{G.rvs()} to generate the quasi-random inter-arrival and service times.
+\end{solution}
+\end{exercise}
 
-To repair this problem it is better to let \pyv{scipy} call a random number generator in C++ just once and generate all random numbers in one pass.
+
+To repair this problem it is better to let \pyv{scipy} call a random number generator in \pyv{C++} just once and generate all random numbers in one pass.
 Here is one way to obtain a speed up of about a factor 100.
-\begin{pyverbatim}
+\begin{pynotangle}
 def generate_jobs(F, G, p_business, num_jobs):
     jobs = set()
     time = 0
@@ -135,7 +137,7 @@ def generate_jobs(F, G, p_business, num_jobs):
         time = job.arrival_time
 
     return jobs
-\end{pyverbatim}
+\end{pynotangle}
 
 We assume that the service distribution is the same for all job classes. If we do not want this, we can make the service time dependent on the job type.
 
@@ -144,10 +146,8 @@ We assume that the service distribution is the same for all job classes. If we d
 
 \begin{solution}
 The code explains all. Note, we will not use it in our simulation.
-
-
-\begin{pyverbatim}
-def generate_jobs_bad_implementation(F, Ge, Gb, p_business, num_jobs):
+\begin{pynotangle}
+def generate_jobs_bad_implementation_2(F, Ge, Gb, p_business, num_jobs):
     # the difference in performance is tremendous
     for n in range(num_jobs):
         job = Job()
@@ -163,24 +163,424 @@ def generate_jobs_bad_implementation(F, Ge, Gb, p_business, num_jobs):
         time = job.arrival_time
 
     return jobs
-
-\end{pyverbatim}
+\end{pynotangle}
   \end{solution}
 \end{exercise}
 
 \begin{exercise}
   Try to implement (or design) the $G/G/c$ queue with business customers. The rules must be like this. Business and economy class customers have separate queues and separate, dedicated servers. There is one business server and there are $c$ economy class servers. If the business (economy) server becomes  idle and there is an economy (business) class customer in queue, the business (economy) server takes an economy (business) customer into service.
 
-You can find the code in \pyv{tutorial_5.py}. Read it carefully so that you understand all details.
+You can find the code in \pyv{tutorial_5.py}. Read it carefully so that you understand all details. 
+\begin{solution}
+We give most code at once. Study the code in detail.
+\begin{pyverbatim}
+from collections import deque
+from heapq import heappop, heappush
+import numpy as np
+from scipy.stats import expon, uniform
+
+np.random.seed(8)
+
+ARRIVAL = 0
+DEPARTURE = 1
+
+ECONOMY = 0
+BUSINESS = 1
+
+# %%
+
+
+class Job:
+    def __init__(self):
+        self.arrival_time = 0
+        self.service_time = 0
+        self.customer_type = ECONOMY
+        self.server_type = ECONOMY
+        self.departure_time = 0
+        self.queue_length_at_arrival = 0
+
+    def sojourn_time(self):
+        return self.departure_time - self.arrival_time
+
+    def waiting_time(self):
+        return self.sojourn_time() - self.service_time
+
+    def service_start(self):
+        return self.departure_time - self.service_time
+
+    def __repr__(self):
+        return f"{self.customer_type}, {self.server_type}, {self.arrival_time}, {self.service_time}, {self.service_start()}, {self.departure_time}\n"
+
+    def __lt__(self, other):
+        # this is necessary to sort jobs when they have the same arrival times.
+        return self.queue_length_at_arrival < other.queue_length_at_arrival
+
+
+# %%
+
+
+def generate_jobs(A, S, p_business):
+    jobs = set()
+    num_jobs = len(A)
+    p = uniform(0, 1).rvs(num_jobs)
+
+    for n in range(num_jobs):
+        job = Job()
+        job.arrival_time = A[n]
+        job.service_time = S[n]
+        if p[n] < p_business:
+            job.customer_type = BUSINESS
+        else:
+            job.customer_type = ECONOMY
+        jobs.add(job)
+
+    return jobs
+
+
+# %%
+
+
+class GGc_with_business:
+    def __init__(self, c, jobs):
+        self.b = 1  # number of b servers
+        self.c = c  # number of e servers
+        self.jobs = jobs
+
+        self.num_b_busy = 0
+        self.num_e_busy = 0
+        self.stack = []
+        self.b_queue = deque()
+        self.e_queue = deque()
+
+        self.fill_stack()
+
+    def fill_stack(self):
+        for job in sorted(self.jobs, key=lambda j: j.arrival_time):
+            heappush(self.stack, (job.arrival_time, job, ARRIVAL))
+
+    def handle_arrival(self, time, job):
+        if job.customer_type == BUSINESS:
+            job.queue_length_at_arrival = len(self.b_queue)
+        else:
+            job.queue_length_at_arrival = len(self.e_queue)
+
+        if job.customer_type == ECONOMY:
+            if self.num_e_busy < self.c:
+                job.server_type = ECONOMY
+                self.start_service(time, job)
+            elif self.num_b_busy < self.b:
+                job.server_type = BUSINESS
+                self.start_service(time, job)
+            else:
+                self.e_queue.append(job)
+        else:  # business customer
+            if self.num_b_busy < self.b:
+                job.server_type = BUSINESS
+                self.start_service(time, job)
+            elif self.num_e_busy < self.c:
+                job.server_type = ECONOMY
+                self.start_service(time, job)
+            else:
+                self.b_queue.append(job)
+
+    def start_service(self, time, job):
+        if job.server_type == BUSINESS:
+            self.num_b_busy += 1
+        else:
+            self.num_e_busy += 1
+        job.departure_time = time + job.service_time
+        heappush(self.stack, (job.departure_time, job, DEPARTURE))
+
+    def pop_from_queue_set_server_and_start(self, time, queue, server_type):
+        next_job = queue.popleft()
+        next_job.server_type = server_type
+        self.start_service(time, next_job)
+
+    def handle_departure(self, time, job):
+        if job.server_type == BUSINESS:
+            self.num_b_busy -= 1
+            if self.b_queue:
+                self.pop_from_queue_set_server_and_start(time, self.b_queue, BUSINESS)
+            elif self.e_queue:
+                self.pop_from_queue_set_server_and_start(time, self.e_queue, BUSINESS)
+        else:  # economy server free
+            self.num_e_busy -= 1
+            if self.e_queue:
+                self.pop_from_queue_set_server_and_start(time, self.e_queue, ECONOMY)
+            elif self.b_queue:
+                self.pop_from_queue_set_server_and_start(time, self.b_queue, ECONOMY)
+
+    def run(self):
+        time = 0
+        while self.stack:  # not empty
+            time, job, epoch_type = heappop(self.stack)
+            if epoch_type == ARRIVAL:
+                self.handle_arrival(time, job)
+            else:
+                self.handle_departure(time, job)
+
+    def print_served_job(self):
+        for j in sorted(self.jobs, key=lambda j: j.arrival_time):
+            print(j)
+
+    def mean_waiting_time(self, customer_type=None):
+        if customer_type is None:
+            jobs = self.jobs
+        else:
+            jobs = set(j for j in self.jobs if j.customer_type == customer_type)
+        return sum(j.waiting_time() for j in jobs) / len(jobs)
+
+    def max_waiting_time(self, customer_type=None):
+        if customer_type is None:
+            return max(j.waiting_time() for j in self.jobs)
+        else:
+            return max(
+                j.waiting_time() for j in self.jobs if j.customer_type == customer_type
+            )
+
+\end{pyverbatim}
+\end{solution}
+
 \end{exercise}
 
 
 \begin{exercise}
   To design some further test cases: think about what happens if two customer classes are completely separated:  business customers have one dedicated server and the economy customers have $c$ dedicated servers.  How would you implement this in the code?
+\begin{solution}
+Here are all the tests.    
+\begin{pyverbatim}
+def sakasegawa(F, G, c):
+    labda = 1.0 / F.mean()
+    ES = G.mean()
+    rho = labda * ES / c
+    EWQ_1 = rho ** (np.sqrt(2 * (c + 1)) - 1) / (c * (1 - rho)) * ES
+    ca2 = F.var() * labda * labda
+    ce2 = G.var() / ES / ES
+    return (ca2 + ce2) / 2 * EWQ_1
+
+
+# %%
+
+
+def make_arrivals_and_services(F, G, num_jobs):
+    a = F.rvs(num_jobs)
+    A = np.cumsum(a)
+    S = G.rvs(num_jobs)
+    return A, S
+
+
+# %%
+
+
+def DD1_test_1():
+    # test with only business customers
+    c = 0
+    F = uniform(1, 0.0001)
+    G = expon(0.5, 0.0001)
+    num_jobs = 5
+    p_business = 1
+    A, S = make_arrivals_and_services(F, G, num_jobs)
+    jobs = generate_jobs(A, S, p_business)
+    ggc = GGc_with_business(c, jobs)
+    ggc.run()
+    ggc.print_served_job()
+
+
+DD1_test_1()
+
+# %%
+
+
+def DD1_test_2():
+    # test with only economy customers
+    c = 1
+    F = uniform(1, 0.0001)
+    G = expon(0.5, 0.0001)
+    p_business = 0
+    num_jobs = 5
+    A, S = make_arrivals_and_services(F, G, num_jobs)
+    jobs = generate_jobs(A, S, p_business)
+    ggc = GGc_with_business(c, jobs)
+    ggc.run()
+    ggc.print_served_job()
+
+
+DD1_test_2()
+
+# %%
+
+
+def DD1_test_3():
+    # test with only economy customers but only a business server
+    c = 0
+    F = uniform(1, 0.0001)
+    G = expon(0.5, 0.0001)
+    p_business = 0
+    num_jobs = 5
+    A, S = make_arrivals_and_services(F, G, num_jobs)
+    jobs = generate_jobs(A, S, p_business)
+    ggc = GGc_with_business(c, jobs)
+    ggc.run()
+    ggc.print_served_job()
+
+
+DD1_test_3()
+
+# %%
+
+
+def DD2_test_1():
+    # test with only economy customers and one e_server. As the b_server is always present, we must have 2 servers.
+    # assume that all jobs arrive at time 0, and have service time 1
+    c = 1
+    F = uniform(0, 0.0001)
+    G = expon(1, 0.0001)
+    p_business = 0
+    num_jobs = 10
+    A, S = make_arrivals_and_services(F, G, num_jobs)
+    jobs = generate_jobs(A, S, p_business)
+    ggc = GGc_with_business(c, jobs)
+    ggc.run()
+    ggc.print_served_job()
+
+
+DD2_test_1()
+
+# %%
+
+
+def mm1_test_1():
+    # test with only business customers but no e_server, very few jobs
+    c = 0
+    labda = 0.9
+    mu = 1
+    F = expon(scale=1.0 / labda)
+    G = expon(scale=1.0 / mu)
+    p_business = 1
+
+    num_jobs = 10
+    A, S = make_arrivals_and_services(F, G, num_jobs)
+    jobs = generate_jobs(A, S, p_business)
+    ggc = GGc_with_business(c, jobs)
+    ggc.run()
+    ggc.print_served_job()
+
+
+mm1_test_1()
+
+# %%
+
+
+def mm1_test_2():
+    # test with only economy customers but no e_server
+    c = 0
+    labda = 0.9
+    mu = 1
+    F = expon(scale=1.0 / labda)
+    G = expon(scale=1.0 / mu)
+    p_business = 0
+
+    print("theory: ", sakasegawa(F, G, c + 1))  # 1 for the business server
+
+    num_jobs = 100_000
+    A, S = make_arrivals_and_services(F, G, num_jobs)
+    jobs = generate_jobs(A, S, p_business)
+    ggc = GGc_with_business(c, jobs)
+    ggc.run()
+
+    print("mean waiting: ", ggc.mean_waiting_time())
+
+
+mm1_test_2()
+
+# %%
+
+
+def mm1_test_3():
+    # test with only business customers but no e_server
+    c = 0
+    labda = 0.9
+    mu = 1
+    F = expon(scale=1.0 / labda)
+    G = expon(scale=1.0 / mu)
+    p_business = 1
+
+    print("theory: ", sakasegawa(F, G, c + 1))  # 1 for the business server
+
+    num_jobs = 100_000
+    A, S = make_arrivals_and_services(F, G, num_jobs)
+    jobs = generate_jobs(A, S, p_business)
+    ggc = GGc_with_business(c, jobs)
+    ggc.run()
+
+    print("mean waiting: ", ggc.mean_waiting_time())
+
+
+mm1_test_3()
+
+# %%
+
+
+def mm2_test_1():
+    # test with only business customers and 1 e_server
+    c = 1
+    labda = 0.9
+    mu = 1
+    F = expon(scale=1.0 / labda)
+    G = expon(scale=1.0 / mu)
+    p_business = 1
+
+    print("theory: ", sakasegawa(F, G, c + 1))  # 1 for the business server
+
+    num_jobs = 100_000
+    A, S = make_arrivals_and_services(F, G, num_jobs)
+    jobs = generate_jobs(A, S, p_business)
+    ggc = GGc_with_business(c, jobs)
+    ggc.run()
+
+    # mind that Sakasegawa's result is an approximation for the M/M/c with c>1
+    print("mean waiting: ", ggc.mean_waiting_time())
+
+
+mm2_test_1()
+
+
+# %%
+
+
+def mm2_test_2():
+    # test with only economy customers and 1 e_server
+    c = 1
+    labda = 0.9
+    mu = 1
+    F = expon(scale=1.0 / labda)
+    G = expon(scale=1.0 / mu)
+    p_business = 0
+
+    print("theory: ", sakasegawa(F, G, c + 1))  # 1 for the business server
+
+    num_jobs = 100_000
+    A, S = make_arrivals_and_services(F, G, num_jobs)
+    jobs = generate_jobs(A, S, p_business)
+    ggc = GGc_with_business(c, jobs)
+    ggc.run()
+
+    print("mean waiting: ", ggc.mean_waiting_time())
+
+
+mm2_test_2()
+    
+\end{pyverbatim}
+    
+\end{solution}
+
 \end{exercise}
 
 \begin{exercise}
-  Suppose there are no business customers, then all servers should be available for the economy class customers. With this idea you can implement the $M/M/c$ queue and check whether the simulator gives the same results as the theoretical values.
+  Suppose there are no business customers, then all servers should be available for the economy class customers.
+  Likewise, if there are no economy class customers, then all servers are available for the business class customers.
+
+  With this idea you can implement the $M/M/c$ queue and check whether the simulator gives the same results as the theoretical values. (In fact, we have two tests, one for either case.)
 \end{exercise}
 
 \subsection{Case analysis and summary}
@@ -188,16 +588,97 @@ You can find the code in \pyv{tutorial_5.py}. Read it carefully so that you unde
 
 Recall, we build this simulator to see whether we want to share the servers or not.
 To obtain insight into the performance of each situation (shared, or unshared), we need to analyze a few characteristic situations.
-The result of this might be that in certain settings, sharing is best (relatively many business customer?), and in others, we don't want to share.
+The result of this might be that in certain settings sharing is best (perhaps with relatively many business customer), and in others, it is better not to share.
 
 \begin{exercise}
-  Assume we have $n=300$ customers, the desks open 2 hours before departure and close 1 hour before departure, and service distribution is $U[1,2]$ (minutes) for  all customers. The fracton of business customers is $p=0.1$. There are $c=6$ servers for the economy class customers, and 1 for the business customers. Finally, assume that during the opening slot of the desks, the arrival process is Poisson with constant rate.
+  Assume we have $n=300$ customers, the desks open 3 hours before departure and close 1 hour before departure, and service distribution is $\sim U[1,3]$ (minutes) for all customers.
+  The fracton of business customers is $p=0.1$.
+  There are $c=5$ servers for the economy class customers, and 1 for the business customers.
+  Finally, assume that during the opening slot of the desks, the 300 customers arrive $\sim U[0, 120]$.
 
 Make a `test-bed' that allows you to compare, side-by-side, the shared versus the unshared situation. Then, do the simulation and interpret the results.
 \end{exercise}
 
 \begin{exercise}
-  Now start varying on the base case, for instance, longer opening hours, more (less) customers, higher (lower) fraction of business customers, longer (shorter) service times, more (less) variability in the service times.  (In other words, just play with your simulator, and try to relate the outcomes to what you experienced/observed from your last flight.) Compare the results.
+  Now start varying on the base case, for instance, longer opening hours, more (or less) customers, higher (lower) fraction of business customers, longer (shorter) service times, more (less) variability in the service times.  (In other words, just play with your simulator, and try to relate the outcomes to what you experienced/observed from your last flight.) Compare the results.
+
+  \begin{solution}
+    We use the \pyv{copy} module to copy the jobs.
+    Like this we can generate the jobs only once, and then reuse the same jobs for different simulations.
+    This makes a comparison between different simulation runs fairer.
+
+    \begin{pyverbatim}
+import copy  # to copy the simulation data
+
+
+def case_analysis(jobs, c):
+    # we need the same jobs for all cases, so that we can compare in a fair way.
+    b_jobs = set(copy.copy(j) for j in jobs if j.customer_type == BUSINESS)
+    e_jobs = set(copy.copy(j) for j in jobs if j.customer_type == ECONOMY)
+
+    # Case 1: each class its own server, no sharing
+    bus = GGc_with_business(0, b_jobs)
+    bus.run()
+
+    eco = GGc_with_business(c - 1, e_jobs)
+    eco.run()
+
+    # Case 2: sharing with business server
+    shared = GGc_with_business(c, jobs)
+    shared.run()
+
+    print("separate: bus mean", bus.mean_waiting_time())
+    print("shared: bus mean: ", shared.mean_waiting_time(BUSINESS))
+    print("separate: bus max", bus.max_waiting_time())
+    print("shared: bus max: ", shared.max_waiting_time(BUSINESS))
+
+    print("separate: eco mean", eco.mean_waiting_time())
+    print("shared: eco mean: ", shared.mean_waiting_time(ECONOMY))
+    print("separate: eco max", eco.max_waiting_time())
+    print("shared: eco max: ", shared.max_waiting_time(ECONOMY))
+
+    print("shared: all mean: ", shared.mean_waiting_time())
+    print("shared: all max: ", shared.max_waiting_time())
+    print()
+
+
+# %%
+
+
+def case1():
+    num_jobs = 300
+    opening_time_of_desks = 60  # minutes
+    labda = num_jobs / opening_time_of_desks
+    F = expon(scale=1.0 / labda)
+    G = uniform(1, 2)
+    p_business = 0.1
+    c = 6
+    A, S = make_arrivals_and_services(F, G, num_jobs)
+    jobs = generate_jobs(A, S, p_business)
+    case_analysis(jobs, c)
+
+
+case1()
+
+# %%
+
+
+def case2():
+    num_jobs = 300
+    labda = num_jobs / 180
+    F = expon(scale=1.0 / labda)
+    G = uniform(1, 2)
+    p_business = 0.05
+    c = 5
+    A, S = make_arrivals_and_services(F, G, num_jobs)
+    jobs = generate_jobs(A, S, p_business)
+    case_analysis(jobs, c)
+
+
+case2()
+      
+    \end{pyverbatim}
+  \end{solution}
 \end{exercise}
 
 
@@ -225,3 +706,5 @@ Make a `test-bed' that allows you to compare, side-by-side, the shared versus th
 
   \end{solution}
 \end{exercise}
+
+
