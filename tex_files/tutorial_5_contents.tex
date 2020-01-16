@@ -210,7 +210,7 @@ class Job:
         return self.departure_time - self.service_time
 
     def __str__(self):  # What do you think this method does?
-        customer_type = "A" if self.customer_type == ARRIVAL else "B"
+        customer_type = "E" if self.customer_type == ECONOMY else "B"
         server_type = "E" if self.server_type == ECONOMY else "B"
 
         return f"Job(" \
