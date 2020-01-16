@@ -3,34 +3,34 @@
 # Tutorial 2, solutions
 
 
-This solution is a jupyter notebook which allows you to directly interact with the code so that
-you can see the effect of any changes you may like to make.
+This solution is a jupyter notebook which allows you to directly interact with
+the code so that you can see the effect of any changes you may like to make.
 
 Author: Nicky van Foreest
 '''
 
 # %%
+import matplotlib.pyplot as plt
 import numpy as np
 import scipy
 from scipy.stats import poisson
-import matplotlib.pyplot as plt
 
-plt.ion() # to skip making the graphs, I only use it for testing purposes.
+plt.ion()  # to skip making the graphs, I only use it for testing purposes.
 
 scipy.random.seed(3)
+
 
 def compute_Q_d(a, s, q0=0):
     # a: no of arrivals in a period
     # s: no of services at start of a period
-    d = np.zeros_like(a) # departures
-    Q = np.zeros_like(a) # queue lengths
-    Q[0] = q0 # starting level of the queue
+    d = np.zeros_like(a)  # departures
+    Q = np.zeros_like(a)  # queue lengths
+    Q[0] = q0  # starting level of the queue
     for i in range(1, len(a)):
-        d[i] = min(Q[i-1], s[i])
-        Q[i] = Q[i-1] + a[i] - d[i]
+        d[i] = min(Q[i - 1], s[i])
+        Q[i] = Q[i - 1] + a[i] - d[i]
 
     return Q, d
-
 
 # %%
 def experiment_1():
@@ -38,6 +38,7 @@ def experiment_1():
     a = poisson(labda).rvs(N)
     s = poisson(mu).rvs(N)
     print(a.mean(), a.std())
+
 
 experiment_1()
 
@@ -62,6 +63,7 @@ def cdf(a):
     x = sorted(a)
     return x, y
 
+
 def experiment_3():
     labda, mu, q0, N = 5, 6, 0, 100
     a = poisson(labda).rvs(N)
@@ -73,6 +75,7 @@ def experiment_3():
     x, F = cdf(Q)
     plt.plot(x, F)
     plt.show()
+
 
 experiment_3()
 
@@ -112,7 +115,7 @@ experiment_5()
 
 # %%
 def experiment_6():
-    N = 100 #  Again, replace the numbers
+    N = 100  # Again, replace the numbers
     labda = 5
     mu = 6
     q0 = 10
@@ -123,11 +126,12 @@ def experiment_6():
     Q, d = compute_Q_d(a, s, q0)
     print(Q.mean(), Q.std())
 
+
 experiment_6()
 
 # %%
 def experiment_6a():
-    N = 10 # Use a larger value here
+    N = 10  # Use a larger value here
     labda = 5
     mu = 6
     q0 = 0
@@ -138,11 +142,12 @@ def experiment_6a():
     Q, d = compute_Q_d(a, s, q0)
     print(Q.mean(), Q.std())
 
+
 experiment_6a()
 
 # %%
 def experiment_6b():
-    N = 10 # Change to a larger value.
+    N = 10  # Change to a larger value.
     labda = 5
     mu = 6
     q0 = 0
@@ -152,6 +157,7 @@ def experiment_6b():
 
     Q, d = compute_Q_d(a, s, q0)
     print(Q.mean(), Q.std())
+
 
 experiment_6b()
 
@@ -175,7 +181,7 @@ def compute_Q_d_with_extra_servers(a, q0=0, mu=6, threshold=np.inf, extra=0):
 
 
 def experiment_7():
-    N = 100 # take a big number here.
+    N = 100  # take a big number here.
     labda = 5
     mu = 6
     q0 = 0
@@ -188,6 +194,7 @@ def experiment_7():
     x, F = cdf(Q)
     plt.plot(x, F)
     plt.show()
+
 
 experiment_7()
 
@@ -204,9 +211,8 @@ def compute_Q_d_blocking(a, s, q0=0, b=np.inf):
     return Q, d
 
 
-
 def experiment_7a():
-    N = 100 # take a larger value
+    N = 100  # take a larger value
     labda = 5
     mu = 6
     q0 = 0
@@ -271,11 +277,12 @@ def experiment_8():
     av = compute_cost(a, mu, q0, theta, h, p, S)
     print(av)
 
+
 experiment_8()
 
 # %%
 def experiment_9():
-    N = 10 # Change to a larger value.
+    N = 10  # Change to a larger value.
     labda = 5
     mu = 6
     q0 = 0
@@ -284,10 +291,10 @@ def experiment_9():
     s = poisson(mu).rvs(N)
 
     Q, d = compute_Q_d(a, s, q0)
-    loss = (Q > 20)
-    print(loss.sum())
+    loss = (Q > 20).sum()
+    print(loss)
     total_demand = a.sum() 
-    print(100*(Q > 0).sum()/total_demand)
+    print(100 * loss / total_demand)
 
 
 experiment_9()

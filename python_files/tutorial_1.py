@@ -3,16 +3,16 @@
 # Tutorial 1, solutions
 
 
-This solution is a jupyter notebook which allows you to directly interact with the code so that
-you can see the effect of any changes you may like to make.
+This solution is a jupyter notebook which allows you to directly interact with
+the code so that you can see the effect of any changes you may like to make.
 
 Author: Nicky van Foreest
 '''
 
 # %%
+import matplotlib.pyplot as plt
 import numpy as np
 import scipy
-import matplotlib.pyplot as plt
 
 plt.ion()  # you can skip this, I only use it for testing
            # purposes so that the computer skips making the graphs.
@@ -51,6 +51,7 @@ def cdf_simple(a):
 
     return F
 
+
 def test1():
     a = [3.2, 4, 4, 1.3, 8.5, 9]
 
@@ -60,6 +61,7 @@ def test1():
     s = sorted(a)
     plt.plot(I, s)
     plt.show()
+
 
 """
 You can run a separate test, such as test1 by uncommenting the line
@@ -83,6 +85,7 @@ def test1a():
     plt.plot(I, s)
     plt.show()
 
+
 test1a()
 
 # %%
@@ -102,6 +105,7 @@ def test2():
     plt.plot(x, y)
     plt.show()
 
+
 test2()
 
 # %%
@@ -114,9 +118,7 @@ def cdf(a):  # the implementation we will use mostly. It is simple and fast.
     x = np.sort(a)
     return x, y
 
-
 # %%
-
 def make_nice_plots_1():
     a = [3.2, 4, 4, 1.3, 8.5, 9]
 
@@ -124,6 +126,7 @@ def make_nice_plots_1():
 
     plt.plot(x, y, drawstyle="steps-post")
     plt.show()
+
 
 make_nice_plots_1()
 
@@ -150,18 +153,19 @@ def cdf_fastest(X):
     y = count.cumsum() / count.sum()
     return x, y
 
-
 # %%
 from scipy.stats import uniform
 
 # fix the seed
 scipy.random.seed(3)
 
+
 def simulation_1():
     L = 3  # number of interarrival times
     G = uniform(loc=4, scale=2)  # G is called a frozen distribution.
     a = G.rvs(L)
     print(a)
+
 
 simulation_1()
 
@@ -181,6 +185,7 @@ def simulation_2():
     plt.legend()
     plt.show()
 
+
 simulation_2()
 
 # %%
@@ -192,6 +197,7 @@ def KS(X, F):
     y_theo = np.array([F.cdf(x) for x in support])
     return np.max(np.abs(y - y_theo))
 
+
 def simulation_3():
     N = 1  # number of customers
     L = 300
@@ -201,10 +207,12 @@ def simulation_3():
 
     print(KS(a, G))
 
+
 simulation_3()
 
 # %%
 from scipy.stats import expon
+
 
 def plot_distributions(x, y, N, L, dist, dist_name):
     # plot the empirical cdf and the theoretical cdf in one figure
@@ -214,13 +222,14 @@ def plot_distributions(x, y, N, L, dist, dist_name):
     plt.legend()
     plt.show()
 
+
 def simulation_4():
     N = 1  # number of customers
     L = 300
 
     labda = 1.0 / 5  # lambda is a function in python. Hence we write labda
     E = expon(scale=1.0 / labda)
-    print(E.mean()) # to check that we chose the right scale
+    print(E.mean())  # to check that we chose the right scale
     a = E.rvs(L)
 
     print(KS(a, E))
@@ -229,16 +238,18 @@ def simulation_4():
 
     plot_distributions(x, y, N, L, E, dist_name)
 
+
 simulation_4()
 
 # %%
 def compute_arrivaltimes(a):
-    A=[0]
+    A = [0]
     i = 1
     for x in a:
-        A.append(A[i-1] + x)
+        A.append(A[i - 1] + x)
         i += 1
     return A
+
 
 def shop_1():
     a = [4, 3, 1.2, 5]
@@ -249,10 +260,12 @@ def shop_1():
     times = [0] + sorted(A[1:] + B[1:])
     print(times)
 
+
 shop_1()
 
 # %%
 from itertools import chain
+
 
 def superposition(a):
     A = np.cumsum(a, axis=1)
@@ -275,6 +288,7 @@ def shop_3():
 
     print(KS(a, E))  # Compute KS statistic using the function defined earlier
 
+
 shop_3()
 
 # %%
@@ -293,10 +307,12 @@ def shop_4():
 
     print(KS(a, E))
 
+
 shop_4()
 
 # %%
 from scipy.stats import norm
+
 
 def shop_5():
     N, L = 10, 100
@@ -312,6 +328,7 @@ def shop_5():
 
     print(KS(a, E))
 
+
 shop_5()
 
 # %%
@@ -323,8 +340,8 @@ def memoryless_1():
     G = uniform(loc=4, scale=2)  # G is called a frozen distribution.
     a = superposition(G.rvs((N, L)))
 
-    s = 0.5 # threshold
-    a = a[a>s] # select the interarrival times longer than x
+    s = 0.5  # threshold
+    a = a[a > s]  # select the interarrival times longer than x
     a -= s  # shift, check what happens if you don't include this line.
     x, y = cdf(a)
 
@@ -336,8 +353,8 @@ def memoryless_1():
 
     print(KS(a, E))
 
-memoryless_1()
 
+memoryless_1()
 
 # %%
 def memoryless_2():
@@ -345,8 +362,8 @@ def memoryless_2():
     G = uniform(loc=4, scale=2)  # G is called a frozen distribution.
     a = superposition(G.rvs((N, L)))
 
-    s = 2 # threshold
-    a = a[a>s] # select the interarrival times longer than x
+    s = 2  # threshold
+    a = a[a > s]  # select the interarrival times longer than x
     a -= s  # shift, check what happens if you don't include this line.
     x, y = cdf(a)
 
@@ -358,8 +375,8 @@ def memoryless_2():
 
     print(KS(a, E))
 
-memoryless_2()
 
+memoryless_2()
 
 # %%
 def memoryless_3():
@@ -367,8 +384,8 @@ def memoryless_3():
     G = uniform(loc=4, scale=2)  # G is called a frozen distribution.
     a = superposition(G.rvs((N, L)))
 
-    s = 2 # threshold
-    a = a[a>s] # select the interarrival times longer than x
+    s = 2  # threshold
+    a = a[a > s]  # select the interarrival times longer than x
     a -= s  # shift, check what happens if you don't include this line.
     x, y = cdf(a)
 
@@ -380,8 +397,8 @@ def memoryless_3():
 
     print(KS(a, E))
 
-memoryless_3()
 
+memoryless_3()
 
 # %%
 # keep the numbering
@@ -391,11 +408,11 @@ def poisson_1():
     N, L = 10, 1000
     G = uniform(loc=4, scale=2)  # G is called a frozen distribution.
     # G = norm(loc=5, scale=1)
-    A = np.cumsum(G.rvs((N, L)), axis=1) # step 1
-    A = np.sort(A.flatten()) # step 2
+    A = np.cumsum(G.rvs((N, L)), axis=1)  # step 1
+    A = np.sort(A.flatten())  # step 2
 
     mean = 20  # specify the number of arrivals per interval
-    bins = N * L // mean # step 3
+    bins = N * L // mean  # step 3
     p, x = np.histogram(A, bins)
 
     P = np.bincount(p)
@@ -406,6 +423,7 @@ def poisson_1():
     plt.plot(support, scipy.stats.poisson.pmf(support, mean))
     # plt.pause(10)
     plt.show()
+
 
 poisson_1()
 
@@ -414,11 +432,11 @@ def poisson_2():
     N, L = 10, 1000
     G = uniform(loc=4, scale=2)  # G is called a frozen distribution.
     # G = norm(loc=5, scale=1)
-    A = np.cumsum(G.rvs((N, L)), axis=1) # step 1
-    A = np.sort(A.flatten()) # step 2
+    A = np.cumsum(G.rvs((N, L)), axis=1)  # step 1
+    A = np.sort(A.flatten())  # step 2
 
     mean = 5  # specify the number of arrivals per interval
-    bins = N * L // mean # step 3
+    bins = N * L // mean  # step 3
     p, x = np.histogram(A, bins)
 
     P = np.bincount(p)
@@ -429,6 +447,7 @@ def poisson_2():
     plt.plot(support, scipy.stats.poisson.pmf(support, mean))
     # plt.pause(10)
     plt.show()
+
 
 poisson_2()
 
@@ -437,11 +456,11 @@ def poisson_3():
     N, L = 10, 1000
     labda = 5
     G = expon(scale=1.0 / (N * labda))
-    A = np.cumsum(G.rvs((N, L)), axis=1) # step 1
-    A = np.sort(A.flatten()) # step 2
+    A = np.cumsum(G.rvs((N, L)), axis=1)  # step 1
+    A = np.sort(A.flatten())  # step 2
 
     mean = 20  # specify the number of arrivals per interval
-    bins = N * L // mean # step 3
+    bins = N * L // mean  # step 3
     p, x = np.histogram(A, bins)
 
     P = np.bincount(p)
@@ -452,5 +471,6 @@ def poisson_3():
     plt.plot(support, scipy.stats.poisson.pmf(support, mean))
     # plt.pause(10)
     plt.show()
+
 
 poisson_3()
