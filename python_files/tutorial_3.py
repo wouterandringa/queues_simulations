@@ -3,18 +3,20 @@
 # Tutorial 3, solutions
 
 
-This solution is a jupyter notebook which allows you to directly interact with the code so that
-you can see the effect of any changes you may like to make.
+This solution is a jupyter notebook which allows you to directly interact with
+the code so that you can see the effect of any changes you may like to make.
 
 Author: Nicky van Foreest
 '''
 
 # %%
-from heapq import heappop, heappush
 import scipy
+
+from heapq import heappop, heappush
 from scipy.stats import uniform, expon
 
 scipy.random.seed(3)
+
 
 def sort_ages():
     stack = []
@@ -27,6 +29,7 @@ def sort_ages():
     while stack:
         age, name = heappop(stack)
         print(name, age)
+
 
 sort_ages()
 
@@ -43,6 +46,7 @@ def sort_ages_with_more_info():
         age, name, phone = heappop(stack)
         print(age, name, phone)
 
+
 sort_ages_with_more_info()
 
 # %%
@@ -52,7 +56,7 @@ sort_ages_with_more_info()
 ARRIVAL = 0
 DEPARTURE = 1
 
-stack = [] # this is the event stack
+stack = []  # this is the event stack
 
 # %%
 class Job:
@@ -74,7 +78,6 @@ class Job:
     def __le__(self, other):
         # this is necessary to sort jobs when they have the same arrival times.
         return self.id <= other.id
-
 
 # %%
 def experiment_1():
@@ -99,7 +102,6 @@ def experiment_1():
         print(job)
 
 
-
 experiment_1()
 
 # %%
@@ -107,14 +109,17 @@ class Server:
     def __init__(self):
         self.busy = False
 
+
 server = Server()
 queue = []
-served_jobs = [] # used for statistics
+served_jobs = []  # used for statistics
+
 
 def start_service(time, job):
     server.busy = True
     job.departure_time = time + job.service_time
     heappush(stack, (job.departure_time, job, DEPARTURE))
+
 
 def handle_arrival(time, job):
     job.queue_length_at_arrival = len(queue)
@@ -123,10 +128,11 @@ def handle_arrival(time, job):
     else:
         start_service(time, job)
 
+
 def handle_departure(time, job):
     server.busy = False
-    if queue: # queue is not empty
-        next_job = queue.pop(0) # pop oldest job in queue
+    if queue:  # queue is not empty
+        next_job = queue.pop(0)  # pop oldest job in queue
         start_service(time, next_job)
 
 # %%
@@ -160,12 +166,12 @@ def experiment_2():
     print("Simulated avg. queue length:", av_queue_length)
 
     tot_sojourn = sum(j.sojourn_time() for j in served_jobs)
-    av_sojourn_time = tot_sojourn/len(served_jobs)
-    print("Theoretical avg. sojourn time:", (1./labda)*rho/(1-rho))
+    av_sojourn_time = tot_sojourn / len(served_jobs)
+    print("Theoretical avg. sojourn time:", (1. / labda) * rho / (1 - rho))
     print("Simulated avg. sojourn time:", av_sojourn_time)
 
-experiment_2()
 
+experiment_2()
 
 # %%
 def experiment_2a():
@@ -198,18 +204,20 @@ def experiment_2a():
     print("Simulated avg. queue length:", av_queue_length)
 
     tot_sojourn = sum(j.sojourn_time() for j in served_jobs)
-    av_sojourn_time = tot_sojourn/len(served_jobs)
-    print("Theoretical avg. sojourn time:", (1./labda)*rho/(1-rho))
+    av_sojourn_time = tot_sojourn / len(served_jobs)
+    print("Theoretical avg. sojourn time:", (1. / labda) * rho / (1 - rho))
     print("Simulated avg. sojourn time:", av_sojourn_time)
+
 
 experiment_2a()
 
 # %%
 from scipy.stats import uniform
 
-stack = [] # this is the event stack
+stack = []  # this is the event stack
 queue = []
-served_jobs = [] # used for statistics
+served_jobs = []  # used for statistics
+
 
 def experiment_3():
     labda = 2.0
@@ -242,25 +250,25 @@ def experiment_3():
 experiment_3()
 
 # %%
-
 def pollaczek_khinchine(labda, G):
     ES = G.mean()
-    rho = labda*ES
-    ce2 = G.var()/ES/ES
-    EW = (1.+ce2)/2 * rho/(1-rho)*ES
+    rho = labda * ES
+    ce2 = G.var() / ES / ES
+    EW = (1. + ce2) / 2 * rho / (1 - rho) * ES
     return EW
 
 
-labda = 1./3
-F = expon(scale=1./labda)  # interarrival time distributon
+labda = 1. / 3
+F = expon(scale=1. / labda)  # interarrival time distributon
 G = uniform(1, 2)
 
-print("PK: ", labda*pollaczek_khinchine(labda,G))
+print("PK: ", labda * pollaczek_khinchine(labda, G))
 
 # %%
-stack = [] # this is the event stack
+stack = []  # this is the event stack
 queue = []
-served_jobs = [] # used for statistics
+served_jobs = []  # used for statistics
+
 
 def test_mg1():
     job = Job()
@@ -297,6 +305,7 @@ def test_mg1():
     print("Theoretical avg. sojourn time: ", pollaczek_khinchine(labda, G) + G.mean())
     print("Avg. sojourn time:", av_sojourn_time)
 
+
 test_mg1()
 
 # %%
@@ -307,9 +316,10 @@ F = np.sort(uniform(0, 120).rvs(60))
 # %%
 from collections import Counter
 
-stack = [] # this is the event stack
+stack = []  # this is the event stack
 queue = []
-served_jobs = [] # used for statistics
+served_jobs = []  # used for statistics
+
 
 def check_in():
     num_jobs = 60
@@ -355,9 +365,10 @@ plt.plot(x, y, "o")
 plt.show()
 
 # %%
-stack = [] # this is the event stack
+stack = []  # this is the event stack
 queue = []
-served_jobs = [] # used for statistics
+served_jobs = []  # used for statistics
+
 
 def check_in_2():
     num_jobs = 60
@@ -391,4 +402,6 @@ def check_in_2():
     
     plt.plot(x, y, "o")
     plt.show()
+
+
 check_in_2()

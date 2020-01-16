@@ -36,11 +36,13 @@ For this very general problem (insert elements in an ordered way in a list) a nu
 \begin{solution}
   If you have read (and thought about) the documentation on the web, you must have ended up with this code.
 \begin{pyverbatim}
-from heapq import heappop, heappush
 import scipy
+
+from heapq import heappop, heappush
 from scipy.stats import uniform, expon
 
 scipy.random.seed(3)
+
 
 def sort_ages():
     stack = []
@@ -53,6 +55,7 @@ def sort_ages():
     while stack:
         age, name = heappop(stack)
         print(name, age)
+
 
 sort_ages()
   \end{pyverbatim}
@@ -83,6 +86,7 @@ def sort_ages_with_more_info():
     while stack:
         age, name, phone = heappop(stack)
         print(age, name, phone)
+
 
 sort_ages_with_more_info()
 \end{pyverbatim}
@@ -127,7 +131,7 @@ So, make a new file, and type the following at the top of it.
 ARRIVAL = 0
 DEPARTURE = 1
 
-stack = [] # this is the event stack
+stack = []  # this is the event stack
 \end{pyverbatim}
 
 \begin{exercise}
@@ -161,7 +165,6 @@ class Job:
     def __le__(self, other):
         # this is necessary to sort jobs when they have the same arrival times.
         return self.id <= other.id
-
 \end{pyverbatim}
 
 A class has a number of \emph{attributes}, such as \pyv{self.arrival_time}, to capture its state and a number of functions, such as \pyv{def waiting_time(self)}, to compute specific information that relates to the class\footnote{In python, functions belonging to a class are called `methods' or `member functions'.}.
@@ -219,7 +222,6 @@ def experiment_1():
         print(job)
 
 
-
 experiment_1()
     \end{pyverbatim}
   \end{solution}
@@ -236,7 +238,6 @@ while stack:
         handle_arrival(time, job)
     else:
         handle_departure(time, job)
-
 \end{pynotangle}
 
 \begin{exercise}
@@ -254,14 +255,17 @@ class Server:
     def __init__(self):
         self.busy = False
 
+
 server = Server()
 queue = []
-served_jobs = [] # used for statistics
+served_jobs = []  # used for statistics
+
 
 def start_service(time, job):
     server.busy = True
     job.departure_time = time + job.service_time
     heappush(stack, (job.departure_time, job, DEPARTURE))
+
 
 def handle_arrival(time, job):
     job.queue_length_at_arrival = len(queue)
@@ -270,10 +274,11 @@ def handle_arrival(time, job):
     else:
         start_service(time, job)
 
+
 def handle_departure(time, job):
     server.busy = False
-    if queue: # queue is not empty
-        next_job = queue.pop(0) # pop oldest job in queue
+    if queue:  # queue is not empty
+        next_job = queue.pop(0)  # pop oldest job in queue
         start_service(time, next_job)
 \end{pyverbatim}
 \end{solution}
@@ -315,12 +320,12 @@ def experiment_2():
     print("Simulated avg. queue length:", av_queue_length)
 
     tot_sojourn = sum(j.sojourn_time() for j in served_jobs)
-    av_sojourn_time = tot_sojourn/len(served_jobs)
-    print("Theoretical avg. sojourn time:", (1./labda)*rho/(1-rho))
+    av_sojourn_time = tot_sojourn / len(served_jobs)
+    print("Theoretical avg. sojourn time:", (1. / labda) * rho / (1 - rho))
     print("Simulated avg. sojourn time:", av_sojourn_time)
 
-experiment_2()
 
+experiment_2()
 \end{pyverbatim}
 \end{solution}
 
@@ -374,9 +379,10 @@ def experiment_2a():
     print("Simulated avg. queue length:", av_queue_length)
 
     tot_sojourn = sum(j.sojourn_time() for j in served_jobs)
-    av_sojourn_time = tot_sojourn/len(served_jobs)
-    print("Theoretical avg. sojourn time:", (1./labda)*rho/(1-rho))
+    av_sojourn_time = tot_sojourn / len(served_jobs)
+    print("Theoretical avg. sojourn time:", (1. / labda) * rho / (1 - rho))
     print("Simulated avg. sojourn time:", av_sojourn_time)
+
 
 experiment_2a()
   \end{pyverbatim}
@@ -394,9 +400,10 @@ You should see that you need a real large amount of jobs to obtain a good estima
   \begin{pyverbatim}
 from scipy.stats import uniform
 
-stack = [] # this is the event stack
+stack = []  # this is the event stack
 queue = []
-served_jobs = [] # used for statistics
+served_jobs = []  # used for statistics
+
 
 def experiment_3():
     labda = 2.0
@@ -461,21 +468,20 @@ Assume that demand arrives as a Poisson process with rate $\lambda=1/3$ per minu
 \begin{solution}
 Here is simple implementation.
     \begin{pyverbatim}
-
 def pollaczek_khinchine(labda, G):
     ES = G.mean()
-    rho = labda*ES
-    ce2 = G.var()/ES/ES
-    EW = (1.+ce2)/2 * rho/(1-rho)*ES
+    rho = labda * ES
+    ce2 = G.var() / ES / ES
+    EW = (1. + ce2) / 2 * rho / (1 - rho) * ES
     return EW
 
 
-labda = 1./3
-F = expon(scale=1./labda)  # interarrival time distributon
+labda = 1. / 3
+F = expon(scale=1. / labda)  # interarrival time distributon
 G = uniform(1, 2)
 
-print("PK: ", labda*pollaczek_khinchine(labda,G))
-    \end{pyverbatim}
+print("PK: ", labda * pollaczek_khinchine(labda, G))
+\end{pyverbatim}
   \end{solution}
 \end{exercise}
 
@@ -490,9 +496,10 @@ Reset all data and clear all lists.
 To ensure that we do not keep old data, we have to reset all lists.
 
 \begin{pyverbatim}
-stack = [] # this is the event stack
+stack = []  # this is the event stack
 queue = []
-served_jobs = [] # used for statistics
+served_jobs = []  # used for statistics
+
 
 def test_mg1():
     job = Job()
@@ -528,6 +535,7 @@ def test_mg1():
     av_sojourn_time = tot_sojourn / len(served_jobs)
     print("Theoretical avg. sojourn time: ", pollaczek_khinchine(labda, G) + G.mean())
     print("Avg. sojourn time:", av_sojourn_time)
+
 
 test_mg1()
 \end{pyverbatim}
@@ -574,9 +582,10 @@ We need to start with importing the \pyv{Counter} class.
 \begin{pyverbatim}
 from collections import Counter
 
-stack = [] # this is the event stack
+stack = []  # this is the event stack
 queue = []
-served_jobs = [] # used for statistics
+served_jobs = []  # used for statistics
+
 
 def check_in():
     num_jobs = 60
@@ -644,9 +653,10 @@ What do you see?
 \begin{solution}
 Here is the code.
 \begin{pyverbatim}
-stack = [] # this is the event stack
+stack = []  # this is the event stack
 queue = []
-served_jobs = [] # used for statistics
+served_jobs = []  # used for statistics
+
 
 def check_in_2():
     num_jobs = 60
@@ -680,6 +690,8 @@ def check_in_2():
     
     plt.plot(x, y, "o")
     plt.show()
+
+
 check_in_2()
 \end{pyverbatim}
 This is much better. 

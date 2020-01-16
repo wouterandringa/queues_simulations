@@ -3,16 +3,17 @@
 # Tutorial 5, solutions
 
 
-This solution is a jupyter notebook which allows you to directly interact with the code so that
-you can see the effect of any changes you may like to make.
+This solution is a jupyter notebook which allows you to directly interact with
+the code so that you can see the effect of any changes you may like to make.
 
 Author: Nicky van Foreest
 '''
 
 # %%
+import numpy as np
+
 from collections import deque
 from heapq import heappop, heappush
-import numpy as np
 from scipy.stats import expon, uniform
 
 np.random.seed(8)
@@ -44,8 +45,17 @@ class Job:
     def service_start(self):
         return self.departure_time - self.service_time
 
-    def __repr__(self):
-        return f"{self.customer_type}, {self.server_type}, {self.arrival_time}, {self.service_time}, {self.service_start()}, {self.departure_time}\n"
+    def __str__(self):  # What do you think this method does?
+        customer_type = "A" if self.customer_type == ARRIVAL else "B"
+        server_type = "E" if self.server_type == ECONOMY else "B"
+
+        return f"Job(" \
+               f" customer_type={customer_type}," \
+               f" server_type={server_type}," \
+               f" arrival_time={self.arrival_time:.2f}," \
+               f" service_time={self.service_time:.2f}," \
+               f" service_start={self.service_start():.2f}," \
+               f" departure_time={self.departure_time:.2f} )"
 
     def __lt__(self, other):
         # this is necessary to sort jobs when they have the same arrival times.
@@ -64,10 +74,12 @@ def generate_jobs(A, S, p_business):
         job = Job()
         job.arrival_time = A[n]
         job.service_time = S[n]
+
         if p[n] < p_business:
             job.customer_type = BUSINESS
         else:
             job.customer_type = ECONOMY
+
         jobs.add(job)
 
     return jobs
@@ -88,9 +100,6 @@ class GGc_with_business:
         self.b_queue = deque()
         self.e_queue = deque()
 
-        self.fill_stack()
-
-    def fill_stack(self):
         for job in sorted(self.jobs, key=lambda j: j.arrival_time):
             heappush(self.stack, (job.arrival_time, job, ARRIVAL))
 
@@ -124,10 +133,11 @@ class GGc_with_business:
             self.num_b_busy += 1
         else:
             self.num_e_busy += 1
+
         job.departure_time = time + job.service_time
         heappush(self.stack, (job.departure_time, job, DEPARTURE))
 
-    def pop_from_queue_set_server_and_start(self, time, queue, server_type):
+    def start_service_from_queue(self, time, queue, server_type):
         next_job = queue.popleft()
         next_job.server_type = server_type
         self.start_service(time, next_job)
@@ -135,21 +145,23 @@ class GGc_with_business:
     def handle_departure(self, time, job):
         if job.server_type == BUSINESS:
             self.num_b_busy -= 1
+
             if self.b_queue:
-                self.pop_from_queue_set_server_and_start(time, self.b_queue, BUSINESS)
+                self.start_service_from_queue(time, self.b_queue, BUSINESS)
             elif self.e_queue:
-                self.pop_from_queue_set_server_and_start(time, self.e_queue, BUSINESS)
+                self.start_service_from_queue(time, self.e_queue, BUSINESS)
         else:  # economy server free
             self.num_e_busy -= 1
+
             if self.e_queue:
-                self.pop_from_queue_set_server_and_start(time, self.e_queue, ECONOMY)
+                self.start_service_from_queue(time, self.e_queue, ECONOMY)
             elif self.b_queue:
-                self.pop_from_queue_set_server_and_start(time, self.b_queue, ECONOMY)
+                self.start_service_from_queue(time, self.b_queue, ECONOMY)
 
     def run(self):
-        time = 0
         while self.stack:  # not empty
             time, job, epoch_type = heappop(self.stack)
+
             if epoch_type == ARRIVAL:
                 self.handle_arrival(time, job)
             else:
@@ -164,16 +176,15 @@ class GGc_with_business:
             jobs = self.jobs
         else:
             jobs = set(j for j in self.jobs if j.customer_type == customer_type)
+
         return sum(j.waiting_time() for j in jobs) / len(jobs)
 
     def max_waiting_time(self, customer_type=None):
         if customer_type is None:
             return max(j.waiting_time() for j in self.jobs)
         else:
-            return max(
-                j.waiting_time() for j in self.jobs if j.customer_type == customer_type
-            )
-
+            return max(j.waiting_time() for j in self.jobs
+                       if j.customer_type == customer_type)
 
 # %%
 def sakasegawa(F, G, c):
@@ -396,7 +407,6 @@ def mm2_test_2():
 
 
 mm2_test_2()
-    
 
 # %%
 import copy  # to copy the simulation data
@@ -467,4 +477,3 @@ def case2():
 
 
 case2()
-      
