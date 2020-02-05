@@ -3,66 +3,35 @@
 # Tutorial 3, solutions
 
 
-This solution is a jupyter notebook which allows you to directly interact with
-the code so that you can see the effect of any changes you may like to make.
+This solution is a jupyter notebook which allows you to directly interact with the code so that
+you can see the effect of any changes you may like to make.
 
 Author: Nicky van Foreest
 '''
 
 # %%
-import scipy
-
+from collections import deque
 from heapq import heappop, heappush
-from scipy.stats import uniform, expon
+import numpy as np
+from scipy.stats import expon, uniform
 
-scipy.random.seed(3)
+np.random.seed(8)
 
-
-def sort_ages():
-    stack = []
-
-    heappush(stack, (21, "Jan"))
-    heappush(stack, (20, "Piet"))
-    heappush(stack, (18, "Klara"))
-    heappush(stack, (25, "Cynthia"))
-
-    while stack:
-        age, name = heappop(stack)
-        print(name, age)
-
-
-sort_ages()
-
-# %%
-def sort_ages_with_more_info():
-    stack = []
-
-    heappush(stack, (21, "Jan", "Huawei"))
-    heappush(stack, (20, "Piet", "Apple"))
-    heappush(stack, (18, "Klara", "Motorola"))
-    heappush(stack, (25, "Cynthia", "Nexus"))
-
-    while stack:
-        age, name, phone = heappop(stack)
-        print(age, name, phone)
-
-
-sort_ages_with_more_info()
-
-# %%
-# void  code for numbering
-
-# %%
 ARRIVAL = 0
 DEPARTURE = 1
 
-stack = []  # this is the event stack
+ECONOMY = 0
+BUSINESS = 1
 
 # %%
+
+
 class Job:
     def __init__(self):
         self.arrival_time = 0
         self.service_time = 0
+        self.customer_type = ECONOMY
+        self.server_type = ECONOMY
         self.departure_time = 0
         self.queue_length_at_arrival = 0
 
@@ -72,336 +41,430 @@ class Job:
     def waiting_time(self):
         return self.sojourn_time() - self.service_time
 
+    def service_start(self):
+        return self.departure_time - self.service_time
+
     def __repr__(self):
-        return f"{self.arrival_time}, {self.service_time}, {self.departure_time}\n"
+        return f"{self.customer_type}, {self.server_type}, {self.arrival_time}, {self.service_time}, {self.service_start()}, {self.departure_time}\n"
 
-    def __le__(self, other):
+    def __lt__(self, other):
         # this is necessary to sort jobs when they have the same arrival times.
-        return self.id <= other.id
+        return self.queue_length_at_arrival < other.queue_length_at_arrival
+
 
 # %%
-def experiment_1():
-    labda = 2.0
-    mu = 3.0
-    rho = labda / mu
-    F = expon(scale=1.0 / labda)  # interarrival time distributon
-    G = expon(scale=1.0 / mu)  # service time distributon
 
-    num_jobs = 10
 
-    time = 0
-    for i in range(num_jobs):
-        time += F.rvs()
+def generate_jobs(A, S, p_business):
+    jobs = set()
+    num_jobs = len(A)
+    p = uniform(0, 1).rvs(num_jobs)
+
+    for n in range(num_jobs):
         job = Job()
-        job.arrival_time = time
-        job.service_time = G.rvs()
-        heappush(stack, (job.arrival_time, job, ARRIVAL))
-
-    while stack:
-        time, job, typ = heappop(stack)
-        print(job)
-
-
-experiment_1()
-
-# %%
-class Server:
-    def __init__(self):
-        self.busy = False
-
-
-server = Server()
-queue = []
-served_jobs = []  # used for statistics
-
-
-def start_service(time, job):
-    server.busy = True
-    job.departure_time = time + job.service_time
-    heappush(stack, (job.departure_time, job, DEPARTURE))
-
-
-def handle_arrival(time, job):
-    job.queue_length_at_arrival = len(queue)
-    if server.busy:
-        queue.append(job)
-    else:
-        start_service(time, job)
-
-
-def handle_departure(time, job):
-    server.busy = False
-    if queue:  # queue is not empty
-        next_job = queue.pop(0)  # pop oldest job in queue
-        start_service(time, next_job)
-
-# %%
-def experiment_2():
-    labda = 2.0
-    mu = 3.0
-    rho = labda / mu
-    F = expon(scale=1.0 / labda)  # interarrival time distributon
-    G = expon(scale=1.0 / mu)  # service time distributon
-    num_jobs = 10  # too small, change it to a larger number, and rerun the experiment
-
-    time = 0
-    for i in range(num_jobs):
-        time += F.rvs()
-        job = Job()
-        job.arrival_time = time
-        job.service_time = G.rvs()
-        heappush(stack, (job.arrival_time, job, ARRIVAL))
-
-    while stack:
-        time, job, typ = heappop(stack)
-        if typ == ARRIVAL:
-            handle_arrival(time, job)
+        job.arrival_time = A[n]
+        job.service_time = S[n]
+        if p[n] < p_business:
+            job.customer_type = BUSINESS
         else:
-            handle_departure(time, job)
-            served_jobs.append(job)
+            job.customer_type = ECONOMY
+        jobs.add(job)
 
-    tot_queue = sum(j.queue_length_at_arrival for j in served_jobs)
-    av_queue_length = tot_queue / len(served_jobs)
-    print("Theoretical avg. queue length: ", rho * rho / (1 - rho))
-    print("Simulated avg. queue length:", av_queue_length)
+    return jobs
 
-    tot_sojourn = sum(j.sojourn_time() for j in served_jobs)
-    av_sojourn_time = tot_sojourn / len(served_jobs)
-    print("Theoretical avg. sojourn time:", (1. / labda) * rho / (1 - rho))
-    print("Simulated avg. sojourn time:", av_sojourn_time)
-
-
-experiment_2()
 
 # %%
-def experiment_2a():
-    labda = 2.0
-    mu = 3.0
-    rho = labda / mu
-    F = expon(scale=1.0 / labda)  # interarrival time distributon
-    G = expon(scale=1.0 / mu)  # service time distributon
-    num_jobs = 1000
 
-    time = 0
-    for i in range(num_jobs):
-        time += F.rvs()
-        job = Job()
-        job.arrival_time = time
-        job.service_time = G.rvs()
-        heappush(stack, (job.arrival_time, job, ARRIVAL))
 
-    while stack:
-        time, job, typ = heappop(stack)
-        if typ == ARRIVAL:
-            handle_arrival(time, job)
+class GGc_with_business:
+    def __init__(self, c, jobs):
+        self.b = 1  # number of b servers
+        self.c = c  # number of e servers
+        self.jobs = jobs
+
+        self.num_b_busy = 0
+        self.num_e_busy = 0
+        self.stack = []
+        self.b_queue = deque()
+        self.e_queue = deque()
+
+        self.fill_stack()
+
+    def fill_stack(self):
+        for job in sorted(self.jobs, key=lambda j: j.arrival_time):
+            heappush(self.stack, (job.arrival_time, job, ARRIVAL))
+
+    def handle_arrival(self, time, job):
+        if job.customer_type == BUSINESS:
+            job.queue_length_at_arrival = len(self.b_queue)
         else:
-            handle_departure(time, job)
-            served_jobs.append(job)
+            job.queue_length_at_arrival = len(self.e_queue)
 
-    tot_queue = sum(j.queue_length_at_arrival for j in served_jobs)
-    av_queue_length = tot_queue / len(served_jobs)
-    print("Theoretical avg. queue length: ", rho * rho / (1 - rho))
-    print("Simulated avg. queue length:", av_queue_length)
+        if job.customer_type == ECONOMY:
+            if self.num_e_busy < self.c:
+                job.server_type = ECONOMY
+                self.start_service(time, job)
+            elif self.num_b_busy < self.b:
+                job.server_type = BUSINESS
+                self.start_service(time, job)
+            else:
+                self.e_queue.append(job)
+        else:  # business customer
+            if self.num_b_busy < self.b:
+                job.server_type = BUSINESS
+                self.start_service(time, job)
+            elif self.num_e_busy < self.c:
+                job.server_type = ECONOMY
+                self.start_service(time, job)
+            else:
+                self.b_queue.append(job)
 
-    tot_sojourn = sum(j.sojourn_time() for j in served_jobs)
-    av_sojourn_time = tot_sojourn / len(served_jobs)
-    print("Theoretical avg. sojourn time:", (1. / labda) * rho / (1 - rho))
-    print("Simulated avg. sojourn time:", av_sojourn_time)
-
-
-experiment_2a()
-
-# %%
-from scipy.stats import uniform
-
-stack = []  # this is the event stack
-queue = []
-served_jobs = []  # used for statistics
-
-
-def experiment_3():
-    labda = 2.0
-    mu = 3.0
-    rho = labda / mu
-    F = uniform(3, 0.00001)
-    G = uniform(2, 0.00001)
-    num_jobs = 10
-
-    time = 0
-    for i in range(num_jobs):
-        time += F.rvs()
-        job = Job()
-        job.arrival_time = time
-        job.service_time = G.rvs()
-        heappush(stack, (job.arrival_time, job, ARRIVAL))
-
-    while stack:
-        time, job, typ = heappop(stack)
-        if typ == ARRIVAL:
-            handle_arrival(time, job)
+    def start_service(self, time, job):
+        if job.server_type == BUSINESS:
+            self.num_b_busy += 1
         else:
-            handle_departure(time, job)
-            served_jobs.append(job)
+            self.num_e_busy += 1
+        job.departure_time = time + job.service_time
+        heappush(self.stack, (job.departure_time, job, DEPARTURE))
 
-    for j in served_jobs:
-        print(j)
+    def pop_from_queue_set_server_and_start(self, time, queue, server_type):
+        next_job = queue.popleft()
+        next_job.server_type = server_type
+        self.start_service(time, next_job)
 
+    def handle_departure(self, time, job):
+        if job.server_type == BUSINESS:
+            self.num_b_busy -= 1
+            if self.b_queue:
+                self.pop_from_queue_set_server_and_start(time, self.b_queue, BUSINESS)
+            elif self.e_queue:
+                self.pop_from_queue_set_server_and_start(time, self.e_queue, BUSINESS)
+        else:  # economy server free
+            self.num_e_busy -= 1
+            if self.e_queue:
+                self.pop_from_queue_set_server_and_start(time, self.e_queue, ECONOMY)
+            elif self.b_queue:
+                self.pop_from_queue_set_server_and_start(time, self.b_queue, ECONOMY)
 
-experiment_3()
+    def run(self):
+        time = 0
+        while self.stack:  # not empty
+            time, job, epoch_type = heappop(self.stack)
+            if epoch_type == ARRIVAL:
+                self.handle_arrival(time, job)
+            else:
+                self.handle_departure(time, job)
+
+    def print_served_job(self):
+        for j in sorted(self.jobs, key=lambda j: j.arrival_time):
+            print(j)
+
+    def mean_waiting_time(self, customer_type=None):
+        if customer_type is None:
+            jobs = self.jobs
+        else:
+            jobs = set(j for j in self.jobs if j.customer_type == customer_type)
+        return sum(j.waiting_time() for j in jobs) / len(jobs)
+
+    def max_waiting_time(self, customer_type=None):
+        if customer_type is None:
+            return max(j.waiting_time() for j in self.jobs)
+        else:
+            return max(
+                j.waiting_time() for j in self.jobs if j.customer_type == customer_type
+            )
+
 
 # %%
-def pollaczek_khinchine(labda, G):
+def sakasegawa(F, G, c):
+    labda = 1.0 / F.mean()
     ES = G.mean()
-    rho = labda * ES
+    rho = labda * ES / c
+    EWQ_1 = rho ** (np.sqrt(2 * (c + 1)) - 1) / (c * (1 - rho)) * ES
+    ca2 = F.var() * labda * labda
     ce2 = G.var() / ES / ES
-    EW = (1. + ce2) / 2 * rho / (1 - rho) * ES
-    return EW
+    return (ca2 + ce2) / 2 * EWQ_1
 
-
-labda = 1. / 3
-F = expon(scale=1. / labda)  # interarrival time distributon
-G = uniform(1, 2)
-
-print("PK: ", labda * pollaczek_khinchine(labda, G))
 
 # %%
-stack = []  # this is the event stack
-queue = []
-served_jobs = []  # used for statistics
 
 
-def test_mg1():
-    job = Job()
-    labda = 1.0 / 3
-    F = expon(scale=1.0 / labda)  # interarrival time distributon
-    G = uniform(1, 3)
-    print("ES: ", G.mean(), "rho: ", labda * G.mean())
+def make_arrivals_and_services(F, G, num_jobs):
+    a = F.rvs(num_jobs)
+    A = np.cumsum(a)
+    S = G.rvs(num_jobs)
+    return A, S
 
-    num_jobs = 1000
-
-    time = 0
-    for i in range(num_jobs):
-        time += F.rvs()
-        job = Job()
-        job.arrival_time = time
-        job.service_time = G.rvs()
-        heappush(stack, (job.arrival_time, job, ARRIVAL))
-
-    while stack:
-        time, job, typ = heappop(stack)
-        if typ == ARRIVAL:
-            handle_arrival(time, job)
-        else:
-            handle_departure(time, job)
-            served_jobs.append(job)
-
-    tot_queue = sum(j.queue_length_at_arrival for j in served_jobs)
-    av_queue_length = tot_queue / len(served_jobs)
-    print("Theoretical avg. queue length: ", labda * pollaczek_khinchine(labda, G))
-    print("Simulated avg. queue length:", av_queue_length)
-
-    tot_sojourn = sum(j.sojourn_time() for j in served_jobs)
-    av_sojourn_time = tot_sojourn / len(served_jobs)
-    print("Theoretical avg. sojourn time: ", pollaczek_khinchine(labda, G) + G.mean())
-    print("Avg. sojourn time:", av_sojourn_time)
-
-
-test_mg1()
 
 # %%
-import numpy as np
-
-F = np.sort(uniform(0, 120).rvs(60))
-
-# %%
-from collections import Counter
-
-stack = []  # this is the event stack
-queue = []
-served_jobs = []  # used for statistics
 
 
-def check_in():
-    num_jobs = 60
-    F = np.sort(uniform(0, 120).rvs(num_jobs))
-    G = uniform(1, 3)
-
-    for i in range(num_jobs):
-        job = Job()
-        job.arrival_time = F[i]
-        job.service_time = G.rvs()
-        heappush(stack, (job.arrival_time, job, ARRIVAL))
-
-    while stack:
-        time, job, typ = heappop(stack)
-        if typ == ARRIVAL:
-            handle_arrival(time, job)
-        else:
-            handle_departure(time, job)
-            served_jobs.append(job)
-
-    tot_queue = sum(j.queue_length_at_arrival for j in served_jobs)
-    av_queue_length = tot_queue / len(served_jobs)
-    print("Simulated avg. queue length:", av_queue_length)
-
-    tot_sojourn = sum(j.sojourn_time() for j in served_jobs)
-    av_sojourn_time = tot_sojourn / len(served_jobs)
-    print("Avg. sojourn time:", av_sojourn_time)
-
-    c = Counter([j.queue_length_at_arrival for j in served_jobs])
-    print("Queue length distributon, sloppy output")
-    print(sorted(c.items()))
+def DD1_test_1():
+    # test with only business customers
+    c = 0
+    F = uniform(1, 0.0001)
+    G = expon(0.5, 0.0001)
+    num_jobs = 5
+    p_business = 1
+    A, S = make_arrivals_and_services(F, G, num_jobs)
+    jobs = generate_jobs(A, S, p_business)
+    ggc = GGc_with_business(c, jobs)
+    ggc.run()
+    ggc.print_served_job()
 
 
-check_in()
+DD1_test_1()
 
 # %%
-import matplotlib.pyplot as plt
 
-x = [job.arrival_time for job in served_jobs]
-y = [job.queue_length_at_arrival for job in served_jobs]
 
-plt.plot(x, y, "o")
-plt.show()
+def DD1_test_2():
+    # test with only economy customers
+    c = 1
+    F = uniform(1, 0.0001)
+    G = expon(0.5, 0.0001)
+    p_business = 0
+    num_jobs = 5
+    A, S = make_arrivals_and_services(F, G, num_jobs)
+    jobs = generate_jobs(A, S, p_business)
+    ggc = GGc_with_business(c, jobs)
+    ggc.run()
+    ggc.print_served_job()
+
+
+DD1_test_2()
 
 # %%
-stack = []  # this is the event stack
-queue = []
-served_jobs = []  # used for statistics
 
 
-def check_in_2():
-    num_jobs = 60
-    F = np.sort(uniform(0, 150).rvs(num_jobs))
-    G = uniform(1, 2)
+def DD1_test_3():
+    # test with only economy customers but only a business server
+    c = 0
+    F = uniform(1, 0.0001)
+    G = expon(0.5, 0.0001)
+    p_business = 0
+    num_jobs = 5
+    A, S = make_arrivals_and_services(F, G, num_jobs)
+    jobs = generate_jobs(A, S, p_business)
+    ggc = GGc_with_business(c, jobs)
+    ggc.run()
+    ggc.print_served_job()
 
-    for i in range(num_jobs):
-        job = Job()
-        job.arrival_time = F[i]
-        job.service_time = G.rvs()
-        heappush(stack, (job.arrival_time, job, ARRIVAL))
 
-    while stack:
-        time, job, typ = heappop(stack)
-        if typ == ARRIVAL:
-            handle_arrival(time, job)
-        else:
-            handle_departure(time, job)
-            served_jobs.append(job)
+DD1_test_3()
 
-    tot_queue = sum(j.queue_length_at_arrival for j in served_jobs)
-    av_queue_length = tot_queue / len(served_jobs)
-    print("Simulated avg. queue length:", av_queue_length)
+# %%
 
-    tot_sojourn = sum(j.sojourn_time() for j in served_jobs)
-    av_sojourn_time = tot_sojourn / len(served_jobs)
-    print("Avg. sojourn time:", av_sojourn_time)
 
-    x = [job.arrival_time for job in served_jobs]
-    y = [job.queue_length_at_arrival for job in served_jobs]
+def DD2_test_1():
+    # test with only economy customers and one e_server. As the b_server is always present, we must have 2 servers.
+    # assume that all jobs arrive at time 0, and have service time 1
+    c = 1
+    F = uniform(0, 0.0001)
+    G = expon(1, 0.0001)
+    p_business = 0
+    num_jobs = 10
+    A, S = make_arrivals_and_services(F, G, num_jobs)
+    jobs = generate_jobs(A, S, p_business)
+    ggc = GGc_with_business(c, jobs)
+    ggc.run()
+    ggc.print_served_job()
+
+
+DD2_test_1()
+
+# %%
+
+
+def mm1_test_1():
+    # test with only business customers but no e_server, very few jobs
+    c = 0
+    labda = 0.9
+    mu = 1
+    F = expon(scale=1.0 / labda)
+    G = expon(scale=1.0 / mu)
+    p_business = 1
+
+    num_jobs = 10
+    A, S = make_arrivals_and_services(F, G, num_jobs)
+    jobs = generate_jobs(A, S, p_business)
+    ggc = GGc_with_business(c, jobs)
+    ggc.run()
+    ggc.print_served_job()
+
+
+mm1_test_1()
+
+# %%
+
+
+def mm1_test_2():
+    # test with only economy customers but no e_server
+    c = 0
+    labda = 0.9
+    mu = 1
+    F = expon(scale=1.0 / labda)
+    G = expon(scale=1.0 / mu)
+    p_business = 0
+
+    print("theory: ", sakasegawa(F, G, c + 1))  # 1 for the business server
+
+    num_jobs = 100_000
+    A, S = make_arrivals_and_services(F, G, num_jobs)
+    jobs = generate_jobs(A, S, p_business)
+    ggc = GGc_with_business(c, jobs)
+    ggc.run()
+
+    print("mean waiting: ", ggc.mean_waiting_time())
+
+
+mm1_test_2()
+
+# %%
+
+
+def mm1_test_3():
+    # test with only business customers but no e_server
+    c = 0
+    labda = 0.9
+    mu = 1
+    F = expon(scale=1.0 / labda)
+    G = expon(scale=1.0 / mu)
+    p_business = 1
+
+    print("theory: ", sakasegawa(F, G, c + 1))  # 1 for the business server
+
+    num_jobs = 100_000
+    A, S = make_arrivals_and_services(F, G, num_jobs)
+    jobs = generate_jobs(A, S, p_business)
+    ggc = GGc_with_business(c, jobs)
+    ggc.run()
+
+    print("mean waiting: ", ggc.mean_waiting_time())
+
+
+mm1_test_3()
+
+# %%
+
+
+def mm2_test_1():
+    # test with only business customers and 1 e_server
+    c = 1
+    labda = 0.9
+    mu = 1
+    F = expon(scale=1.0 / labda)
+    G = expon(scale=1.0 / mu)
+    p_business = 1
+
+    print("theory: ", sakasegawa(F, G, c + 1))  # 1 for the business server
+
+    num_jobs = 100_000
+    A, S = make_arrivals_and_services(F, G, num_jobs)
+    jobs = generate_jobs(A, S, p_business)
+    ggc = GGc_with_business(c, jobs)
+    ggc.run()
+
+    # mind that Sakasegawa's result is an approximation for the M/M/c with c>1
+    print("mean waiting: ", ggc.mean_waiting_time())
+
+
+mm2_test_1()
+
+
+# %%
+
+
+def mm2_test_2():
+    # test with only economy customers and 1 e_server
+    c = 1
+    labda = 0.9
+    mu = 1
+    F = expon(scale=1.0 / labda)
+    G = expon(scale=1.0 / mu)
+    p_business = 0
+
+    print("theory: ", sakasegawa(F, G, c + 1))  # 1 for the business server
+
+    num_jobs = 100_000
+    A, S = make_arrivals_and_services(F, G, num_jobs)
+    jobs = generate_jobs(A, S, p_business)
+    ggc = GGc_with_business(c, jobs)
+    ggc.run()
+
+    print("mean waiting: ", ggc.mean_waiting_time())
+
+
+mm2_test_2()
     
-    plt.plot(x, y, "o")
-    plt.show()
+
+# %%
+import copy  # to copy the simulation data
 
 
-check_in_2()
+def case_analysis(jobs, c):
+    # we need the same jobs for all cases, so that we can compare in a fair way.
+    b_jobs = set(copy.copy(j) for j in jobs if j.customer_type == BUSINESS)
+    e_jobs = set(copy.copy(j) for j in jobs if j.customer_type == ECONOMY)
+
+    # Case 1: each class its own server, no sharing
+    bus = GGc_with_business(0, b_jobs)
+    bus.run()
+
+    eco = GGc_with_business(c - 1, e_jobs)
+    eco.run()
+
+    # Case 2: sharing with business server
+    shared = GGc_with_business(c, jobs)
+    shared.run()
+
+    print("separate: bus mean", bus.mean_waiting_time())
+    print("shared: bus mean: ", shared.mean_waiting_time(BUSINESS))
+    print("separate: bus max", bus.max_waiting_time())
+    print("shared: bus max: ", shared.max_waiting_time(BUSINESS))
+
+    print("separate: eco mean", eco.mean_waiting_time())
+    print("shared: eco mean: ", shared.mean_waiting_time(ECONOMY))
+    print("separate: eco max", eco.max_waiting_time())
+    print("shared: eco max: ", shared.max_waiting_time(ECONOMY))
+
+    print("shared: all mean: ", shared.mean_waiting_time())
+    print("shared: all max: ", shared.max_waiting_time())
+    print()
+
+
+# %%
+
+
+def case1():
+    num_jobs = 300
+    opening_time_of_desks = 60  # minutes
+    labda = num_jobs / opening_time_of_desks
+    F = expon(scale=1.0 / labda)
+    G = uniform(1, 2)
+    p_business = 0.1
+    c = 6
+    A, S = make_arrivals_and_services(F, G, num_jobs)
+    jobs = generate_jobs(A, S, p_business)
+    case_analysis(jobs, c)
+
+
+case1()
+
+# %%
+
+
+def case2():
+    num_jobs = 300
+    labda = num_jobs / 180
+    F = expon(scale=1.0 / labda)
+    G = uniform(1, 2)
+    p_business = 0.05
+    c = 5
+    A, S = make_arrivals_and_services(F, G, num_jobs)
+    jobs = generate_jobs(A, S, p_business)
+    case_analysis(jobs, c)
+
+
+case2()
+      
