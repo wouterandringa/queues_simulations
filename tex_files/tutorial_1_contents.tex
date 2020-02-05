@@ -2,22 +2,37 @@
 
 The aim of this tutorial is to empirically show a fascinating fact: even for very small populations in which individuals decide independently to visit a server (a shop, a hospital, etc), the exponential distribution is a good model for the inter-arrival times as seen by the server.
 We will develop a simulation to motivate this `fact of nature'.
-In particular, our aim is to build the analogues of~\cref{fig:uniformfew,fig:uniformmany,fig:normal}  in terms of cdfs instead of pdfs.
 
 I expect that you will be able to cover up to about~\cref{sec:simul-many-cust} during the tutorial.
 The rest of the sections are homework.
 All solutions are at the end of this document.
 I also make the code available on github in the form of one complete Python program and as a Jupyter notebook.
+These notebooks are particularly useful if you do not have much experience with programming.
+Moreover, the notebooks contain the answers to all programming questions, the graphs and so on.
+Check the web on how to run and use notebooks in anaconda (search on `jupyter notebook anaconda', or something similar).
 
 If you want to increase your probabilistic intuition, coding skills, and knowledge of data analysis, try to do all exercises by yourself.
-This is quite challenging, if you get stuck, check the solutions.
+This is quite challenging; if you get stuck, check the solutions.
 Otherwise, if this is too much of challenge, just start from the solutions or the Jupyter notebook.
 
 \subsection{Background}
 
 We discuss an example to intuitively see how the exponential distribution originates.
-Consider a group of $N$ patients that have to visit a hospital for regular checkup, for instance, after each visit they have to see an MD somewhere between  $4$ to $6$ weeks later.
-Let us  assume that the inter-arrival times $\{X_k^i, k=1,2, \ldots\}$ of patient $i$ are reasonable well modeled as  uniform distributed between $4$ and $6$ weeks, i.e.,  $X_k^i \sim U[4, 6]$.
+Consider a group of $N$ patients that have to visit a hospital for a regular checkup, for instance, after each visit they have to see an MD somewhere between $4$ to $6$ weeks later.
+While each of the patients visit the hospital at quite regular times, the doctor `sees' the superposition of these visit times, and these times are much more chaotic.
+As an example, consider two patients with arrival times:
+\begin{align*}
+  4&;\, 9;\, 14.5;\, 19.8; \\   
+  5.5&;\, 9,8;\, 13.9;\, 19.3.
+\end{align*}
+In this case doctor sees the arrival times
+\begin{equation*}
+4;\, 5.5;\, 9;\, 9.8;\, 13.9;\, 14.5;\, 19.3;\, 19.8.
+\end{equation*}
+Here you can already see that patients arrive with more variation than the single patients.
+
+More formally, write $X_k^i$ for the time interval between the $k-1$th and $k$th visit of patient $i$; we call such time intervals \emph{inter-arrival times}.
+Assume that these inter-arrival times are reasonable well modeled as uniformly distributed between $4$ and $6$ weeks, i.e., $X_k^i \sim U[4, 6]$.
 Then, with $A_{0}^i=0$ for all~$i$, define
 \begin{equation}\label{eq:A_kk}
 A_k^i = A_{k-1}^i + X_k^i = \sum_{j=1}^k X_j^i
@@ -37,79 +52,79 @@ Thus, with this procedure, starting from inter-arrival times of individual patie
 
 To plot the empirical distribution function, of $\{X_k\}$, we just count the number of inter-arrival times smaller than time $t$ for any $t$.
 In other words, we compute  the empirical distribution of $\{X_k\}$  as
-\begin{equation*}
+\begin{equation}\label{eq:3}
   \P{X \leq t}_{n} = \frac1{n}\sum_{k=1}^{n} \1{X_k\leq t},
-\end{equation*}
+\end{equation}
 where the \emph{indicator function} is $\1{X_k\leq t}=1$ if $X_k\leq t$ and $\1{X_k\leq t}=0$
 if $X_k> t$.
 
-In the three panels in Figure~\ref{fig:uniformfew} we show the emperical distribution for three different cases.
-In the first example, we take $N=1$ patient and let the computer generate $n=100$ uniformly distributed numbers on the set $[4, 6]$.
-Thus, the time between two visits of this single patient is somewhere between $4$ and $6$ hours, and the average inter-arrival times $\E X = 5$.
-For the  second simulation we take $n=100$ visits for $N=3$ patients, and in the third, $N=10$ patients.  We add as a reference (the continuous curve) the density of the exponential distribution $\lambda e^{-\lambda t}$ for $\lambda=1/5$, $\lambda=3/5$ and $\lambda=10/5$, respectively.
-(Recall that when one person visits the doctor with an average inter-arrival time of $5$ hours, the arrival rate is $1/5$.
-Hence, when $N$ patients visit the doctor, each with an average inter-arrival time of 5 hours, the total arrival rate as seen by the doctor must be $N/5$.)
+% In the three panels in Figure~\ref{fig:uniformfew} we show the emperical distribution for three different cases.
+% In the first example, we take $N=1$ patient and let the computer generate $n=100$ uniformly distributed numbers on the set $[4, 6]$.
+% Thus, the time between two visits of this single patient is somewhere between $4$ and $6$ hours, and the average inter-arrival times $\E X = 5$.
+% For the  second simulation we take $n=100$ visits for $N=3$ patients, and in the third, $N=10$ patients.  We add as a reference (the continuous curve) the density of the exponential distribution $\lambda e^{-\lambda t}$ for $\lambda=1/5$, $\lambda=3/5$ and $\lambda=10/5$, respectively.
+% (Recall that when one person visits the doctor with an average inter-arrival time of $5$ hours, the arrival rate is $1/5$.
+% Hence, when $N$ patients visit the doctor, each with an average inter-arrival time of 5 hours, the total arrival rate as seen by the doctor must be $N/5$.)
 
 
-\begin{figure}[ht]
-  \centering
-  \begin{tabular}[h]{c}
-% see progs/convergence_to_exp.py
- \input{../../queueing_book/progs/uniform_to_exponential_few.tex}\\
-  \end{tabular}
-  \caption{The inter-arrival process as seen by the doctor owner. Observe
-    that the density $\lambda e^{-\lambda x}$ intersects the $y$-axis
-    at level $N/5$, which is equal to the arrival rate when $N$
-    persons visit the doctor. The parameter $n=100$ is the simulation
-    length, i.e., the number of visits per patient, and $b=10$ is the
-    number of bins to collect the data, see~\cref{rem:1}.}
-  \label{fig:uniformfew}
-\end{figure}
+% \begin{figure}[ht]
+%   \centering
+%   \begin{tabular}[h]{c}
+% % see progs/convergence_to_exp.py
+%  \input{../../queueing_book/progs/uniform_to_exponential_few.tex}\\
+%   \end{tabular}
+%   \caption{The inter-arrival process as seen by the doctor owner. Observe
+%     that the density $\lambda e^{-\lambda x}$ intersects the $y$-axis
+%     at level $N/5$, which is equal to the arrival rate when $N$
+%     persons visit the doctor. The parameter $n=100$ is the simulation
+%     length, i.e., the number of visits per patient, and $b=10$ is the
+%     number of bins to collect the data, see~\cref{rem:1}.}
+%   \label{fig:uniformfew}
+% \end{figure}
 
-In Figure~\ref{fig:uniformmany} we extend the number of visits to $n=1000$, and in Figure~\ref{fig:normal} we take the inter-arrival times to be normally distributed times with mean $5$ and $\sigma=1$.
+% In Figure~\ref{fig:uniformmany} we extend the number of visits to $n=1000$, and in Figure~\ref{fig:normal} we take the inter-arrival times to be normally distributed times with mean $5$ and $\sigma=1$.
 
-\begin{figure}[ht]
-  \centering
-  \begin{tabular}[h]{c}
-% see progs/convergence_to_exp.py
- \input{../../queueing_book/progs/uniform_to_exponential_many.tex}\\
-  \end{tabular}
-  \caption{Each of the $N$ patients visits the doctor at uniformly
-    distributed inter-arrival times, but now the number of visits is
-    $n=1000$.}
-  \label{fig:uniformmany}
-\end{figure}
+% \begin{figure}[ht]
+%   \centering
+%   \begin{tabular}[h]{c}
+% % see progs/convergence_to_exp.py
+%  \input{../../queueing_book/progs/uniform_to_exponential_many.tex}\\
+%   \end{tabular}
+%   \caption{Each of the $N$ patients visits the doctor at uniformly
+%     distributed inter-arrival times, but now the number of visits is
+%     $n=1000$.}
+%   \label{fig:uniformmany}
+% \end{figure}
 
-\begin{figure}[ht]
-  \centering
-  \begin{tabular}[h]{c}
-% see progs/convergence_to_exp.py
- \input{../../queueing_book/progs/normal_to_exponential.tex}
-  \end{tabular}
-  \caption{Each of the $N$ patients visits the doctor with normally
-    distributed inter-arrival times with $\mu=5$ and
-    $\sigma=1$.}  \label{fig:normal}
-\end{figure}
+% \begin{figure}[ht]
+%   \centering
+%   \begin{tabular}[h]{c}
+% % see progs/convergence_to_exp.py
+%  \input{../../queueing_book/progs/normal_to_exponential.tex}
+%   \end{tabular}
+%   \caption{Each of the $N$ patients visits the doctor with normally
+%     distributed inter-arrival times with $\mu=5$ and
+%     $\sigma=1$.}  \label{fig:normal}
+% \end{figure}
 
-As the graphs show, even when the patient population consists of 10 members, each visiting the doctor with an inter-arrival time that is quite `far' from exponential, the distribution of the inter-arrival times as observed by the doctor is very well approximated by an exponential distribution.
-Thus, it appears reasonable to use the exponential distribution to model inter-arrival times of patients for systems (such as a doctor, or a hospital or a call center) that handle many (thousands of) patients each of which deciding independently to visit the system.
+% As the graphs show, even when the patient population consists of 10 members, each visiting the doctor with an inter-arrival time that is quite `far' from exponential, the distribution of the inter-arrival times as observed by the doctor is very well approximated by an exponential distribution.
+% Thus, it appears reasonable to use the exponential distribution to model inter-arrival times of patients for systems (such as a doctor, or a hospital or a call center) that handle many (thousands of) patients each of which deciding independently to visit the system.
 
 
-\begin{remark}\label{rem:1}
-  The computations of the bins in~\cref{fig:uniformfew,fig:uniformmany,fig:normal} is a bit subtle, in particular the height.
-  The procedure works as follows.
-  Let $a=(X_1, \ldots, X_n)$ denote the simulated inter-arrival times.
-  Define the width of a bin as $\delta = (\max\{a\} - \min\{a\})/b$, where $b$ is specified by the user, for instance $b=10$.
-  Thus, if $b=10$, the total range of observations is divided in $b=10$ cells.
-  Then the height of the $i$th bin is computed as $h_i = n_i/(n \delta)$ where $n_i$ is the number of observations in the $i$th cell.
-  Observe that then $\sum_{i=1}^b h_i \delta = 1$.
-\end{remark}
+% \begin{remark}\label{rem:1}
+%   The computations of the bins in~\cref{fig:uniformfew,fig:uniformmany,fig:normal} is a bit subtle, in particular the height.
+%   The procedure works as follows.
+%   Let $a=(X_1, \ldots, X_n)$ denote the simulated inter-arrival times.
+%   Define the width of a bin as $\delta = (\max\{a\} - \min\{a\})/b$, where $b$ is specified by the user, for instance $b=10$.
+%   Thus, if $b=10$, the total range of observations is divided in $b=10$ cells.
+%   Then the height of the $i$th bin is computed as $h_i = n_i/(n \delta)$ where $n_i$ is the number of observations in the $i$th cell.
+%   Observe that then $\sum_{i=1}^b h_i \delta = 1$.
+% \end{remark}
 
 
 \subsection{Simulations}
 
 \begin{exercise}
-  Make a plan of the steps you have to carry out to make an analogue of Figure 1.1 of the queueing book in terms of a cdf.
+  Make a plan of the steps you need to compute empirical distribution in accordance with~\cref{eq:3}. 
   In the next set of exercises we'll carry out these steps.
   So please do not read on before having thought about this problem, but spend some 5 minutes to think about how to approach the problem and how to chop it up into simple steps.
   Then organize the steps into a logical sequence.
@@ -853,7 +868,7 @@ What can you conclude from this analysis?
 \subsection{The number arrivals in an interval and the Poisson distribution}
 
 Besides the memory-less property, we can also analyze whether our inter-arrival times satisfy the `Poisson property'.
-That is, when the inter-arrival times are exponential with arrival rate $\lambda$, the number of observations in an interval of a fixed length $t$ should be Poisson distributed with mean $\lambda t$.  In this final section we will try to see whether this `Poisson' property holds for our patient inter-arrival times.
+That is, when the inter-arrival times are exponential with arrival rate $\lambda$, the number of observations in an interval of a fixed length $t$ should be Poisson distributed with mean~$\lambda t$.  In this final section we will try to see whether this `Poisson' property holds for our patient inter-arrival times.
 
 \begin{exercise}
   With the code below we can compute the number of arrivals per interval for the list \pyv{A} that contains the arrival times of patients.
@@ -985,5 +1000,5 @@ poisson_3()
 
 %%% Local Variables:
 %%% mode: latex
-%%% TeX-master: "tutorial_a4"
+%%% TeX-master: "../tutorial_a4"
 %%% End:

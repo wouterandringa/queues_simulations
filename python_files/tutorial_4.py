@@ -10,254 +10,284 @@ Author: Nicky van Foreest
 '''
 
 # %%
-# empty code for numbering
-
-# %%
-# empty code for numbering
-
-# %%
-# empty code for numbering
-
-# %%
-from collections import deque
-from heapq import heappop, heappush
 import numpy as np
-from scipy.stats import expon, uniform
+import scipy
+from scipy.stats import poisson
+import matplotlib.pyplot as plt
 
-np.random.seed(8)
+plt.ion() # to skip making the graphs, I only use it for testing purposes.
 
-ARRIVAL = 0
-DEPARTURE = 1
+scipy.random.seed(3)
 
+def compute_Q_d(a, s, q0=0):
+    # a: no of arrivals in a period
+    # s: no of services at start of a period
+    d = np.zeros_like(a) # departures
+    Q = np.zeros_like(a) # queue lengths
+    Q[0] = q0 # starting level of the queue
+    for i in range(1, len(a)):
+        d[i] = min(Q[i-1], s[i])
+        Q[i] = Q[i-1] + a[i] - d[i]
 
-class Job:
-    def __init__(self):
-        self.arrival_time = 0
-        self.service_time = 0
-        self.departure_time = 0
-        self.queue_length_at_arrival = 0
-
-    def sojourn_time(self):
-        return self.departure_time - self.arrival_time
-
-    def waiting_time(self):
-        return self.sojourn_time() - self.service_time
-
-    def __repr__(self):
-        return f"{self.arrival_time}, {self.service_time}, {self.departure_time}\n"
-
-    def __lt__(self, other):
-        # this is necessary to sort jobs when they have the same arrival times.
-        return self.queue_length_at_arrival < other.queue_length_at_arrival
+    return Q, d
 
 
-class GGc:
-    def __init__(self, jobs, c):
-        self.jobs = jobs
-        self.c = c
-        self.num_busy = 0  # number of busy servers
-        self.stack = []  # event stack
-        self.queue = deque()
-        self.served_jobs = []
+# %%
+def experiment_1():
+    labda, mu, q0, N = 5, 6, 0, 100
+    a = poisson(labda).rvs(N)
+    s = poisson(mu).rvs(N)
+    print(a.mean(), a.std())
 
-    def handle_arrival(self, time, job):
-        job.queue_length_at_arrival = len(self.queue)
-        if self.num_busy < self.c:
-            self.start_service(time, job)
+experiment_1()
+
+# %%
+def experiment_2():
+    labda, mu, q0, N = 5, 6, 0, 100
+    a = poisson(labda).rvs(N)
+    s = poisson(mu).rvs(N)
+    Q, d = compute_Q_d(a, s, q0)
+
+    plt.plot(Q)
+    plt.show()
+    print(d.mean())
+
+
+experiment_2()
+
+# %%
+def cdf(a):
+    y = range(1, len(a) + 1)
+    y = [yy / len(a) for yy in y]  # normalize
+    x = sorted(a)
+    return x, y
+
+def experiment_3():
+    labda, mu, q0, N = 5, 6, 0, 100
+    a = poisson(labda).rvs(N)
+    s = poisson(mu).rvs(N)
+    Q, d = compute_Q_d(a, s, q0)
+
+    print(d.mean())
+
+    x, F = cdf(Q)
+    plt.plot(x, F)
+    plt.show()
+
+experiment_3()
+
+# %%
+# A void cell for the numbering    
+
+# %%
+def experiment_4():
+    labda, mu = 5, 6
+    q0, N = 1000, 100
+    a = poisson(labda).rvs(N)
+    s = poisson(mu).rvs(N)
+    Q, d = compute_Q_d(a, s, q0)
+    plt.plot(Q)
+    plt.show()
+
+
+experiment_4()
+
+# %%
+def experiment_5():
+    N = 10  # set this to the correct value.
+    labda = 6
+    mu = 5
+    q0 = 30
+
+    a = poisson(labda).rvs(N)
+    s = poisson(mu).rvs(N)
+
+    Q, d = compute_Q_d(a, s, q0)
+
+    plt.plot(Q)
+    plt.show()
+
+
+experiment_5()
+
+# %%
+def experiment_6():
+    N = 100 #  Again, replace the numbers
+    labda = 5
+    mu = 6
+    q0 = 10
+
+    a = poisson(labda).rvs(N)
+    s = poisson(mu).rvs(N)
+
+    Q, d = compute_Q_d(a, s, q0)
+    print(Q.mean(), Q.std())
+
+experiment_6()
+
+# %%
+def experiment_6a():
+    N = 10 # Use a larger value here
+    labda = 5
+    mu = 6
+    q0 = 0
+
+    a = poisson(labda).rvs(N)
+    s = np.ones_like(a) * mu
+
+    Q, d = compute_Q_d(a, s, q0)
+    print(Q.mean(), Q.std())
+
+experiment_6a()
+
+# %%
+def experiment_6b():
+    N = 10 # Change to a larger value.
+    labda = 5
+    mu = 6
+    q0 = 0
+
+    a = poisson(labda).rvs(N)
+    s = poisson(1.1 * mu).rvs(N)
+
+    Q, d = compute_Q_d(a, s, q0)
+    print(Q.mean(), Q.std())
+
+experiment_6b()
+
+# %%
+def compute_Q_d_with_extra_servers(a, q0=0, mu=6, threshold=np.inf, extra=0):
+    d = np.zeros_like(a)
+    Q = np.zeros_like(a)
+    Q[0] = q0
+    present = False  # extra employees are not in
+    for i in range(1, len(a)):
+        rate = mu + extra if present else mu  # service rate
+        s = poisson(rate).rvs()
+        d[i] = min(Q[i - 1], s)
+        Q[i] = Q[i - 1] + a[i] - d[i]
+        if Q[i] == 0:
+            present = False  # send employee home
+        elif Q[i] >= threshold:
+            present = True  # hire employee for next period
+
+    return Q, d
+
+
+def experiment_7():
+    N = 100 # take a big number here.
+    labda = 5
+    mu = 6
+    q0 = 0
+
+    a = poisson(labda).rvs(N)
+
+    Q, d = compute_Q_d_with_extra_servers(a, q0, mu=6, threshold=20, extra=2)
+    print(Q.mean(), Q.std())
+
+    x, F = cdf(Q)
+    plt.plot(x, F)
+    plt.show()
+
+experiment_7()
+
+# %%
+def compute_Q_d_blocking(a, s, q0=0, b=np.inf):
+    # b is the blocking level.
+    d = np.zeros_like(a)
+    Q = np.zeros_like(a)
+    Q[0] = q0
+    for i in range(1, len(a)):
+        d[i] = min(Q[i - 1], s[i])
+        Q[i] = min(b, Q[i - 1] + a[i] - d[i])
+
+    return Q, d
+
+
+
+def experiment_7a():
+    N = 100 # take a larger value
+    labda = 5
+    mu = 6
+    q0 = 0
+
+    a = poisson(labda).rvs(N)
+    s = poisson(mu).rvs(N)
+
+    Q, d = compute_Q_d_blocking(a, s, q0, b=15)
+    print(Q.mean(), Q.std())
+
+    x, F = cdf(Q)
+    plt.plot(x, F)
+    plt.show()
+
+
+experiment_7a()
+
+# %%
+def compute_cost(a, mu, q0=0, threshold=np.inf, h=0, p=0, S=0):
+    d = np.zeros_like(a)
+    Q = np.zeros_like(a)
+    Q[0] = q0
+    present = False  # extra employee is not in.
+    queueing_cost = 0
+    server_cost = 0
+    setup_cost = 0
+    for i in range(1, len(a)):
+        if present:
+            server_cost += p
+            c = poisson(mu).rvs()
         else:
-            self.queue.append(job)
+            c = 0  # server not present, hence no service
+        d[i] = min(Q[i - 1], c)
+        Q[i] = Q[i - 1] + a[i] - d[i]
+        if Q[i] == 0:
+            present = False  # send employee home
+        elif Q[i] >= threshold:
+            present = True  # switch on server
+            setup_cost += S
+        queueing_cost += h * Q[i]
 
-    def put_new_arrivals_on_stack(self):
-        while self.jobs:
-            job = self.jobs.popleft()
-            heappush(self.stack, (job.arrival_time, job, ARRIVAL))
+    print(queueing_cost, setup_cost, server_cost)
 
-    def start_service(self, time, job):
-        self.num_busy += 1  # server becomes busy.
-        job.departure_time = time + job.service_time
-        heappush(self.stack, (job.departure_time, job, DEPARTURE))
+    total_cost = queueing_cost + server_cost + setup_cost
+    num_periods = len(a) - 1
+    average_cost = total_cost / num_periods
+    return average_cost
 
-    def handle_departure(self, time, job):
-        self.num_busy -= 1
-        self.served_jobs.append(job)
-        if self.queue:  # not empty
-            next_job = self.queue.popleft()
-            self.start_service(time, next_job)
 
-    def consistency_check(self):
-        if (
-            self.num_busy < 0
-            or self.num_busy > self.c
-            or len(self.queue) < 0
-            or (len(self.queue) > 0 and self.num_busy < self.c)
-        ):
-            print("there is something wrong")
-            quit()
+def experiment_8():
+    N = 100
+    labda = 0.3
+    mu = 1
+    q0 = 0
+    theta = 100  # threshold
 
-    def run(self):
-        time = 0
-        self.put_new_arrivals_on_stack()
+    h = 1
+    p = 5
+    S = 500
 
-        while self.stack:  # not empty
-            time, job, typ = heappop(self.stack)
-            # self.consistency_check() # use only when testing.
-            if typ == ARRIVAL:
-                self.handle_arrival(time, job)
-            else:
-                self.handle_departure(time, job)
+    a = poisson(labda).rvs(N)
+    av = compute_cost(a, mu, q0, theta, h, p, S)
+    print(av)
 
-def make_jobs(arrival_times, service_times_jobs):
-    jobs = deque()
-    for a, s in zip(arrival_times, service_times_jobs):
-        job = Job()
-        job.arrival_time = a
-        job.service_time = s
-        jobs.append(job)
-
-    return jobs
-    
+experiment_8()
 
 # %%
-def ddc_test():
-    num_jobs = 10
-    a = [10] * num_jobs
-    A = np.cumsum(a)
-    S = [25.0] * num_jobs
+def experiment_9():
+    N = 10 # Change to a larger value.
+    labda = 5
+    mu = 6
+    q0 = 0
 
-    jobs = make_jobs(A, S)
-    c = 1
+    a = poisson(labda).rvs(N)
+    s = poisson(mu).rvs(N)
 
-    ggc = GGc(jobs, c)
-    ggc.run()
-    print(ggc.served_jobs)
-
-
-ddc_test()
-
-# %%
-def sakasegawa(F, G, c):
-    labda = 1.0 / F.mean()
-    ES = G.mean()
-    rho = labda * ES / c
-    EWQ_1 = rho ** (np.sqrt(2 * (c + 1)) - 1) / (c * (1 - rho)) * ES
-    ca2 = F.var() * labda * labda
-    ce2 = G.var() / ES / ES
-    return (ca2 + ce2) / 2 * EWQ_1
+    Q, d = compute_Q_d(a, s, q0)
+    loss = (Q > 20)
+    print(loss.sum())
+    total_demand = a.sum() 
+    print(100*(Q > 0).sum()/total_demand)
 
 
-# %%
-def mm1_test(labda=0.8, mu=1, num_jobs=100):
-    c = 1
-    F = expon(scale=1.0 / labda)
-    G = expon(scale=1.0 / mu)
-    a = F.rvs(num_jobs)
-    A = np.cumsum(a)
-    S = G.rvs(num_jobs)
-    jobs = make_jobs(A, S)
-
-    ggc = GGc(jobs, c)
-    ggc.run()
-    tot_wait_in_q = sum(j.waiting_time() for j in ggc.served_jobs)
-    avg_wait_in_q = tot_wait_in_q / len(ggc.served_jobs)
-    # print(sorted(ggc.served_jobs, key=lambda job: job.arrival_time))
-
-    print("M/M/1 TEST")
-    print("Theo avg. waiting time in queue:", sakasegawa(F, G, c))
-    print("Simu avg. waiting time in queue:", avg_wait_in_q)
-
-mm1_test(num_jobs=100)
-mm1_test(num_jobs=100_000)
-
-# %%
-def md1_test(labda=0.9, mu=1, num_jobs=100):
-    c = 1
-    F = expon(scale=1.0 / labda)
-    G = uniform(mu, 0.0001)
-    a = F.rvs(num_jobs)
-    A = np.cumsum(a)
-    S = G.rvs(num_jobs)
-    jobs = make_jobs(A, S)
-
-    ggc = GGc(jobs, c)
-    ggc.run()
-    tot_wait_in_q = sum(j.waiting_time() for j in ggc.served_jobs)
-    avg_wait_in_q = tot_wait_in_q / len(ggc.served_jobs)
-
-    print("M/D/1 TEST")
-    print("Theo avg. waiting time in queue:", sakasegawa(F, G, c))
-    print("Simu avg. waiting time in queue:", avg_wait_in_q)
-
-
-md1_test(num_jobs=100)
-md1_test(num_jobs=100_000)
-
-# %%
-def md2_test(labda=1.8, mu=1, num_jobs=100):
-    c = 2
-    F = expon(scale=1.0 / labda)
-    G = uniform(mu, 0.0001)
-    a = F.rvs(num_jobs)
-    A = np.cumsum(a)
-    S = G.rvs(num_jobs)
-    jobs = make_jobs(A, S)
-
-    ggc = GGc(jobs, c)
-    ggc.run()
-    tot_wait_in_q = sum(j.waiting_time() for j in ggc.served_jobs)
-    avg_wait_in_q = tot_wait_in_q / len(ggc.served_jobs)
-
-    print("M/D/2 TEST")
-    print("Theo avg. waiting time in queue:", sakasegawa(F, G, c))
-    print("Simu avg. waiting time in queue:", avg_wait_in_q)
-
-
-md2_test(num_jobs=100)
-md2_test(num_jobs=100_000)
-
-# %%
-num_jobs = 300
-A = np.sort(uniform(0, 120).rvs(num_jobs))
-
-# %%
-# empty code for numbering
-
-# %%
-# empty code for numbering
-
-# %%
-# empty code for numbering
-
-# %%
-def intake_process():
-    num_jobs = 300
-    A = np.sort(uniform(0, 120).rvs(num_jobs))
-    S = uniform(1, 3).rvs(num_jobs)
-    jobs = make_jobs(A, S)
-
-    ggc = GGc(jobs, c=5)
-    ggc.run()
-
-    max_waiting_time = max(j.waiting_time() for j in ggc.served_jobs)
-    longer_ten = sum((j.waiting_time() >= 10) for j in ggc.served_jobs)
-    print(max_waiting_time, longer_ten)
-
-
-intake_process()
-
-def intake_test_1():
-    num_jobs = 300
-    A = np.sort(uniform(0, 120).rvs(num_jobs))
-    S = uniform(1, 3).rvs(num_jobs)
-
-    print("Num servers, max waiting time, num longer than 10")
-    for c in range(3, 10):
-        jobs = make_jobs(A, S)
-        ggc = GGc(jobs, c)
-        ggc.run()
-
-        max_waiting_time = max(j.waiting_time() for j in ggc.served_jobs)
-        longer_ten = sum((j.waiting_time() >= 10) for j in ggc.served_jobs)
-        print(c, max_waiting_time, longer_ten)
-
-
-intake_test_1()
+experiment_9()

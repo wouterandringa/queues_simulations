@@ -1,4 +1,5 @@
-\documentclass[a4paper]{article}
+%\documentclass[a5paper]{article}
+\documentclass[b6paper]{article}
 
 \newif\ifshowextra
 %\showextrafalse
@@ -8,12 +9,14 @@
 \usepackage[solutionfiles]{optional}
 %\usepackage[check]{optional}
 
-\usepackage{../../queueing_book/preamble}
+% \opt{nosolutionfiles}{\usepackage[nosolutionfiles]{answers}}
+% \opt{solutionfiles}{\usepackage{answers}}
 
-%\usepackage{mathpazo}
+
+\usepackage{../queueing_book/preamble}
+\usepackage[top=5mm, left=5mm, right=5mm, bottom=2cm]{geometry}
 
 \input{tutorial_contents.tex}
-
 
 %%% Local Variables:
 %%% mode: latex
