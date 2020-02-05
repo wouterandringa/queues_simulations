@@ -29,7 +29,7 @@ class PrintMachine(enum.Enum):
         if self == self.DONT_PRINT and self._should_go_to_print(line):
             return self.PRINT, self.DONT_PRINT
 
-        return self, self.PRINT
+        return self, self
 
     def _should_go_to_dont_print(self, line):
         return any(trigger in line for trigger in self.dont_print_triggers)
@@ -59,27 +59,35 @@ def tangle(fname):
     return source
 
 
-title = """# %%
+def main():
+    title = """# %%
 '''
 # Tutorial {}, solutions
 
 
-This solution is a jupyter notebook which allows you to directly interact with the code so that
-you can see the effect of any changes you may like to make.
+This solution is a jupyter notebook which allows you to directly interact with
+the code so that you can see the effect of any changes you may like to make.
 
 Author: Nicky van Foreest
 '''
 """
 
-for i, fname in enumerate(glob.glob("tex_files/tutorial_*_contents.tex")):
-    source = tangle(fname)
+    files = glob.glob("tex_files/tutorial_*_contents.tex")
+    files.sort()
 
-    if source == "":
-        continue
+    for i, fname in enumerate(files, 1):
+        source = tangle(fname)
 
-    f_to = f"python_files/tutorial_{i + 1}.py"
+        if source == "":
+            continue
 
-    source.insert(0, title.format(i + 1))
+        f_to = f"python_files/tutorial_{i}.py"
 
-    with open(f_to, "w") as fp:
-        fp.write("".join(source))
+        source.insert(0, title.format(i))
+
+        with open(f_to, "w") as fp:
+            fp.write("".join(source))
+
+
+if __name__ == "__main__":
+    main()
