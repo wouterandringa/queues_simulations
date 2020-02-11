@@ -836,7 +836,7 @@ memoryless_2()
 \end{exercise}
 
 \begin{exercise}
-When $s=2$ the memoryless property does not seem to hold. Suppose we take more data points, in other words, let's take $N=10^5$, and see what happens.
+When $s=2$ the memoryless property does not seem to hold. Suppose we take more data points, in other words, let's take $L=10^5$, and see what happens.
   \begin{solution}
 Here is the answer.
 \begin{pyverbatim}
@@ -870,7 +870,7 @@ What can you conclude from this analysis?
   \begin{solution}
     Suppose we would have set $s=6$.
     Since the inter-arrival times of an individual patient are $\sim U[4, 6]$, there cannot be any inter-arrival that is larger than $6$.
-    Thus, we cannot expect that the tail of the exponential distribution (which has an infinite support) will be a good model for the tail of our emperical distribution.
+    Thus, we cannot expect that the tail of the exponential distribution (which has an infinite support) will be a good model for the tail of our empirical distribution.
     In general, (as far as I know) using data to estimate tail probabilities is pretty sensitive, and one should be very careful to use data for this.
 
     Also, it is important to know how data is obtained (and stored) before one starts with data analysis.
