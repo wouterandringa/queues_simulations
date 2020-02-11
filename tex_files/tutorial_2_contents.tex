@@ -166,7 +166,6 @@ Explain what you see.
 \begin{solution}
   The queue length drains at rate $\mu-\lambda$ when $q_0$ is really large.
   Thus, for such settings, you might just as well approximate the queue length behavior as $q(t) = q_0 - (\mu-\lambda)t$, i.e., as a deterministic system.
-
 \end{solution}
 \end{exercise}
 
@@ -177,14 +176,13 @@ Set $q_0=10000$ and $N=1000$.  (In Anaconda you can just change the numbers and 
 Explain what you see. What is the drain rate of $Q$?
 \begin{solution}
   Copy this code and run it.
-  I don't use the values for $N$ and $Q0$ as specified in the exercise; running the code becomes somewhat slow, and this gets on my nerves while testing everything.
+  I don't use the values for $N$ and $q_0$ as specified in the exercise; running the code becomes somewhat slow, and this gets on my nerves while testing everything.
   Hence, you should replace the numbers by the ones mentioned in the exercise.
 
 \begin{pyverbatim}
 def experiment_5():
     N = 10  # set this to the correct value.
-    labda = 6
-    mu = 5
+    labda, mu = 5, 6
     q0 = 30
 
     a = poisson(labda).rvs(N)
@@ -210,8 +208,8 @@ Copy this code and run it.
 \begin{pyverbatim}
 def experiment_6():
     N = 100  # Again, replace the numbers
-    labda = 5
-    mu = 6
+    labda = 6
+    mu = 5
     q0 = 10
 
     a = poisson(labda).rvs(N)
