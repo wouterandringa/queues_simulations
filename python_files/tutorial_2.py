@@ -44,7 +44,7 @@ experiment_1()
 
 # %%
 def experiment_2():
-    labda, mu, q0, N = 5, 6, 0, 100
+    labda, mu, q0, N = 5, 6, 100, 100
     a = poisson(labda).rvs(N)
     s = poisson(mu).rvs(N)
     Q, d = compute_Q_d(a, s, q0)
