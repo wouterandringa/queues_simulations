@@ -116,8 +116,8 @@ experiment_5()
 # %%
 def experiment_6():
     N = 100  # Again, replace the numbers
-    labda = 5
-    mu = 6
+    labda = 6
+    mu = 5
     q0 = 10
 
     a = poisson(labda).rvs(N)
