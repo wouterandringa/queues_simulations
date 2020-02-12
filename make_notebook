@@ -1,6 +1,6 @@
 python tangle.py
 
-file=tutorial_5
+file=tutorial_2
 
 ipynb-py-convert python_files/$file.py notebooks/$file.ipynb
 jupyter nbconvert --execute notebooks/$file.ipynb --inplace

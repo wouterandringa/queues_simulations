@@ -98,8 +98,7 @@ experiment_4()
 # %%
 def experiment_5():
     N = 10  # set this to the correct value.
-    labda = 5
-    mu = 6
+    labda, mu = 5, 6
     q0 = 30
 
     a = poisson(labda).rvs(N)
