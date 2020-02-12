@@ -11,6 +11,4 @@ pdflatex tutorial_mobile
 rm hint.tex ans.tex
 rm x.log
 
-mv tutorial_a4.pdf ..
-mv tutorial_mobile.pdf ..
 
