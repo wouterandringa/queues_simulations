@@ -371,7 +371,7 @@ However, for the sake of clarity we chose not to do so.
 
 
 Another way to deal with large queues is to simply block customers if the queue is too long.
-What would happen if we would customers to enter the system when the queue is 15 or larger?
+What would happen if we would ensure that customers can not enter the system when the queue is 15 or larger?
 How, for instance, would that affect the average queue and the distribution of the queue?
 \begin{exercise}
   Modify the code to include blocking and do an experiment to see the effect on the queue length.
@@ -432,7 +432,7 @@ We assume (and it is easy to prove) that it is optimal to switch off the server 
   The number of arrivals and services per period are Poisson distributed with the given rates.
   Then, $h=1$ (without loss of generality), $p=5$ and $S=500$.
   Write a simulator to compute the average cost for setting $\theta=100$.
-  Then, change $N$ to find a better value.
+  Then, change $\theta$ to find a better value.
 
 \begin{solution}
 Here is all the code.
