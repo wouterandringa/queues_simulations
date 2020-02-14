@@ -290,10 +290,10 @@ def experiment_9():
     s = poisson(mu).rvs(N)
 
     Q, d = compute_Q_d(a, s, q0)
-    loss = (Q > 20).sum()
-    print(loss)
-    total_demand = a.sum() 
-    print(100 * loss / total_demand)
+    loss_periods = (Q > 20).sum()
+    total_loss = Q[Q > 20].sum() - 20 * loss_periods
+    total_demand = a.sum()
+    print(100 * total_loss / total_demand)
 
 
 experiment_9()

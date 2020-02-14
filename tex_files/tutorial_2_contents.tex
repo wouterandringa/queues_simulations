@@ -500,7 +500,7 @@ As a final example, suppose we have to pay a penalty for any customer that sees 
   Use the programs we developed earlier to compute the queue lengths, and use the code \pyv{(Q>20)} to count all periods in in which $Q>20$.
 
   \begin{solution}
-Here is the code.
+Here is the code. Check in particular the meaning of the code \pyv{(Q>20)} and \pyv{Q[Q>20]}. Why do I subtract \pyv{20 * loss_periods}?
 \begin{pyverbatim}
 def experiment_9():
     N = 10  # Change to a larger value.
@@ -512,10 +512,10 @@ def experiment_9():
     s = poisson(mu).rvs(N)
 
     Q, d = compute_Q_d(a, s, q0)
-    loss = (Q > 20).sum()
-    print(loss)
-    total_demand = a.sum() 
-    print(100 * loss / total_demand)
+    loss_periods = (Q > 20).sum()
+    total_loss = Q[Q > 20].sum() - 20 * loss_periods
+    total_demand = a.sum()
+    print(100 * total_loss / total_demand)
 
 
 experiment_9()
