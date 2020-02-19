@@ -77,7 +77,7 @@ experiment_1()
 
 \begin{pyverbatim}
 def experiment_2():
-    labda, mu, q0, N = 5, 6, 0, 100
+    labda, mu, q0, N = 5, 6, 100, 100
     a = poisson(labda).rvs(N)
     s = poisson(mu).rvs(N)
     Q, d = compute_Q_d(a, s, q0)
@@ -166,7 +166,6 @@ Explain what you see.
 \begin{solution}
   The queue length drains at rate $\mu-\lambda$ when $q_0$ is really large.
   Thus, for such settings, you might just as well approximate the queue length behavior as $q(t) = q_0 - (\mu-\lambda)t$, i.e., as a deterministic system.
-
 \end{solution}
 \end{exercise}
 
@@ -177,14 +176,13 @@ Set $q_0=10000$ and $N=1000$.  (In Anaconda you can just change the numbers and 
 Explain what you see. What is the drain rate of $Q$?
 \begin{solution}
   Copy this code and run it.
-  I don't use the values for $N$ and $Q0$ as specified in the exercise; running the code becomes somewhat slow, and this gets on my nerves while testing everything.
+  I don't use the values for $N$ and $q_0$ as specified in the exercise; running the code becomes somewhat slow, and this gets on my nerves while testing everything.
   Hence, you should replace the numbers by the ones mentioned in the exercise.
 
 \begin{pyverbatim}
 def experiment_5():
     N = 10  # set this to the correct value.
-    labda = 6
-    mu = 5
+    labda, mu = 5, 6
     q0 = 30
 
     a = poisson(labda).rvs(N)
@@ -210,8 +208,8 @@ Copy this code and run it.
 \begin{pyverbatim}
 def experiment_6():
     N = 100  # Again, replace the numbers
-    labda = 5
-    mu = 6
+    labda = 6
+    mu = 5
     q0 = 10
 
     a = poisson(labda).rvs(N)
@@ -373,7 +371,7 @@ However, for the sake of clarity we chose not to do so.
 
 
 Another way to deal with large queues is to simply block customers if the queue is too long.
-What would happen if we would customers to enter the system when the queue is 15 or larger?
+What would happen if we would ensure that customers can not enter the system when the queue is 15 or larger?
 How, for instance, would that affect the average queue and the distribution of the queue?
 \begin{exercise}
   Modify the code to include blocking and do an experiment to see the effect on the queue length.
@@ -434,7 +432,7 @@ We assume (and it is easy to prove) that it is optimal to switch off the server 
   The number of arrivals and services per period are Poisson distributed with the given rates.
   Then, $h=1$ (without loss of generality), $p=5$ and $S=500$.
   Write a simulator to compute the average cost for setting $\theta=100$.
-  Then, change $N$ to find a better value.
+  Then, change $\theta$ to find a better value.
 
 \begin{solution}
 Here is all the code.
@@ -502,7 +500,7 @@ As a final example, suppose we have to pay a penalty for any customer that sees 
   Use the programs we developed earlier to compute the queue lengths, and use the code \pyv{(Q>20)} to count all periods in in which $Q>20$.
 
   \begin{solution}
-Here is the code.
+Here is the code. Check in particular the meaning of the code \pyv{(Q>20)} and \pyv{Q[Q>20]}. Why do I subtract \pyv{20 * loss_periods}?
 \begin{pyverbatim}
 def experiment_9():
     N = 10  # Change to a larger value.
@@ -514,10 +512,10 @@ def experiment_9():
     s = poisson(mu).rvs(N)
 
     Q, d = compute_Q_d(a, s, q0)
-    loss = (Q > 20).sum()
-    print(loss)
-    total_demand = a.sum() 
-    print(100 * loss / total_demand)
+    loss_periods = (Q > 20).sum()
+    total_loss = Q[Q > 20].sum() - 20 * loss_periods
+    total_demand = a.sum()
+    print(100 * total_loss / total_demand)
 
 
 experiment_9()

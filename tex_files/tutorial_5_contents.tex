@@ -9,7 +9,7 @@ There are still one business server and $c$ economy servers, but when the busine
 When, after this service, there is still no business customer in queue, the business server serves a second economy customer.
 Once a business customer arrives, the business server finishes the economy customer (if there is any in service), and then serves the business customer.
 We use a similar policy for serving business customers by free economy class server.
-The problem is of course to figure out which of these policies is best.
+The problem is, of course, to figure out which of these policies is best.
 
 
 \begin{exercise}
@@ -21,8 +21,8 @@ The problem is of course to figure out which of these policies is best.
 \end{exercise}
 
 As the simulation of this case is somewhat more difficult than the $G/G/c$ queue, testing is also more important.
-For this reason we will follow a \emph{test-driven} procedure, which works like this.
-First we design a number of test cases, from very simple to a bit less simple.
+For this reason, we will follow a \emph{test-driven} procedure, which works like this.
+First, we design a number of test cases, from very simple to a bit less simple.
 Then we build and test until the first test case passes.
 Then we build and test until also the second case passes, and so on, until all the tests pass \footnote{Indeed, when decision this tutorial, we caught numerous mistakes, from missing \pyv{if} statements (a very big bug) to simple typos.}.
 
@@ -602,7 +602,7 @@ The result of this might be that in certain settings sharing is best (perhaps wi
 
 \begin{exercise}
   Assume we have $n=300$ customers, the desks open 3 hours before departure and close 1 hour before departure, and service distribution is $\sim U[1,3]$ (minutes) for all customers.
-  The fracton of business customers is $p=0.1$.
+  The fraction of business customers is $p=0.1$.
   There are $c=5$ servers for the economy class customers, and 1 for the business customers.
   Finally, assume that during the opening slot of the desks, the 300 customers arrive $\sim U[0, 120]$.
 

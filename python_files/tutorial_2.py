@@ -44,7 +44,7 @@ experiment_1()
 
 # %%
 def experiment_2():
-    labda, mu, q0, N = 5, 6, 0, 100
+    labda, mu, q0, N = 5, 6, 100, 100
     a = poisson(labda).rvs(N)
     s = poisson(mu).rvs(N)
     Q, d = compute_Q_d(a, s, q0)
@@ -98,8 +98,7 @@ experiment_4()
 # %%
 def experiment_5():
     N = 10  # set this to the correct value.
-    labda = 6
-    mu = 5
+    labda, mu = 5, 6
     q0 = 30
 
     a = poisson(labda).rvs(N)
@@ -116,8 +115,8 @@ experiment_5()
 # %%
 def experiment_6():
     N = 100  # Again, replace the numbers
-    labda = 5
-    mu = 6
+    labda = 6
+    mu = 5
     q0 = 10
 
     a = poisson(labda).rvs(N)
@@ -291,10 +290,10 @@ def experiment_9():
     s = poisson(mu).rvs(N)
 
     Q, d = compute_Q_d(a, s, q0)
-    loss = (Q > 20).sum()
-    print(loss)
-    total_demand = a.sum() 
-    print(100 * loss / total_demand)
+    loss_periods = (Q > 20).sum()
+    total_loss = Q[Q > 20].sum() - 20 * loss_periods
+    total_demand = a.sum()
+    print(100 * total_loss / total_demand)
 
 
 experiment_9()

@@ -84,8 +84,8 @@ def experiment_1():
     labda = 2.0
     mu = 3.0
     rho = labda / mu
-    F = expon(scale=1.0 / labda)  # interarrival time distributon
-    G = expon(scale=1.0 / mu)  # service time distributon
+    F = expon(scale=1.0 / labda)  # interarrival time distribution
+    G = expon(scale=1.0 / mu)  # service time distribution
 
     num_jobs = 10
 
@@ -140,8 +140,8 @@ def experiment_2():
     labda = 2.0
     mu = 3.0
     rho = labda / mu
-    F = expon(scale=1.0 / labda)  # interarrival time distributon
-    G = expon(scale=1.0 / mu)  # service time distributon
+    F = expon(scale=1.0 / labda)  # interarrival time distribution
+    G = expon(scale=1.0 / mu)  # service time distribution
     num_jobs = 10  # too small, change it to a larger number, and rerun the experiment
 
     time = 0
@@ -178,8 +178,8 @@ def experiment_2a():
     labda = 2.0
     mu = 3.0
     rho = labda / mu
-    F = expon(scale=1.0 / labda)  # interarrival time distributon
-    G = expon(scale=1.0 / mu)  # service time distributon
+    F = expon(scale=1.0 / labda)  # interarrival time distribution
+    G = expon(scale=1.0 / mu)  # service time distribution
     num_jobs = 1000
 
     time = 0
@@ -259,7 +259,7 @@ def pollaczek_khinchine(labda, G):
 
 
 labda = 1. / 3
-F = expon(scale=1. / labda)  # interarrival time distributon
+F = expon(scale=1. / labda)  # interarrival time distribution
 G = uniform(1, 2)
 
 print("PK: ", labda * pollaczek_khinchine(labda, G))
@@ -273,7 +273,7 @@ served_jobs = []  # used for statistics
 def test_mg1():
     job = Job()
     labda = 1.0 / 3
-    F = expon(scale=1.0 / labda)  # interarrival time distributon
+    F = expon(scale=1.0 / labda)  # interarrival time distribution
     G = uniform(1, 3)
     print("ES: ", G.mean(), "rho: ", labda * G.mean())
 
@@ -349,7 +349,7 @@ def check_in():
     print("Avg. sojourn time:", av_sojourn_time)
 
     c = Counter([j.queue_length_at_arrival for j in served_jobs])
-    print("Queue length distributon, sloppy output")
+    print("Queue length distribution, sloppy output")
     print(sorted(c.items()))
 
 
