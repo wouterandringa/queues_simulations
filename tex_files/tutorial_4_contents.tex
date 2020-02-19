@@ -55,7 +55,7 @@ Likewise,   generalize  the \pyv{handle_departure} function of the $G/G/1$ queue
 \begin{exercise}
   The design of the simulation of $G/G/1$ queue is not entirely satisfactory. For instance, if we want to run different experiments, we have to clean up old experiments before we can start new ones. The current design is not very practical for this. It is better to encapsulate the state and its behavior (i.e., functions) of the simulator into one class. Build a class that simulates the $G/G/c$ queue; use the ideas of the $G/G/1$ simulator.
 
-It is not  problem when you spend considerable time on this exercise. Most of the following exercises are simple numerical experiments, which should take little time. So, just try and see how far you get. All code is in the solution.
+It is not a problem when you spend considerable time on this exercise. Most of the following exercises are simple numerical experiments, which should take little time. So, just try and see how far you get. All code is in the solution.
 
 \begin{solution}
   Study this code it in detail so that you really understand how it works.
@@ -219,7 +219,7 @@ def sakasegawa(F, G, c):
   Implement the test in a function so that you can organize all your setting in one clean environment. We can use this below for more general cases.
 \end{hint}
 \begin{solution}
-In the next function we perform the test. We give this function standard  arguments so that we can  run the function as a standalone test. As such we want to to  contain all parameter values.
+In the next function we perform the test. We give this function standard  arguments so that we can  run the function as a standalone test. As such we want to contain all parameter values.
 
 \begin{pyverbatim}
 def mm1_test(labda=0.8, mu=1, num_jobs=100):
