@@ -168,7 +168,7 @@ class Job:
 \end{pyverbatim}
 
 A class has a number of \emph{attributes}, such as \pyv{self.arrival_time}, to capture its state and a number of functions, such as \pyv{def waiting_time(self)}, to compute specific information that relates to the class\footnote{In python, functions belonging to a class are called `methods' or `member functions'.}.
-We initialize the arrival time and service time to zero, and we we use the attributes \pyv{departure_time} and \pyv{queue_length_at_arrival} for a statistical analysis at the end of the simulation.
+We initialize the arrival time and service time to zero, and we use the attributes \pyv{departure_time} and \pyv{queue_length_at_arrival} for a statistical analysis at the end of the simulation.
 Finally, we have functions to compute the waiting time and the sojourn time, and \pyv{__repr__} to print info about the job.
 (We also need the function \pyv{__le__} for a technical reason, which you do not need to know if you are a python newbie.
 When two jobs have the same arrival time, the heap queue needs extra information to sort such jobs.
