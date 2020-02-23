@@ -115,7 +115,7 @@ We generate \pyv{num_jobs} jobs. Then, with probability $p$ (\pyv{p_business} in
 
 
 To repair this problem it is better to let \pyv{scipy} call a random number generator in \pyv{C++} just once and generate all random numbers in one pass.
-Here is one way to obtain a speed up of about a factor 100.
+Here is one way to obtain a speedup of about a factor 100.
 \begin{pynotangle}
 def generate_jobs(F, G, p_business, num_jobs):
     jobs = set()
