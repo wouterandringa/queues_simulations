@@ -383,7 +383,8 @@ def make_nice_plots_2():
 
     left = np.concatenate(([x[0] - 1], x))
     right = np.concatenate((x, [x[-1] + 1]))
-
+    y = np.concatenate(([0], y))
+    
     plt.hlines(y, left, right)
     plt.show()
 
